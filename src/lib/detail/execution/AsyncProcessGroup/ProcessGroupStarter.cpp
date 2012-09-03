@@ -1,0 +1,211 @@
+#include "ProcessGroupStarter.hpp"
+
+#include "yandex/contest/SystemError.hpp"
+
+#include "yandex/contest/system/unistd/Operations.hpp"
+
+#include <thread>
+
+#include <boost/assert.hpp>
+
+#include <signal.h>
+
+#include <unistd.h>
+#include <signal.h>
+#include <sys/wait.h>
+#include <sys/time.h>
+
+namespace yandex{namespace contest{namespace invoker{
+    namespace detail{namespace execution{namespace async_process_group_detail
+{
+    namespace
+    {
+        void nop(int) {}
+    }
+
+    ProcessGroupStarter::ProcessGroupStarter(const AsyncProcessGroup::Task &task):
+        id2pid_(task.processes.size()),
+        monitor_(task.processes)
+    {
+        std::vector<system::unistd::Pipe> pipes_(task.pipesNumber);
+        for (std::size_t id = 0; id < task.processes.size(); ++id)
+        {
+            ProcessStarter starter(task.processes[id], pipes_);
+            const Pid pid = starter();
+            id2pid_[id] = pid;
+            BOOST_ASSERT(pid2id_.find(pid) == pid2id_.end());
+            pid2id_[pid] = id;
+            monitor_.started(id, task.processes[id]);
+        }
+        pipes_.clear();
+        BOOST_ASSERT(monitor_.running().size() == task.processes.size());
+        // SIGALRM setup
+        struct sigaction act;
+        act.sa_handler = nop;
+        act.sa_flags = 0;
+        sigemptyset(&act.sa_mask);
+        if (sigaction(SIGALRM, &act, nullptr) < 0)
+            BOOST_THROW_EXCEPTION(SystemError("sigaction"));
+        // real time limit
+        realTimeLimitPoint_ = std::chrono::steady_clock::now() +
+            std::chrono::milliseconds(task.resourceLimits.realTimeLimitMillis);
+    }
+
+    void ProcessGroupStarter::executionLoop()
+    {
+        while (monitor_.processGroupIsRunning())
+            waitForAnyChild(
+                [this](int &statLoc, ::rusage &rusage)
+                {
+                    const Pid pid = waitUntil(statLoc, rusage, realTimeLimitPoint_);
+                    if (pid == 0)
+                        monitor_.realTimeLimitExceeded();
+                    return pid;
+                });
+        // let's terminate each running process
+        for (const Id id: monitor_.running())
+        {
+            const Pid pid = id2pid_[id];
+            // OK, try to kill it.
+            // Note, that it may fail because process
+            // can be already terminated, but in that case
+            // it has no effect (see kill(3), it is
+            // implementation-defined whether such call
+            // is successful or ESRCH).
+            if (::kill(pid, SIGKILL) < 0 && errno != ESRCH)
+                BOOST_THROW_EXCEPTION(SystemError("kill") <<
+                                      Error::message("This should not happen."));
+        }
+        // let's collect results
+        while (monitor_.processesAreRunning())
+            waitForAnyChild(wait);
+    }
+
+    void ProcessGroupStarter::waitForAnyChild(const WaitFunction &waitFunction)
+    {
+        BOOST_ASSERT(monitor_.processesAreRunning());
+        int statLoc;
+        ::rusage rusage_;
+        const Pid pid = waitFunction(statLoc, rusage_);
+        if (pid != 0)
+        {
+            if (pid < 0)
+            {
+                BOOST_ASSERT_MSG(errno != ECHILD, "We have child processes.");
+                BOOST_THROW_EXCEPTION(SystemError("wait4") << Error::message("Undocumented error."));
+            }
+            BOOST_ASSERT_MSG(pid2id_.find(pid) != pid2id_.end(), "We get process we haven't started.");
+            const Id id = pid2id_.at(pid);
+            monitor_.terminated(id, statLoc, rusage_);
+        }
+    }
+
+    Pid ProcessGroupStarter::wait(int &statLoc, ::rusage &rusage)
+    {
+        Pid rpid;
+        do
+        {
+            rpid = wait3(&statLoc, 0, &rusage);
+        }
+        while (rpid < 0 && errno == EINTR);
+        BOOST_ASSERT_MSG(rpid != 0, "Timeout is not possible.");
+        return rpid;
+    }
+
+    namespace
+    {
+        template <typename Duration>
+        ::timeval toTimeval(const Duration &duration)
+        {
+            constexpr unsigned MAXVAL = 1000 * 1000;
+            ::timeval tval;
+            tval.tv_sec = std::chrono::duration_cast<
+                std::chrono::seconds>(duration).count();
+            tval.tv_usec = std::chrono::duration_cast<
+                std::chrono::microseconds>(duration).count() % MAXVAL;
+            BOOST_ASSERT(0 <= tval.tv_sec && tval.tv_sec < MAXVAL);
+            BOOST_ASSERT(0 <= tval.tv_usec && tval.tv_usec < MAXVAL);
+            return tval;
+        }
+
+        /// Used to interrupt system calls.
+        class IntervalTimer: private boost::noncopyable
+        {
+        public:
+            template <typename Duration>
+            explicit IntervalTimer(const Duration &duration)
+            {
+                tval_.it_interval = zeroTimeVal;
+                // too small values are dangerous
+                tval_.it_value = duration < resolution ?
+                    toTimeval(resolution) : toTimeval(duration);
+                system::unistd::setitimer(ITIMER_REAL, tval_);
+            }
+
+            void disable() noexcept
+            {
+                if (*this)
+                {
+                    // this function may not throw with zero argument
+                    system::unistd::setitimer(ITIMER_REAL, zeroITimerVal);
+                    tval_.it_value = zeroTimeVal;
+                }
+            }
+
+            explicit operator bool() const noexcept
+            {
+                return tval_.it_value.tv_sec || tval_.it_value.tv_usec;
+            }
+
+            ~IntervalTimer()
+            {
+                disable();
+            }
+
+        private:
+            static const ::timeval zeroTimeVal;
+            static const ::itimerval zeroITimerVal;
+            static const std::chrono::milliseconds resolution;
+
+        private:
+            ::itimerval tval_;
+        };
+
+        const ::timeval IntervalTimer::zeroTimeVal = {
+            .tv_sec = 0, .tv_usec = 0
+        };
+
+        const ::itimerval IntervalTimer::zeroITimerVal = {
+            .it_interval = {.tv_sec = 0, .tv_usec = 0},
+            .it_value = {.tv_sec = 0, .tv_usec = 0}
+        };
+
+        const std::chrono::milliseconds IntervalTimer::resolution(10);
+    }
+
+    /// Returns 0 if real time limit exceeded
+    Pid ProcessGroupStarter::waitUntil(int &statLoc, ::rusage &rusage, const TimePoint &untilPoint)
+    {
+        TimePoint now = Clock::now();
+        if (now >= untilPoint)
+            return 0;
+        Pid rpid;
+        int errno_ = 0;
+        do
+        {
+            {
+                IntervalTimer timer(untilPoint - now);
+                // will be interrupted on timer event
+                rpid = wait3(&statLoc, 0, &rusage);
+                errno_ = errno;
+            }
+            // first assignment and check was made at the beginning of the function
+            now = Clock::now();
+            if (now >= untilPoint)
+                return 0;
+        }
+        while (rpid < 0 && errno_ == EINTR);
+        BOOST_ASSERT_MSG(rpid != 0, "Timeout is not possible.");
+        return rpid;
+    }
+}}}}}}

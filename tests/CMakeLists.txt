@@ -1,0 +1,1 @@
+yandex_contest_tests_cmake()

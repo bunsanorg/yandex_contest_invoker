@@ -151,7 +151,6 @@ namespace yandex{namespace contest{namespace invoker{
             fdMap_(maxFD_)
         {
             freeFDs_.flip(); // freeFDs = "111...11";
-            freeFDs_.reset(0); // 0 is not valid descriptor
         }
 
         void setRequired(const int fd)

@@ -294,7 +294,7 @@ struct SendRecvPosixFixture: SendRecvFixture<SendRecvPosixFixture>, SendRecvCFix
     const std::string clientSourceName = "client.c";
     const std::string echoServerSourceName = "echoServer.c";
 
-    const std::string commonSource = this->bufferSource + R"EOF(
+    const std::string commonSource = bufferSource + R"EOF(
 #include <unistd.h>
 
 int errRet(int code, const char *cmd)

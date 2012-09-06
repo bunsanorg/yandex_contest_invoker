@@ -23,7 +23,7 @@ namespace yandex{namespace contest{namespace invoker
     struct ProcessGroupIllegalStateError:
         virtual ProcessGroupError, virtual ContainerIllegalStateError {};
 
-    struct ProcessGroupHasAlreadyStartedError: ProcessGroupIllegalStateError {};
+    struct ProcessGroupHasAlreadyStartedError: virtual ProcessGroupIllegalStateError {};
 
     struct ProcessGroupHasNotStartedError: virtual ProcessGroupIllegalStateError {};
 

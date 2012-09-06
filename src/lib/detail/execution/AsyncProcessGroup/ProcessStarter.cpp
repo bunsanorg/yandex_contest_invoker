@@ -27,7 +27,7 @@ namespace yandex{namespace contest{namespace invoker{
 
     struct UnresolvedFDAliasError: virtual FDAliasError {};
 
-    struct InvalidTargetFDAliasError: FDAliasError {};
+    struct InvalidTargetFDAliasError: virtual FDAliasError {};
 
     ProcessStarter::ProcessStarter(const AsyncProcessGroup::Process &process,
                                    std::vector<system::unistd::Pipe> &pipes):

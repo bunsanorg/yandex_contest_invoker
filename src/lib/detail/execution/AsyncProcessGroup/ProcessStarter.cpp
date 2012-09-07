@@ -117,6 +117,7 @@ namespace yandex{namespace contest{namespace invoker{
     {
         try
         {
+            controlGroup_.attachTask(system::unistd::getpid()); // before dropId
             childSetUpFDs();
             // TODO verify has permissions to execute
             childSetUpResourceLimits();
@@ -126,7 +127,6 @@ namespace yandex{namespace contest{namespace invoker{
             system::unistd::access::dropId(ownerId_);
             childSetUpResourceLimitsUser();
             // TODO usePath?
-            controlGroup_.attachTask(system::unistd::getpid());
             exec_.execvpe();
             BOOST_THROW_EXCEPTION(SystemError("execvpe"));
         }

@@ -62,6 +62,12 @@ namespace yandex{namespace contest{namespace invoker{
             std::chrono::milliseconds(task.resourceLimits.realTimeLimitMillis);
     }
 
+    ProcessGroupStarter::~ProcessGroupStarter()
+    {
+        for (const system::cgroup::ControlGroup &cg: id2cgroup_)
+            BOOST_ASSERT_MSG(!cg, "Every control group should be terminated and closed.");
+    }
+
     void ProcessGroupStarter::executionLoop()
     {
         while (monitor_.processGroupIsRunning())
@@ -113,6 +119,8 @@ namespace yandex{namespace contest{namespace invoker{
             // terminate lost children
             terminate(id);
             monitor_.terminated(id, statLoc, id2cgroup_[id]);
+            // control group will not be used after that
+            id2cgroup_[id].close();
         }
     }
 

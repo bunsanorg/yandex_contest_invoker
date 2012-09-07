@@ -86,6 +86,12 @@ namespace yandex{namespace contest{namespace invoker{
     void ProcessGroupStarter::terminate(const Id id)
     {
         BOOST_ASSERT(id < id2cgroup_.size());
+        const Pid pid = id2pid_[id];
+        // sometimes terminate is called before
+        // child has attached itself to control group
+        if (::kill(pid, SIGKILL) < 0 && errno != ESRCH)
+            BOOST_THROW_EXCEPTION(SystemError("kill") <<
+                                  Error::message("This should not happen."));
         id2cgroup_[id].terminate();
     }
 

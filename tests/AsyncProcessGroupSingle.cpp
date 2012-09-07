@@ -257,7 +257,8 @@ BOOST_AUTO_TEST_SUITE_END() // resource_limits
 BOOST_AUTO_TEST_CASE(no_wait)
 {
     process.executable = "sleep";
-    process.arguments = {"sleep", sleepTime};
+    // it will be visible if process is not killed instantly
+    process.arguments = {"sleep", decaSleepTime};
     process.groupWaitsForTermination = false;
     run();
     verifyPGR(PGR::CompletionStatus::ABNORMAL_EXIT);

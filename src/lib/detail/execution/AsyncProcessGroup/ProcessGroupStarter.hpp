@@ -32,6 +32,8 @@ namespace yandex{namespace contest{namespace invoker{
     public:
         explicit ProcessGroupStarter(const AsyncProcessGroup::Task &task);
 
+        ~ProcessGroupStarter();
+
         void executionLoop();
 
         const AsyncProcessGroup::Result &result() const { return monitor_.result(); }

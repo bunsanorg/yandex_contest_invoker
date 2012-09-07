@@ -2,6 +2,8 @@
 
 #include "yandex/contest/system/unistd/Pipe.hpp"
 
+#include "yandex/contest/system/cgroup/ControlGroup.hpp"
+
 #include "ExecutionMonitor.hpp"
 #include "ProcessStarter.hpp"
 
@@ -9,8 +11,6 @@
 #include <functional>
 
 #include <boost/noncopyable.hpp>
-
-#include <sys/resource.h>
 
 namespace yandex{namespace contest{namespace invoker{
     namespace detail{namespace execution{namespace async_process_group_detail
@@ -27,7 +27,7 @@ namespace yandex{namespace contest{namespace invoker{
          *
          * \return negative on fail, zero on skip, positive on success
          */
-        typedef std::function<Pid (int &, ::rusage &)> WaitFunction;
+        typedef std::function<Pid (int &)> WaitFunction;
 
     public:
         explicit ProcessGroupStarter(const AsyncProcessGroup::Task &task);
@@ -37,19 +37,29 @@ namespace yandex{namespace contest{namespace invoker{
         const AsyncProcessGroup::Result &result() const { return monitor_.result(); }
 
     private:
+        void terminate(const Id id);
+
         void waitForAnyChild(const WaitFunction &waitFunction);
 
         /// wait3 analogue except it handles interruptions
-        static Pid wait(int &statLoc, ::rusage &rusage);
+        static Pid wait(int &statLoc);
+
+        /// Return 0 if no process has terminated during duration time
+        static Pid waitFor(int &statLoc, const Duration &duration);
 
         /*!
          * \brief wait3 analogue except it handles interruptions.
          *
          * \return 0 if until was reached
          */
-        static Pid waitUntil(int &statLoc, ::rusage &rusage, const TimePoint &untilPoint);
+        static Pid waitUntil(int &statLoc, const TimePoint &untilPoint);
 
     private:
+        static const Duration waitInterval;
+
+    private:
+        system::cgroup::ControlGroup thisCgroup_;
+        std::vector<system::cgroup::ControlGroup> id2cgroup_;
         std::unordered_map<Pid, Id> pid2id_;
         std::vector<Pid> id2pid_;
         ExecutionMonitor monitor_;

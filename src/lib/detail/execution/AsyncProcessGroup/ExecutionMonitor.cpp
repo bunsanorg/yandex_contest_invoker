@@ -3,6 +3,10 @@
 // SIG_START_FAILED
 #include "ProcessStarter.hpp"
 
+#include "yandex/contest/system/cgroup/CpuAccounting.hpp"
+#include "yandex/contest/system/cgroup/Memory.hpp"
+#include "yandex/contest/system/cgroup/MemorySwap.hpp"
+
 #include <signal.h>
 
 #include <boost/assert.hpp>
@@ -20,7 +24,8 @@ namespace yandex{namespace contest{namespace invoker{
             terminateGroupOnCrash_.insert(id);
     }
 
-    void ExecutionMonitor::terminated(const Id id, const int statLoc, const ::rusage &rusage_)
+    void ExecutionMonitor::terminated(const Id id, const int statLoc,
+                                      system::cgroup::ControlGroup &controlGroup)
     {
         BOOST_ASSERT(running_.size() + terminated_.size() ==
                      result_.processResults.size());
@@ -35,37 +40,22 @@ namespace yandex{namespace contest{namespace invoker{
         BOOST_ASSERT(running_.size() + terminated_.size() == result_.processResults.size());
         // collect info
         process::Result &processResult = result_.processResults[id];
-        process::ResourceLimits &resourceLimits = resourceLimits_[id];
-        processResult.assign(statLoc, rusage_);
+        processResult.assign(statLoc);
+        processResult.completionStatus = process::Result::CompletionStatus::OK;
         if (!processResult)
         {
-            // may be overwritten after signal or rusage checks
+            // may be overwritten after signal or rusage checks (except START_FAILED)
             if (processResult.termSig && processResult.termSig.get() == SIG_START_FAILED)
                 processResult.completionStatus = process::Result::CompletionStatus::START_FAILED;
             else
                 processResult.completionStatus = process::Result::CompletionStatus::ABNORMAL_EXIT;
         }
-        // if !START_FAILED data is meaningful
+        // if !START_FAILED data is meaningful, moreover, START_FAILED should not be rewritten
         if (processResult.completionStatus != process::Result::CompletionStatus::START_FAILED)
         {
-            // special signals
-            if (processResult.termSig)
-            {
-                switch (processResult.termSig.get())
-                {
-                case SIGXCPU:
-                    processResult.completionStatus =
-                        process::Result::CompletionStatus::TIME_LIMIT_EXCEEDED;
-                    break;
-                case SIGXFSZ:
-                    processResult.completionStatus =
-                        process::Result::CompletionStatus::OUTPUT_LIMIT_EXCEEDED;
-                    break;
-                }
-            }
-            if (processResult.completionStatus == process::Result::CompletionStatus::OK ||
-                    processResult.completionStatus == process::Result::CompletionStatus::ABNORMAL_EXIT)
-                processResult.checkResourceUsage(resourceLimits);
+            BOOST_ASSERT(processResult.completionStatus == process::Result::CompletionStatus::OK ||
+                         processResult.completionStatus == process::Result::CompletionStatus::ABNORMAL_EXIT);
+            collectResourceInfo(id, controlGroup);
         }
         // group checks
         if (result_.processGroupResult.completionStatus == process_group::Result::CompletionStatus::OK)
@@ -82,6 +72,35 @@ namespace yandex{namespace contest{namespace invoker{
     {
         result_.processGroupResult.completionStatus =
             process_group::Result::CompletionStatus::REAL_TIME_LIMIT_EXCEEDED;
+    }
+
+    bool ExecutionMonitor::runOutOfResourceLimits(
+        const Id id, system::cgroup::ControlGroup &controlGroup)
+    {
+        return collectResourceInfo(id, controlGroup) != process::Result::CompletionStatus::OK;
+    }
+
+    process::Result::CompletionStatus ExecutionMonitor::collectResourceInfo(
+        const Id id, system::cgroup::ControlGroup &controlGroup)
+    {
+        process::Result &result = result_.processResults[id];
+        process::Result::CompletionStatus &status = result.completionStatus;
+        BOOST_ASSERT(status != process::Result::CompletionStatus::START_FAILED);
+        process::ResourceUsage &resourceUsage = result.resourceUsage;
+        const process::ResourceLimits &resourceLimits = resourceLimits_[id];
+        const system::cgroup::Memory memory(controlGroup);
+        const system::cgroup::MemorySwap memsw(controlGroup);
+        const system::cgroup::CpuAccounting cpuAcct(controlGroup);
+        resourceUsage.memoryUsageBytes = memory.usage();
+        resourceUsage.timeUsageMillis =
+            std::chrono::duration_cast<std::chrono::milliseconds>(
+                cpuAcct.userUsage()).count();
+        if (resourceUsage.timeUsageMillis > resourceLimits.timeLimitMillis)
+            return status = process::Result::CompletionStatus::TIME_LIMIT_EXCEEDED;
+        if (memory.failcnt() || memsw.failcnt())
+            return status = process::Result::CompletionStatus::MEMORY_LIMIT_EXCEEDED;
+        // note: do not overwrite by OK
+        return process::Result::CompletionStatus::OK;
     }
 
     const AsyncProcessGroup::Result &ExecutionMonitor::result() const

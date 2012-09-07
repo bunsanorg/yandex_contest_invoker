@@ -6,6 +6,10 @@
 #include "yandex/contest/system/unistd/Operations.hpp"
 #include "yandex/contest/system/unistd/access/Operations.hpp"
 
+#include "yandex/contest/system/cgroup/CpuSet.hpp"
+#include "yandex/contest/system/cgroup/Memory.hpp"
+#include "yandex/contest/system/cgroup/MemorySwap.hpp"
+
 #include <boost/assert.hpp>
 #include <boost/dynamic_bitset.hpp>
 #include <boost/numeric/conversion/cast.hpp>
@@ -29,13 +33,16 @@ namespace yandex{namespace contest{namespace invoker{
 
     struct InvalidTargetFDAliasError: virtual FDAliasError {};
 
-    ProcessStarter::ProcessStarter(const AsyncProcessGroup::Process &process,
+    ProcessStarter::ProcessStarter(system::cgroup::ControlGroup &controlGroup,
+                                   const AsyncProcessGroup::Process &process,
                                    std::vector<system::unistd::Pipe> &pipes):
+        controlGroup_(controlGroup),
         ownerId_(process.ownerId),
         exec_(process.executable, process.arguments, process.environment),
         currentPath_(process.currentPath),
         resourceLimits_(process.resourceLimits)
     {
+        setUpControlGroup();
         // TODO check that 0, 1, 2 are allocated
         std::unordered_set<int> childUsesFDs;
         const Streams streams(pipes, allocatedFDs_, process.currentPath, descriptors_);
@@ -119,6 +126,7 @@ namespace yandex{namespace contest{namespace invoker{
             system::unistd::access::dropId(ownerId_);
             childSetUpResourceLimitsUser();
             // TODO usePath?
+            controlGroup_.attachTask(system::unistd::getpid());
             exec_.execvpe();
             BOOST_THROW_EXCEPTION(SystemError("execvpe"));
         }
@@ -246,21 +254,23 @@ namespace yandex{namespace contest{namespace invoker{
             fdMonitor.moveMappedFD(fdStream.second, fdStream.first);
     }
 
+    void ProcessStarter::setUpControlGroup()
+    {
+        system::cgroup::ControlGroup parentCG = controlGroup_.parent();
+
+        const system::cgroup::CpuSet parentCpuSet(parentCG), cpuSet(controlGroup_);
+        cpuSet.setCpus(parentCpuSet.cpus());
+        cpuSet.setMems(parentCpuSet.mems());
+
+        const system::cgroup::Memory memory(controlGroup_);
+        const system::cgroup::MemorySwap memorySwap(controlGroup_);
+        memory.setLimit(resourceLimits_.memoryLimitBytes);
+        memorySwap.setLimit(resourceLimits_.memoryLimitBytes);
+    }
+
     void ProcessStarter::childSetUpResourceLimits()
     {
         ::rlimit rlim;
-
-        // cpu limit (in seconds)
-        // FIXME "1 +" fix should be replaced in the future
-        // by something with higher precision
-        rlim.rlim_cur = rlim.rlim_max = 1 + boost::numeric_cast<rlim_t>(
-            (resourceLimits_.timeLimitMillis + 999) / 1000);
-        system::unistd::setrlimit(RLIMIT_CPU, rlim);
-
-        // hard memory limit (in bytes)
-        rlim.rlim_cur = rlim.rlim_max = boost::numeric_cast<rlim_t>(
-            resourceLimits_.hardMemoryLimitBytes);
-        system::unistd::setrlimit(RLIMIT_AS, rlim);
 
         // output limit (in bytes)
         rlim.rlim_cur = rlim.rlim_max = boost::numeric_cast<rlim_t>(

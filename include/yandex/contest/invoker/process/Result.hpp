@@ -50,11 +50,6 @@ namespace yandex{namespace contest{namespace invoker{namespace process
         Result(const Result &)=default;
         Result &operator=(const Result &)=default;
 
-        void assign(const int statLoc, const ::rusage &rusage);
-
-        /// Set appropriate completionStatus if one of resource limits is exceeded.
-        void checkResourceUsage(const ResourceLimits &resourceLimits);
-
         explicit operator bool() const;
 
         typedef result_detail::CompletionStatus CompletionStatus;

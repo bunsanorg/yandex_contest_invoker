@@ -4,9 +4,10 @@
 
 #include "yandex/contest/system/unistd/Operations.hpp"
 
-#include <thread>
+#include <functional>
 
 #include <boost/assert.hpp>
+#include <boost/format.hpp>
 
 #include <signal.h>
 
@@ -23,14 +24,24 @@ namespace yandex{namespace contest{namespace invoker{
         void nop(int) {}
     }
 
+    const ProcessGroupStarter::Duration ProcessGroupStarter::waitInterval =
+        std::chrono::duration_cast<ProcessGroupStarter::Duration>(
+            std::chrono::milliseconds(100));
+
     ProcessGroupStarter::ProcessGroupStarter(const AsyncProcessGroup::Task &task):
+        thisCgroup_(system::cgroup::ControlGroup::getControlGroup(system::unistd::getpid())),
+        id2cgroup_(task.processes.size()),
         id2pid_(task.processes.size()),
         monitor_(task.processes)
     {
         std::vector<system::unistd::Pipe> pipes_(task.pipesNumber);
         for (std::size_t id = 0; id < task.processes.size(); ++id)
         {
-            ProcessStarter starter(task.processes[id], pipes_);
+            const std::string cid = str(boost::format("id_%1%") % id);
+            // we don't children to have access to cgroups
+            system::cgroup::ControlGroup &cg =
+                id2cgroup_[id] = thisCgroup_.createChild(cid, 0700);
+            ProcessStarter starter(cg, task.processes[id], pipes_);
             const Pid pid = starter();
             id2pid_[id] = pid;
             BOOST_ASSERT(pid2id_.find(pid) == pid2id_.end());
@@ -54,58 +65,57 @@ namespace yandex{namespace contest{namespace invoker{
     void ProcessGroupStarter::executionLoop()
     {
         while (monitor_.processGroupIsRunning())
-            waitForAnyChild(
-                [this](int &statLoc, ::rusage &rusage)
-                {
-                    const Pid pid = waitUntil(statLoc, rusage, realTimeLimitPoint_);
-                    if (pid == 0)
-                        monitor_.realTimeLimitExceeded();
-                    return pid;
-                });
+        {
+            for (const Id id: monitor_.running())
+            {
+                if (monitor_.runOutOfResourceLimits(id, id2cgroup_[id]))
+                    terminate(id);
+            }
+            waitForAnyChild(std::bind(waitFor, std::placeholders::_1, waitInterval));
+            if (Clock::now() >= realTimeLimitPoint_)
+                monitor_.realTimeLimitExceeded();
+        }
         // let's terminate each running process
         for (const Id id: monitor_.running())
-        {
-            const Pid pid = id2pid_[id];
-            // OK, try to kill it.
-            // Note, that it may fail because process
-            // can be already terminated, but in that case
-            // it has no effect (see kill(3), it is
-            // implementation-defined whether such call
-            // is successful or ESRCH).
-            if (::kill(pid, SIGKILL) < 0 && errno != ESRCH)
-                BOOST_THROW_EXCEPTION(SystemError("kill") <<
-                                      Error::message("This should not happen."));
-        }
+            terminate(id);
         // let's collect results
         while (monitor_.processesAreRunning())
             waitForAnyChild(wait);
+    }
+
+    void ProcessGroupStarter::terminate(const Id id)
+    {
+        BOOST_ASSERT(id < id2cgroup_.size());
+        id2cgroup_[id].terminate();
     }
 
     void ProcessGroupStarter::waitForAnyChild(const WaitFunction &waitFunction)
     {
         BOOST_ASSERT(monitor_.processesAreRunning());
         int statLoc;
-        ::rusage rusage_;
-        const Pid pid = waitFunction(statLoc, rusage_);
+        const Pid pid = waitFunction(statLoc);
         if (pid != 0)
         {
             if (pid < 0)
             {
                 BOOST_ASSERT_MSG(errno != ECHILD, "We have child processes.");
-                BOOST_THROW_EXCEPTION(SystemError("wait4") << Error::message("Undocumented error."));
+                BOOST_THROW_EXCEPTION(SystemError("wait") << Error::message("Undocumented error."));
             }
             BOOST_ASSERT_MSG(pid2id_.find(pid) != pid2id_.end(), "We get process we haven't started.");
             const Id id = pid2id_.at(pid);
-            monitor_.terminated(id, statLoc, rusage_);
+            // TODO Do we need to check for lost children and report?
+            // terminate lost children
+            terminate(id);
+            monitor_.terminated(id, statLoc, id2cgroup_[id]);
         }
     }
 
-    Pid ProcessGroupStarter::wait(int &statLoc, ::rusage &rusage)
+    Pid ProcessGroupStarter::wait(int &statLoc)
     {
         Pid rpid;
         do
         {
-            rpid = wait3(&statLoc, 0, &rusage);
+            rpid = ::wait(&statLoc);
         }
         while (rpid < 0 && errno == EINTR);
         BOOST_ASSERT_MSG(rpid != 0, "Timeout is not possible.");
@@ -183,8 +193,12 @@ namespace yandex{namespace contest{namespace invoker{
         const std::chrono::milliseconds IntervalTimer::resolution(10);
     }
 
-    /// Returns 0 if real time limit exceeded
-    Pid ProcessGroupStarter::waitUntil(int &statLoc, ::rusage &rusage, const TimePoint &untilPoint)
+    Pid ProcessGroupStarter::waitFor(int &statLoc, const Duration &duration)
+    {
+        return waitUntil(statLoc, Clock::now() + duration);
+    }
+
+    Pid ProcessGroupStarter::waitUntil(int &statLoc, const TimePoint &untilPoint)
     {
         TimePoint now = Clock::now();
         if (now >= untilPoint)
@@ -196,7 +210,7 @@ namespace yandex{namespace contest{namespace invoker{
             {
                 IntervalTimer timer(untilPoint - now);
                 // will be interrupted on timer event
-                rpid = wait3(&statLoc, 0, &rusage);
+                rpid = ::wait(&statLoc);
                 errno_ = errno;
             }
             // first assignment and check was made at the beginning of the function

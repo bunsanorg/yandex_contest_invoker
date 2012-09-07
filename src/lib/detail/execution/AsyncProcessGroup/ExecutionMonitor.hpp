@@ -2,11 +2,11 @@
 
 #include "yandex/contest/invoker/detail/execution/AsyncProcessGroup.hpp"
 
+#include "yandex/contest/system/cgroup/ControlGroup.hpp"
+
 #include <unordered_set>
 
 #include <boost/noncopyable.hpp>
-
-#include <sys/resource.h>
 
 namespace yandex{namespace contest{namespace invoker{
     namespace detail{namespace execution{namespace async_process_group_detail
@@ -29,10 +29,16 @@ namespace yandex{namespace contest{namespace invoker{
         void started(const Id id, const AsyncProcessGroup::Process &process);
 
         /// Notify monitor that process with specified id has terminated.
-        void terminated(const Id id, const int statLoc, const ::rusage &rusage_);
+        void terminated(const Id id, const int statLoc,
+                        system::cgroup::ControlGroup &controlGroup);
 
         /// Notify monitor that real time limit was exceeded.
         void realTimeLimitExceeded();
+
+        bool runOutOfResourceLimits(const Id id, system::cgroup::ControlGroup &controlGroup);
+
+        process::Result::CompletionStatus collectResourceInfo(
+            const Id id, system::cgroup::ControlGroup &controlGroup);
 
         bool processGroupIsRunning() const
         {

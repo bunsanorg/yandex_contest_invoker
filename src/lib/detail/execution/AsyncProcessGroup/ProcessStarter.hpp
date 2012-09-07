@@ -4,6 +4,8 @@
 #include "yandex/contest/system/unistd/Pipe.hpp"
 #include "yandex/contest/system/unistd/Descriptor.hpp"
 
+#include "yandex/contest/system/cgroup/ControlGroup.hpp"
+
 #include "yandex/contest/invoker/detail/execution/AsyncProcessGroup.hpp"
 
 #include <unordered_map>
@@ -32,8 +34,9 @@ namespace yandex{namespace contest{namespace invoker{
     class ProcessStarter: private boost::noncopyable
     {
     public:
-        explicit ProcessStarter(const AsyncProcessGroup::Process &process,
-                                std::vector<system::unistd::Pipe> &pipes);
+        ProcessStarter(system::cgroup::ControlGroup &controlGroup,
+                       const AsyncProcessGroup::Process &process,
+                       std::vector<system::unistd::Pipe> &pipes);
 
         /// Start process and return it's pid.
         Pid operator()();
@@ -46,12 +49,15 @@ namespace yandex{namespace contest{namespace invoker{
 
         void childSetUpFDs();
 
+        void setUpControlGroup();
+
         void childSetUpResourceLimits();
 
         /// For resource limits that depends on user id.
         void childSetUpResourceLimitsUser();
 
     private:
+        system::cgroup::ControlGroup &controlGroup_;
         system::unistd::access::Id ownerId_;
         system::unistd::Exec exec_;
         std::unordered_map<int, int> descriptors_;

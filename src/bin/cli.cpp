@@ -60,7 +60,6 @@ namespace yandex{namespace contest{namespace invoker{namespace cli
             "Trying to execute " << executable << " with " <<
             detail::vectorToString(arguments) << " arguments where " <<
             "memory limit = " << processResourceLimits.memoryLimitBytes << " bytes, " <<
-            "hard memory limit = " << processResourceLimits.hardMemoryLimitBytes << " bytes, " <<
             "time limit = " << processResourceLimits.timeLimitMillis << " milliseconds, " <<
             "output limit = " << processResourceLimits.outputLimitBytes << " bytes, " <<
             "real time limit = " << processGroupResourceLimits.realTimeLimitMillis << " milliseconds";
@@ -100,8 +99,6 @@ int main(int argc, char *argv[])
                 "time limit in milliseconds")
             ("memory-limit,m", po::value<std::uint64_t>(&processResourceLimits.memoryLimitBytes),
                 "memory limit in bytes")
-            ("hard-memory-limit,h", po::value<std::uint64_t>(&processResourceLimits.hardMemoryLimitBytes),
-                "hard memory limit in bytes")
             ("output-limit,o", po::value<std::uint64_t>(&processResourceLimits.outputLimitBytes),
                 "output limit in bytes")
             ("real-time-limit,l", po::value<std::uint64_t>(&processGroupResourceLimits.realTimeLimitMillis),

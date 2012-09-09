@@ -128,7 +128,6 @@ namespace yandex{namespace contest{namespace invoker{
             childSetUpResourceLimitsUser();
             // TODO usePath?
             exec_.execvpe();
-            BOOST_THROW_EXCEPTION(SystemError("execvpe"));
         }
         catch (std::exception &e)
         {
@@ -266,6 +265,10 @@ namespace yandex{namespace contest{namespace invoker{
         const system::cgroup::MemorySwap memorySwap(controlGroup_);
         memory.setLimit(resourceLimits_.memoryLimitBytes);
         memorySwap.setLimit(resourceLimits_.memoryLimitBytes);
+
+        // we do not want to count memory used by control process
+        // TODO set move_charge_at_immigrate to 0 [memory, memsw]
+        // TODO cpuset.memory_migrate = 0
     }
 
     void ProcessStarter::childSetUpResourceLimits()

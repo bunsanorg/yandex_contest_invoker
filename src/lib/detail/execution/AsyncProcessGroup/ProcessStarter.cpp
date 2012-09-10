@@ -267,8 +267,11 @@ namespace yandex{namespace contest{namespace invoker{
         memorySwap.setLimit(resourceLimits_.memoryLimitBytes);
 
         // we do not want to count memory used by control process
-        // TODO set move_charge_at_immigrate to 0 [memory, memsw]
-        // TODO cpuset.memory_migrate = 0
+        cpuSet.setMemoryMigrate(false);
+        memory.setMoveChargeAtImmigrate(false, false);
+
+        // wee need oom-killer
+        memory.setOomKillDisable(false);
     }
 
     void ProcessStarter::childSetUpResourceLimits()

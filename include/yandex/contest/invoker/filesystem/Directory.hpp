@@ -4,7 +4,6 @@
 
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/nvp.hpp>
-#include <boost/serialization/export.hpp>
 
 namespace yandex{namespace contest{namespace invoker{namespace filesystem
 {

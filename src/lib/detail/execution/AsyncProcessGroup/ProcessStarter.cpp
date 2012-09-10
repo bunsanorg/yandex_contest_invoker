@@ -117,13 +117,16 @@ namespace yandex{namespace contest{namespace invoker{
     {
         try
         {
-            controlGroup_.attachTask(system::unistd::getpid()); // before dropId
             childSetUpFDs();
             // TODO verify has permissions to execute
             childSetUpResourceLimits();
             // note: we change current path before privileges drop
             // because we want to permit set arbitrary current path
             boost::filesystem::current_path(currentPath_);
+            // We should not take into account our cpu time.
+            // But it is not possible to attach task without a hack
+            // not being root. So, attach it just before dropId() call.
+            controlGroup_.attachTask(system::unistd::getpid());
             system::unistd::access::dropId(ownerId_);
             childSetUpResourceLimitsUser();
             // TODO usePath?

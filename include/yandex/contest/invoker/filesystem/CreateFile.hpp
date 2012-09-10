@@ -5,6 +5,7 @@
 #include "yandex/contest/invoker/filesystem/SymLink.hpp"
 #include "yandex/contest/invoker/filesystem/Device.hpp"
 #include "yandex/contest/invoker/filesystem/Directory.hpp"
+#include "yandex/contest/invoker/filesystem/FIFO.hpp"
 
 #include "yandex/contest/config/TypeTraits.hpp"
 
@@ -49,7 +50,7 @@ namespace yandex{namespace contest{namespace invoker{namespace filesystem
         }
 
     public:
-        typedef boost::variant<RegularFile, SymLink, Device, Directory> Variant;
+        typedef boost::variant<RegularFile, SymLink, Device, Directory, FIFO> Variant;
 
     private:
         Variant file_;
@@ -73,3 +74,7 @@ YANDEX_CONTEST_CONFIG_EXPORT(
 YANDEX_CONTEST_CONFIG_EXPORT(
     yandex::contest::invoker::filesystem::CreateFile::Variant,
     yandex::contest::invoker::filesystem::Directory, "Directory")
+
+YANDEX_CONTEST_CONFIG_EXPORT(
+    yandex::contest::invoker::filesystem::CreateFile::Variant,
+    yandex::contest::invoker::filesystem::FIFO, "FIFO")

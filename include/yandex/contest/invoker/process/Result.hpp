@@ -17,20 +17,6 @@ namespace yandex{namespace contest{namespace invoker{namespace process
 {
     struct ResourceLimits;
 
-    namespace result_detail
-    {
-        YANDEX_CONTEST_STREAM_ENUM_CLASS(CompletionStatus,
-        (
-            OK,
-            ABNORMAL_EXIT,
-            MEMORY_LIMIT_EXCEEDED,
-            TIME_LIMIT_EXCEEDED,
-            OUTPUT_LIMIT_EXCEEDED,
-            START_FAILED,
-            STOPPED
-        ))
-    }
-
     struct Result: system::unistd::ProcessResult
     {
         friend class boost::serialization::access;
@@ -52,7 +38,16 @@ namespace yandex{namespace contest{namespace invoker{namespace process
 
         explicit operator bool() const;
 
-        typedef result_detail::CompletionStatus CompletionStatus;
+        YANDEX_CONTEST_INCLASS_STREAM_ENUM_CLASS(CompletionStatus,
+        (
+            OK,
+            ABNORMAL_EXIT,
+            MEMORY_LIMIT_EXCEEDED,
+            TIME_LIMIT_EXCEEDED,
+            OUTPUT_LIMIT_EXCEEDED,
+            START_FAILED,
+            STOPPED
+        ))
 
         CompletionStatus completionStatus = CompletionStatus::OK;
 

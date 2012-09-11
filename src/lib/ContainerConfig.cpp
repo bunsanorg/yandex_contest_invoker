@@ -130,7 +130,7 @@ namespace yandex{namespace contest{namespace invoker
 
         filesystem::CreateFile getDevice(const boost::filesystem::path &path,
                                          const mode_t mode,
-                                         const filesystem::DeviceType type,
+                                         const filesystem::Device::Type type,
                                          const int major,
                                          const int minor)
         {
@@ -148,7 +148,7 @@ namespace yandex{namespace contest{namespace invoker
                                              const int major,
                                              const int minor)
         {
-            return getDevice(path, mode, filesystem::DeviceType::CHAR, major, minor);
+            return getDevice(path, mode, filesystem::Device::CHAR, major, minor);
         }
 
         filesystem::CreateFile getSymLink(const boost::filesystem::path &value,

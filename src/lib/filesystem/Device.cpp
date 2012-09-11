@@ -11,10 +11,10 @@ namespace yandex{namespace contest{namespace invoker{namespace filesystem
         mode_t mode_ = mode;
         switch (type)
         {
-        case DeviceType::CHAR:
+        case CHAR:
             mode_ |= S_IFCHR;
             break;
-        case DeviceType::BLOCK:
+        case BLOCK:
             mode_ |= S_IFBLK;
             break;
         }

@@ -165,7 +165,7 @@ BOOST_AUTO_TEST_CASE(Device)
     dev.path = path;
     dev.mode = 0734;
     // /dev/null
-    dev.type = ya::DeviceType::CHAR;
+    dev.type = ya::Device::CHAR;
     dev.minor = 1;
     dev.major = 3;
     dev.create();

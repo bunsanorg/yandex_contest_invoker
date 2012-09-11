@@ -10,15 +10,15 @@
 
 namespace yandex{namespace contest{namespace invoker{namespace filesystem
 {
-    YANDEX_CONTEST_STREAM_ENUM_CLASS(DeviceType,
-    (
-        CHAR,
-        BLOCK
-    ))
-
     /// See mknod(3), makedev(3).
     struct Device: File
     {
+        YANDEX_CONTEST_INCLASS_STREAM_ENUM(Type,
+        (
+            CHAR,
+            BLOCK
+        ))
+
         template <typename Archive>
         void serialize(Archive &ar, const unsigned int)
         {
@@ -28,7 +28,7 @@ namespace yandex{namespace contest{namespace invoker{namespace filesystem
             ar & BOOST_SERIALIZATION_NVP(minor);
         }
 
-        DeviceType type;
+        Type type;
         int major;
         int minor;
 

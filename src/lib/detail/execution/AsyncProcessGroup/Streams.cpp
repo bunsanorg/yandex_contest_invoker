@@ -35,10 +35,10 @@ namespace yandex{namespace contest{namespace invoker{
         system::unistd::Pipe &pipe = pipes_->at(pipeEnd.pipeId);
         switch (pipeEnd.end)
         {
-        case AsyncProcessGroup::Pipe::End::Type::READ:
+        case AsyncProcessGroup::Pipe::End::READ:
             return pipe.readEnd();
             break;
-        case AsyncProcessGroup::Pipe::End::Type::WRITE:
+        case AsyncProcessGroup::Pipe::End::WRITE:
             return pipe.writeEnd();
             break;
         }

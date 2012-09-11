@@ -55,15 +55,6 @@ namespace yandex{namespace contest{namespace invoker{namespace detail{namespace 
         AccessMode accessMode;
     };
 
-    namespace pipe_end_detail
-    {
-        YANDEX_CONTEST_STREAM_ENUM_CLASS(Type,
-        (
-            READ,
-            WRITE
-        ))
-    }
-
     struct Pipe
     {
         struct End
@@ -75,7 +66,11 @@ namespace yandex{namespace contest{namespace invoker{namespace detail{namespace 
                 ar & BOOST_SERIALIZATION_NVP(end);
             }
 
-            typedef pipe_end_detail::Type Type;
+            YANDEX_CONTEST_INCLASS_STREAM_ENUM(Type,
+            (
+                READ,
+                WRITE
+            ))
 
             std::size_t pipeId;
             Type end;

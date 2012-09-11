@@ -9,17 +9,6 @@
 
 namespace yandex{namespace contest{namespace invoker{namespace process_group
 {
-    namespace result_detail
-    {
-        YANDEX_CONTEST_STREAM_ENUM_CLASS(CompletionStatus,
-        (
-            OK,
-            ABNORMAL_EXIT,
-            REAL_TIME_LIMIT_EXCEEDED,
-            STOPPED
-        ))
-    }
-
     struct Result
     {
         friend class boost::serialization::access;
@@ -31,7 +20,13 @@ namespace yandex{namespace contest{namespace invoker{namespace process_group
             ar & BOOST_SERIALIZATION_NVP(resourceUsage);
         }
 
-        typedef result_detail::CompletionStatus CompletionStatus;
+        YANDEX_CONTEST_INCLASS_STREAM_ENUM_CLASS(CompletionStatus,
+        (
+            OK,
+            ABNORMAL_EXIT,
+            REAL_TIME_LIMIT_EXCEEDED,
+            STOPPED
+        ))
 
         CompletionStatus completionStatus;
         ResourceUsage resourceUsage;

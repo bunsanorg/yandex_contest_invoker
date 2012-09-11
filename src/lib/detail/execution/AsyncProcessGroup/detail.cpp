@@ -17,12 +17,12 @@ namespace yandex{namespace contest{namespace invoker{
 
     Pipe::End Pipe::readEnd() const
     {
-        return end(End::Type::READ);
+        return end(End::READ);
     }
 
     Pipe::End Pipe::writeEnd() const
     {
-        return end(End::Type::WRITE);
+        return end(End::WRITE);
     }
 
     FDAlias::FDAlias(const int fd_): fd(fd_) {}

@@ -44,17 +44,26 @@ namespace yandex{namespace contest{namespace invoker{
         processResult.completionStatus = process::Result::CompletionStatus::OK;
         if (!processResult)
         {
+            processResult.completionStatus = process::Result::CompletionStatus::ABNORMAL_EXIT;
             // may be overwritten after signal or rusage checks (except START_FAILED)
-            if (processResult.termSig && processResult.termSig.get() == SIG_START_FAILED)
-                processResult.completionStatus = process::Result::CompletionStatus::START_FAILED;
-            else
-                processResult.completionStatus = process::Result::CompletionStatus::ABNORMAL_EXIT;
+            if (processResult.termSig)
+            {
+                switch (processResult.termSig.get())
+                {
+                case SIGXFSZ:
+                    processResult.completionStatus = process::Result::CompletionStatus::OUTPUT_LIMIT_EXCEEDED;
+                    break;
+                default:
+                    // not constexpr
+                    if (processResult.termSig.get() == SIG_START_FAILED)
+                        processResult.completionStatus = process::Result::CompletionStatus::START_FAILED;
+                }
+            }
         }
         // if !START_FAILED data is meaningful, moreover, START_FAILED should not be rewritten
-        if (processResult.completionStatus != process::Result::CompletionStatus::START_FAILED)
+        if (processResult.completionStatus == process::Result::CompletionStatus::ABNORMAL_EXIT ||
+            processResult.completionStatus == process::Result::CompletionStatus::OK)
         {
-            BOOST_ASSERT(processResult.completionStatus == process::Result::CompletionStatus::OK ||
-                         processResult.completionStatus == process::Result::CompletionStatus::ABNORMAL_EXIT);
             collectResourceInfo(id, controlGroup);
         }
         // group checks

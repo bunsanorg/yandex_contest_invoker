@@ -86,8 +86,6 @@ namespace yandex{namespace contest{namespace invoker
          * \return Process::Result previously set by ProcessGroup::poll() or ProcessGroup::wait().
          *
          * \throws ContainerIllegalStateError if process result was not set.
-         *
-         * \todo It is possible to implement poll() and wait() for Process. Do we need it?
          */
         const Result &result() const;
 

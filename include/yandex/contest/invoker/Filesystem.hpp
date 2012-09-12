@@ -11,6 +11,13 @@
 
 namespace yandex{namespace contest{namespace invoker
 {
+    struct FilesystemError: virtual Error {};
+
+    struct FileExistsError: virtual FilesystemError
+    {
+        typedef boost::error_info<struct pathTag, boost::filesystem::path> path;
+    };
+
     /*!
      * \brief Object implements interface to the container's filesystem.
      */

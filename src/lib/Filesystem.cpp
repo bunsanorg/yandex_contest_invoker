@@ -41,8 +41,14 @@ namespace yandex{namespace contest{namespace invoker
         const boost::filesystem::path remote_ = filesystem::keepInRoot(remote, containerRoot_);
         STREAM_DEBUG << "Attempt to push " << local << " to " << remote << ".";
         boost::filesystem::create_directories(remote_.parent_path());
+        if (boost::filesystem::exists(remote_))
+        {
+            STREAM_INFO << "Attempt to overwrite existing file " << remote_
+                        << " by copy of " << local << ".";
+            boost::filesystem::remove_all(remote_);
+        }
         boost::filesystem::copy_file(local, remote_,
-                                     boost::filesystem::copy_option::overwrite_if_exists);
+                                     boost::filesystem::copy_option::fail_if_exists);
         setOwnerId(remote, ownerId);
         setMode(remote, mode);
     }
@@ -56,6 +62,12 @@ namespace yandex{namespace contest{namespace invoker
         STREAM_DEBUG << "Attempt to push hard link " << local <<
             " to " << remote << "(" << remote_ << ")" << ".";
         boost::filesystem::create_directories(remote_.parent_path());
+        if (boost::filesystem::exists(remote_))
+        {
+            STREAM_INFO << "Attempt to overwrite existing file " << remote_
+                        << " by hard link " << local << ".";
+            boost::filesystem::remove_all(remote_);
+        }
         boost::filesystem::create_hard_link(local, remote_);
         setOwnerId(remote, ownerId);
         setMode(remote, mode);
@@ -90,6 +102,12 @@ namespace yandex{namespace contest{namespace invoker
         STREAM_DEBUG << "Attempt to pull " << remote << "(" << remote_ << ")" <<
             " to " << local << ".";
         boost::filesystem::create_directories(local.parent_path());
+        if (boost::filesystem::exists(local))
+        {
+            STREAM_ERROR << "Attempt to overwrite local file " << local
+                         << ", exception is thrown.";
+            BOOST_THROW_EXCEPTION(FileExistsError() << FileExistsError::path(local));
+        }
         boost::filesystem::copy(remote_, local);
     }
 }}}

@@ -40,6 +40,7 @@ namespace yandex{namespace contest{namespace invoker
     {
         const boost::filesystem::path remote_ = filesystem::keepInRoot(remote, containerRoot_);
         STREAM_DEBUG << "Attempt to push " << local << " to " << remote << ".";
+        boost::filesystem::create_directories(remote_.parent_path());
         boost::filesystem::copy_file(local, remote_,
                                      boost::filesystem::copy_option::overwrite_if_exists);
         setOwnerId(remote, ownerId);
@@ -54,6 +55,7 @@ namespace yandex{namespace contest{namespace invoker
         const boost::filesystem::path remote_ = filesystem::keepInRoot(remote, containerRoot_);
         STREAM_DEBUG << "Attempt to push hard link " << local <<
             " to " << remote << "(" << remote_ << ")" << ".";
+        boost::filesystem::create_directories(remote_.parent_path());
         boost::filesystem::create_hard_link(local, remote_);
         setOwnerId(remote, ownerId);
         setMode(remote, mode);
@@ -87,6 +89,7 @@ namespace yandex{namespace contest{namespace invoker
         const boost::filesystem::path remote_ = filesystem::keepInRoot(remote, containerRoot_);
         STREAM_DEBUG << "Attempt to pull " << remote << "(" << remote_ << ")" <<
             " to " << local << ".";
+        boost::filesystem::create_directories(local.parent_path());
         boost::filesystem::copy(remote_, local);
     }
 }}}

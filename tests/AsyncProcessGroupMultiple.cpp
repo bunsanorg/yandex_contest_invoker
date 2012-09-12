@@ -48,6 +48,35 @@ BOOST_AUTO_TEST_CASE(fast_not_ok_no_terminate)
     verifyPRExit(1);
 }
 
+BOOST_AUTO_TEST_CASE(fast_not_ok_no_wait)
+{
+    p0.executable = "false";
+    p0.groupWaitsForTermination = false;
+    p1.executable = "sleep";
+    p1.arguments = {"sleep", sleepTime};
+    run();
+    verifyPGR(PGR::CompletionStatus::ABNORMAL_EXIT);
+    // fast
+    verifyPRExit(0, 1);
+    // slow
+    verifyPRSig(1);
+}
+
+BOOST_AUTO_TEST_CASE(fast_not_ok_no_terminate_no_wait)
+{
+    p0.executable = "false";
+    p0.groupWaitsForTermination = false;
+    p0.terminateGroupOnCrash = false;
+    p1.executable = "sleep";
+    p1.arguments = {"sleep", sleepTime};
+    run();
+    verifyPGR();
+    // fast
+    verifyPRExit(0, 1);
+    // slow
+    verifyPRExit(1);
+}
+
 BOOST_AUTO_TEST_SUITE_END() // fast_slow
 
 BOOST_AUTO_TEST_SUITE(pipes)

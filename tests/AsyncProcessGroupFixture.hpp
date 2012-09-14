@@ -1,6 +1,6 @@
 #pragma once
 
-#include "yandex/contest/system/execution/tests/BoostExecTest.hpp"
+#include "yandex/contest/tests/BoostExecTest.hpp"
 
 #include "yandex/contest/Tempfile.hpp"
 

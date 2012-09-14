@@ -117,22 +117,7 @@ BOOST_AUTO_TEST_CASE(unstable)
 
 BOOST_AUTO_TEST_CASE(exec)
 {
-    process.executable = "python3";
-    const char cmd[] = R"EOF(
-import sys
-import os
-import math
-
-if __name__ == '__main__':
-    source, level = sys.argv[-2], int(sys.argv[-1]) + 1
-    sys.stderr.write("{}\n".format(level))
-    sys.stderr.flush()
-    x = 0
-    for i in range(10000):
-        x = math.sin(x) + 1
-    if level:
-        os.execv(sys.executable, [sys.executable, "-c", source, source, str(level)])
-    )EOF";
+    process.executable = testsResourcesSourceDir / "exec.py";
     TMP tmpfile;
     process.descriptors[2] = PG::File(tmpfile.path());
     process.resourceLimits.timeLimitMillis = sleepTimeMillis;
@@ -141,7 +126,7 @@ if __name__ == '__main__':
     // single execution is OK
     std::uint64_t singleCpuUsage;
     {
-        process.arguments = {"python3", "-c", cmd, cmd, "-1"};
+        process.arguments = {process.executable.string(), "-1"};
         run();
         verifyPGR();
         verifyPRExit(0);
@@ -151,7 +136,7 @@ if __name__ == '__main__':
     }
     // but a lot of exec are not
     {
-        process.arguments = {"python3", "-c", cmd, cmd, "0"};
+        process.arguments = {process.executable.string(), "0"};
         run();
         const std::string output = readData(tmpfile.path());
         const std::size_t execNumber = std::count(output.begin(), output.end(), '\n');
@@ -177,38 +162,10 @@ BOOST_AUTO_TEST_SUITE(number_of_processes)
 BOOST_AUTO_TEST_CASE(forker)
 {
     TMP tmpfile;
-    process.executable = "python3";
-    const char cmd[] = R"EOF(
-import sys
-import subprocess
-
-popenargs = {
-    "args": ["sleep", "60"]
-}
-
-output = sys.stdout
-
-if __name__ == '__main__':
-    proc = []
-    try:
-        while True:
-            proc.append(subprocess.Popen(**popenargs))
-    except:
-        output.write(str(len(proc)))
-        output.flush()
-    finally:
-        for p in proc:
-            try:
-                if p.poll() is None:
-                    p.kill()
-                p.wait()
-            except:
-                pass
-    )EOF";
+    process.executable = testsResourcesSourceDir / "forker.py";
     process.ownerId = uniqueOwnerId;
     process.descriptors[1] = PG::File(tmpfile.path());
     process.resourceLimits.numberOfProcesses = 10;
-    process.arguments = {"python3", "-c", cmd};
     task.resourceLimits.realTimeLimitMillis = decaSleepTimeMillis;
     run();
     verifyPGR();
@@ -230,20 +187,10 @@ BOOST_AUTO_TEST_CASE(true_1)
 
 BOOST_AUTO_TEST_CASE(exec_1)
 {
-    process.executable = "python3";
-    const char cmd[] = R"EOF(
-import sys
-import os
-
-if __name__ == '__main__':
-    source, level = sys.argv[-2], int(sys.argv[-1])
-    if level > 10:
-        sys.exit()
-    os.execv(sys.executable, [sys.executable, "-c", source, source, str(level + 1)])
-    )EOF";
+    process.executable = testsResourcesSourceDir / "exec_1.py";
     process.ownerId = uniqueOwnerId;
     process.resourceLimits.numberOfProcesses = 1;
-    process.arguments = {"python3", "-c", cmd, cmd, "0"};
+    process.arguments = {process.executable.string(), "0"};
     task.resourceLimits.realTimeLimitMillis = decaSleepTimeMillis; // python is slowpoke...
     run();
     verifyPGR();
@@ -324,19 +271,9 @@ BOOST_AUTO_TEST_SUITE(fd_alias)
 BOOST_AUTO_TEST_CASE(stderr_to_stdout)
 {
     const TMP tmpfile;
-    process.executable = "python3";
+    process.executable = testsResourcesSourceDir / "stderr_to_stdout.py";
     process.descriptors[1] = PG::File(tmpfile.path());
     process.descriptors[2] = PG::FDAlias(1);
-    const char cmd[] = R"EOF(
-import sys
-
-if __name__ == '__main__':
-    sys.stdout.write("stdout")
-    sys.stdout.flush()
-    sys.stderr.write("stderr")
-    sys.stderr.flush()
-    )EOF";
-    process.arguments = {"python3", "-c", cmd};
     run();
     verifyPGR();
     verifyPRExit(0);
@@ -384,23 +321,9 @@ BOOST_AUTO_TEST_SUITE(security)
 
 BOOST_AUTO_TEST_CASE(lost_child)
 {
-    process.executable = "python3";
+    process.executable = testsResourcesSourceDir / "lost_child.py";
     TMP tmpfile;
     process.descriptors[1] = PG::File(tmpfile.path());
-    const char cmd[] = R"EOF(
-import sys
-import os
-
-if __name__ == '__main__':
-    source, level = sys.argv[-2], int(sys.argv[-1])
-    pid = os.fork()
-    if pid:
-        sys.stdout.write(str(pid))
-        sys.stdout.flush()
-    else:
-        os.execvp("sleep", ["sleep", "60"])
-    )EOF";
-    process.arguments = {"python3", "-c", cmd, cmd, "0"};
     run();
     verifyPGR();// FIXME which???
     verifyPRExit(0);

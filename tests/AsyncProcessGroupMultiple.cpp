@@ -213,14 +213,14 @@ BOOST_FIXTURE_TEST_SUITE(send_recv, SendRecvFixture)
 
 BOOST_AUTO_TEST_CASE(posix)
 {
-    benchmark(testsResourcesBinaryDir / "posixClient",
-              testsResourcesBinaryDir / "posixEchoServer");
+    benchmark(testsResourcesBinaryDir / "benchmark" / "posixClient",
+              testsResourcesBinaryDir / "benchmark" / "posixEchoServer");
 }
 
 BOOST_AUTO_TEST_CASE(cxx)
 {
-    benchmark(testsResourcesBinaryDir / "cxxClient",
-              testsResourcesBinaryDir / "cxxEchoServer");
+    benchmark(testsResourcesBinaryDir / "benchmark" / "cxxClient",
+              testsResourcesBinaryDir / "benchmark" / "cxxEchoServer");
 }
 
 BOOST_AUTO_TEST_SUITE_END() // send_recv

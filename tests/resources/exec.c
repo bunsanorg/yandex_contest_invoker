@@ -11,9 +11,11 @@ int main(int argc, char *argv[])
 {
     assert(argc == 1 + 1);
     const int level = atoi(argv[1]) + 1;
-    fprintf(stderr, "%d\n", level);
+    fprintf(stderr, "begin %d\n", level);
     fflush(stderr);
-    burn_cpu(1000 * 1000);
+    burn_cpu(30 * 1000 * 1000);
+    fprintf(stderr, "end %d\n", level);
+    fflush(stderr);
     char lvl[10];
     sprintf(lvl, "%d", level);
     if (level)

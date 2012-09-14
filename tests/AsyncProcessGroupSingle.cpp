@@ -120,9 +120,9 @@ BOOST_AUTO_TEST_CASE(exec)
     process.executable = testsResourcesBinaryDir / "exec";
     TMP tmpfile;
     process.descriptors[2] = PG::File(tmpfile.path());
-    process.resourceLimits.timeLimitMillis = sleepTimeMillis;
-    task.resourceLimits.realTimeLimitMillis = std::max(
-        10 * cpuLimitResolutionMillis, decaSleepTimeMillis);
+    process.resourceLimits.timeLimitMillis = 10 * std::max(decaSleepTimeMillis,
+                                                           cpuLimitResolutionMillis);
+    task.resourceLimits.realTimeLimitMillis = 10 * process.resourceLimits.timeLimitMillis;
     // single execution is OK
     std::uint64_t singleCpuUsage;
     {
@@ -132,6 +132,7 @@ BOOST_AUTO_TEST_CASE(exec)
         verifyPRExit(0);
         BOOST_REQUIRE_EQUAL(result.processGroupResult.completionStatus, PGR::CompletionStatus::OK);
         singleCpuUsage = pr(0).resourceUsage.timeUsageMillis;
+        BOOST_REQUIRE_GT(singleCpuUsage, 0);
         BOOST_TEST_MESSAGE("Single cpu usage: " << singleCpuUsage);
     }
     // but a lot of exec are not
@@ -139,15 +140,16 @@ BOOST_AUTO_TEST_CASE(exec)
         process.arguments = {process.executable.string(), "0"};
         run();
         const std::string output = readData(tmpfile.path());
-        const std::size_t execNumber = std::count(output.begin(), output.end(), '\n');
-        BOOST_REQUIRE(execNumber > 1);
-        BOOST_TEST_MESSAGE("Exec number: " << execNumber);
+        const std::size_t execNumber2x = std::count(output.begin(), output.end(), '\n');
+        BOOST_REQUIRE_GT(execNumber2x, 2 * 4);
+        BOOST_TEST_MESSAGE("Exec number: " << static_cast<double>(execNumber2x) / 2);
         std::uint64_t multipleCpuUsage = pr(0).resourceUsage.timeUsageMillis;
         BOOST_TEST_MESSAGE("Multiple cpu usage: " << multipleCpuUsage);
-        std::uint64_t estimatedMultipleCpuUsage = execNumber * singleCpuUsage;
+        BOOST_REQUIRE_GT(multipleCpuUsage, 0);
+        std::uint64_t estimatedMultipleCpuUsage = (singleCpuUsage * execNumber2x) / 2;
         BOOST_TEST_MESSAGE("Estimated multiple cpu usage: " << estimatedMultipleCpuUsage);
-        double multipleCpuUsageError = std::fabs(
-            static_cast<double>(multipleCpuUsage) - estimatedMultipleCpuUsage) / multipleCpuUsage;
+        double multipleCpuUsageError = std::fabs(static_cast<double>(multipleCpuUsage) -
+                                                 estimatedMultipleCpuUsage) / multipleCpuUsage;
         BOOST_TEST_MESSAGE("Estimated multiple cpu usage error: " << multipleCpuUsageError);
         BOOST_CHECK_SMALL(multipleCpuUsageError, 0.5);
         verifyPGR(PGR::CompletionStatus::ABNORMAL_EXIT);

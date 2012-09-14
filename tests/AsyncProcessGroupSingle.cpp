@@ -117,7 +117,7 @@ BOOST_AUTO_TEST_CASE(unstable)
 
 BOOST_AUTO_TEST_CASE(exec)
 {
-    process.executable = testsResourcesSourceDir / "exec.py";
+    process.executable = testsResourcesBinaryDir / "exec";
     TMP tmpfile;
     process.descriptors[2] = PG::File(tmpfile.path());
     process.resourceLimits.timeLimitMillis = sleepTimeMillis;

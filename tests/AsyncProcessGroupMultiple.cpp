@@ -161,7 +161,7 @@ struct BenchmarkFixture: AsyncProcessGroupMultipleFixture
     typedef Clock::duration Duration;
     typedef Clock::time_point TimePoint;
 
-    TimePoint now()
+    static TimePoint now()
     {
         return Clock::now();
     }
@@ -169,46 +169,24 @@ struct BenchmarkFixture: AsyncProcessGroupMultipleFixture
 
 BOOST_FIXTURE_TEST_SUITE(benchmark, BenchmarkFixture)
 
-BOOST_AUTO_TEST_SUITE(send_recv)
-
-template <typename Config>
 struct SendRecvFixture: BenchmarkFixture
 {
-    Config *this_ = static_cast<Config *>(this);
+    const unsigned long count = 1000UL * 1000UL;
 
-    void benchmark()
+    void benchmark(const boost::filesystem::path &client, const boost::filesystem::path &echoServer)
     {
         TempDir tmpdir;
-        // write sources
-        writeData(tmpdir.path / this_->clientSourceName, this_->clientSource);
-        writeData(tmpdir.path / this_->echoServerSourceName, this_->echoServerSource);
-        // compile
-        p0.executable = this_->compilerExecutable;
-        p0.currentPath = tmpdir.path;
-        p0.arguments = this_->compilerArguments;
-        p1 = p0;
-        p0.arguments.push_back("-o");
-        p0.arguments.push_back("client");
-        p0.arguments.push_back(this_->clientSourceName);
-        p1.arguments.push_back("-o");
-        p1.arguments.push_back("echoServer");
-        p1.arguments.push_back(this_->echoServerSourceName);
-        run();
-        verifyPGR();
-        verifyPRExit(0);
-        verifyPRExit(1);
-        BOOST_REQUIRE_EQUAL(result.processGroupResult.completionStatus, PGR::CompletionStatus::OK);
         // run benchmark
         p0 = p1 = defaultProcess();
-        p0.executable = tmpdir.path / "echoServer";
+        p0.executable = echoServer;
         p0.descriptors[0] = pipe(0).readEnd();
         p1.descriptors[1] = pipe(0).writeEnd();
         p0.descriptors[1] = pipe(1).writeEnd();
         p1.descriptors[0] = pipe(1).readEnd();
         p0.descriptors[2] = PG::File("echoServer.log", PG::AccessMode::WRITE_ONLY);
-        p1.executable = tmpdir.path / "client";
+        p1.executable = client;
         p1.descriptors[2] = PG::File("client.log", PG::AccessMode::WRITE_ONLY);
-        p1.arguments = {"client", boost::lexical_cast<std::string>(this_->count)};
+        p1.arguments = {"client", boost::lexical_cast<std::string>(count)};
         task.resourceLimits.realTimeLimitMillis = 60 * 1000;
         p0.resourceLimits.timeLimitMillis = 60 * 1000;
         p1.resourceLimits = p0.resourceLimits;
@@ -222,204 +200,27 @@ struct SendRecvFixture: BenchmarkFixture
         // output statistics
         BOOST_TEST_MESSAGE("Execution time: " <<
             std::chrono::duration_cast<std::chrono::milliseconds>(time).count() << " ms.");
-        BOOST_TEST_MESSAGE(static_cast<double>(this_->count) /
+        BOOST_TEST_MESSAGE(static_cast<double>(count) /
             std::chrono::duration_cast<std::chrono::seconds>(time).count() << " messages per second.");
-        BOOST_TEST_MESSAGE("echoServer: " << 1000 * static_cast<double>(this_->count) /
+        BOOST_TEST_MESSAGE("echoServer: " << 1000 * static_cast<double>(count) /
             pr(0).resourceUsage.timeUsageMillis << " messages per cpu second.");
-        BOOST_TEST_MESSAGE("client: " << 1000 * static_cast<double>(this_->count) /
+        BOOST_TEST_MESSAGE("client: " << 1000 * static_cast<double>(count) /
             pr(1).resourceUsage.timeUsageMillis << " messages per cpu second.");
     }
 };
 
-struct SendRecvCFixture
+BOOST_FIXTURE_TEST_SUITE(send_recv, SendRecvFixture)
+
+BOOST_AUTO_TEST_CASE(posix)
 {
-    const unsigned long count = 1000UL * 1000UL;
-
-    const std::string bufferSource = R"EOF(
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <assert.h>
-
-#define BUFSIZE 20
-
-char srcBuf[BUFSIZE];
-
-char buf[BUFSIZE];
-
-void clearAll()
-{
-    memset(buf, 0, BUFSIZE);
-    // make invalid
-    buf[BUFSIZE - 1] = 1;
+    benchmark(testsResourcesBinaryDir / "posixClient",
+              testsResourcesBinaryDir / "posixEchoServer");
 }
 
-void fillAll()
+BOOST_AUTO_TEST_CASE(cxx)
 {
-    unsigned char c = 0;
-    for (unsigned i = 0; i + 1 < BUFSIZE; ++i)
-        c ^= (srcBuf[i] = buf[i] = 'a' + (rand() % 50));
-    srcBuf[BUFSIZE - 1] = buf[BUFSIZE - 1] = c;
-}
-
-void fastValidateAll()
-{
-    unsigned char c = 0;
-    for (unsigned i = 0; i < BUFSIZE; ++i)
-    {
-        if (i + 1 < BUFSIZE)
-            assert(buf[i] != 0);
-        c ^= buf[i];
-    }
-    assert(c == 0);
-}
-
-void validateAll()
-{
-    for (unsigned i = 0; i < BUFSIZE; ++i)
-        if (srcBuf[i] != buf[i])
-        {
-            fprintf(stderr, "srcBuf[%u] != buf[%u]: %d != %d\n", i, i, (int)srcBuf[i], (int)buf[i]);
-            abort();
-        }
-}
-    )EOF";
-
-    const std::string echoServerCSource = R"EOF(
-int main()
-{
-    clearAll();
-    while (readAll())
-    {
-        fastValidateAll();
-        writeAll();
-        clearAll();
-    }
-    return 0;
-}
-    )EOF";
-
-    const std::string clientCSource = R"EOF(
-int main(int argc, char *argv[])
-{
-    const unsigned long count = atol(argv[1]);
-    for (unsigned long i = 0; i < count; ++i)
-    {
-        fillAll();
-        writeAll();
-        clearAll();
-        readAll();
-        validateAll();
-    }
-    return 0;
-}
-    )EOF";
-};
-
-struct SendRecvPosixFixture: SendRecvFixture<SendRecvPosixFixture>, SendRecvCFixture
-{
-    const std::string compilerExecutable = "gcc";
-    const std::vector<std::string> compilerArguments = {"gcc", "-O2", "-std=c99"};
-    const std::string clientSourceName = "client.c";
-    const std::string echoServerSourceName = "echoServer.c";
-
-    const std::string commonSource = bufferSource + R"EOF(
-#include <unistd.h>
-
-int errRet(int code, const char *cmd)
-{
-    if (code < 0)
-    {
-        perror(cmd);
-        abort();
-    }
-    return code;
-}
-
-#define ERR(X) errRet(X, #X)
-
-ssize_t readAll()
-{
-    ssize_t readBytes, readBytesInternal;
-    readBytes = ERR(read(STDIN_FILENO, buf, BUFSIZE));
-    if (!readBytes)
-        return 0;
-    while ((readBytes < BUFSIZE) && (readBytesInternal =
-           ERR(read(STDIN_FILENO, buf + readBytes, BUFSIZE - readBytes))))
-    {
-        readBytes += readBytesInternal;
-    }
-    assert(readBytes == BUFSIZE);
-    return readBytes;
-}
-
-ssize_t writeAll()
-{
-    ssize_t writeBytes, writeBytesInternal;
-    writeBytes = ERR(write(STDOUT_FILENO, buf, BUFSIZE));
-    while ((writeBytes < BUFSIZE) && (writeBytesInternal =
-           ERR(write(STDOUT_FILENO, buf + writeBytes, BUFSIZE - writeBytes))))
-    {
-        writeBytes += writeBytesInternal;
-    }
-    assert(writeBytes == BUFSIZE);
-    return writeBytes;
-}
-
-    )EOF";
-
-    const std::string clientSource = commonSource + clientCSource;
-    const std::string echoServerSource = commonSource + echoServerCSource;
-};
-
-BOOST_FIXTURE_TEST_CASE(posix, SendRecvPosixFixture)
-{
-    benchmark();
-}
-
-struct SendRecvCxxFixture: SendRecvFixture<SendRecvCxxFixture>, SendRecvCFixture
-{
-    const std::string compilerExecutable = "g++";
-    const std::vector<std::string> compilerArguments = {"g++", "-O2"};
-    const std::string echoServerSourceName = "echoServer.cpp";
-    const std::string clientSourceName = "client.cpp";
-
-    const std::string commonSource = bufferSource + R"EOF(
-#include <iostream>
-
-const bool ios_hook = std::ios::sync_with_stdio(false);
-
-bool writeAll()
-{
-    std::cout.write(buf, BUFSIZE);
-    std::cout.flush();
-    assert(std::cout);
-    return true;
-}
-
-bool readAll()
-{
-    std::cin.read(buf, BUFSIZE);
-    if (std::cin.gcount())
-    {
-        assert(std::cin.gcount() == BUFSIZE);
-        assert(std::cin);
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
-    )EOF";
-
-    const std::string clientSource = commonSource + clientCSource;
-    const std::string echoServerSource = commonSource + echoServerCSource;
-};
-
-BOOST_FIXTURE_TEST_CASE(cxx, SendRecvCxxFixture)
-{
-    benchmark();
+    benchmark(testsResourcesBinaryDir / "cxxClient",
+              testsResourcesBinaryDir / "cxxEchoServer");
 }
 
 BOOST_AUTO_TEST_SUITE_END() // send_recv

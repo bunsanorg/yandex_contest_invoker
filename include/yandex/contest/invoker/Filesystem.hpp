@@ -32,6 +32,9 @@ namespace yandex{namespace contest{namespace invoker
          */
         const boost::filesystem::path &containerRoot() const;
 
+        /// Transform path in container to host path.
+        boost::filesystem::path keepInRoot(const boost::filesystem::path &path) const;
+
         /*!
          * \brief Push local file into container.
          */

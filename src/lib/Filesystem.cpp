@@ -33,12 +33,17 @@ namespace yandex{namespace contest{namespace invoker
         return containerRoot_;
     }
 
+    boost::filesystem::path Filesystem::keepInRoot(const boost::filesystem::path &path) const
+    {
+        return filesystem::keepInRoot(path, containerRoot_);
+    }
+
     void Filesystem::push(const boost::filesystem::path &local,
                           const boost::filesystem::path &remote,
                           const system::unistd::access::Id &ownerId,
                           const mode_t mode)
     {
-        const boost::filesystem::path remote_ = filesystem::keepInRoot(remote, containerRoot_);
+        const boost::filesystem::path remote_ = keepInRoot(remote);
         STREAM_DEBUG << "Attempt to push " << local << " to " << remote << ".";
         boost::filesystem::create_directories(remote_.parent_path());
         if (boost::filesystem::exists(remote_))
@@ -58,7 +63,7 @@ namespace yandex{namespace contest{namespace invoker
                               const system::unistd::access::Id &ownerId,
                               const mode_t mode)
     {
-        const boost::filesystem::path remote_ = filesystem::keepInRoot(remote, containerRoot_);
+        const boost::filesystem::path remote_ = keepInRoot(remote);
         STREAM_DEBUG << "Attempt to push hard link " << local <<
             " to " << remote << "(" << remote_ << ")" << ".";
         boost::filesystem::create_directories(remote_.parent_path());
@@ -75,7 +80,7 @@ namespace yandex{namespace contest{namespace invoker
 
     system::unistd::FileStatus Filesystem::fileStatus(const boost::filesystem::path &remote)
     {
-        const boost::filesystem::path remote_ = filesystem::keepInRoot(remote, containerRoot_);
+        const boost::filesystem::path remote_ = keepInRoot(remote);
         STREAM_DEBUG << "Attempt to get file status " << remote << "(" << remote_ << ")" << ".";
         return system::unistd::stat(remote_);
     }
@@ -83,14 +88,14 @@ namespace yandex{namespace contest{namespace invoker
     void Filesystem::setOwnerId(const boost::filesystem::path &remote,
                                 const system::unistd::access::Id &ownerId)
     {
-        const boost::filesystem::path remote_ = filesystem::keepInRoot(remote, containerRoot_);
+        const boost::filesystem::path remote_ = keepInRoot(remote);
         STREAM_DEBUG << "Attempt to chown " << remote << "(" << remote_ << ")" << ".";
         system::unistd::chown(remote_, ownerId);
     }
 
     void Filesystem::setMode(const boost::filesystem::path &remote, const mode_t mode)
     {
-        const boost::filesystem::path remote_ = filesystem::keepInRoot(remote, containerRoot_);
+        const boost::filesystem::path remote_ = keepInRoot(remote);
         STREAM_DEBUG << "Attempt to chmod " << remote << "(" << remote_ << ")" << ".";
         system::unistd::chmod(remote_, mode);
     }
@@ -98,7 +103,7 @@ namespace yandex{namespace contest{namespace invoker
     void Filesystem::pull(const boost::filesystem::path &remote,
                           const boost::filesystem::path &local)
     {
-        const boost::filesystem::path remote_ = filesystem::keepInRoot(remote, containerRoot_);
+        const boost::filesystem::path remote_ = keepInRoot(remote);
         STREAM_DEBUG << "Attempt to pull " << remote << "(" << remote_ << ")" <<
             " to " << local << ".";
         boost::filesystem::create_directories(local.parent_path());

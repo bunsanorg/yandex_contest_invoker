@@ -142,4 +142,9 @@ namespace yandex{namespace contest{namespace invoker
     {
         return processGroup_->processResult(id_);
     }
+
+    Process::Id Process::id() const
+    {
+        return id_;
+    }
 }}}

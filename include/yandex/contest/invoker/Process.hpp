@@ -32,12 +32,14 @@ namespace yandex{namespace contest{namespace invoker
         typedef process::ResourceUsage ResourceUsage;
         typedef process::DefaultSettings DefaultSettings;
 
+        typedef std::size_t Id;
+
     public:
         /*!
          * \brief Create new Process, associated with processGroup.
          * TODO: lifetime
          */
-        static ProcessPointer create(const ProcessGroupPointer &processGroup, const std::size_t id);
+        static ProcessPointer create(const ProcessGroupPointer &processGroup, const Id id);
 
         const boost::filesystem::path &executable() const;
 
@@ -116,12 +118,23 @@ namespace yandex{namespace contest{namespace invoker
          */
         bool hasStream(const int descriptor) const;
 
+        /*!
+         * \brief Process identifier.
+         *
+         * Identifier is unique between processes
+         * of one process group.
+         *
+         * \warning User should not rely on value distribution.
+         * Such behavior may be changed in the future.
+         */
+        Id id() const;
+
     private:
         /*!
          * \warning Constructor is private because
          * class uses own reference-counting mechanism.
          */
-        explicit Process(const ProcessGroupPointer &processGroup, const std::size_t id);
+        explicit Process(const ProcessGroupPointer &processGroup, const Id id);
 
     private:
         friend void intrusive_ptr_add_ref(Process *) noexcept;
@@ -130,6 +143,6 @@ namespace yandex{namespace contest{namespace invoker
 
     private:
         ProcessGroupPointer processGroup_;
-        const std::size_t id_;
+        const Id id_;
     };
 }}}

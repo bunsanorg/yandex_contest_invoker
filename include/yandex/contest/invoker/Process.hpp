@@ -7,6 +7,8 @@
 
 #include "yandex/contest/invoker/detail/CommonProcessTypedefs.hpp"
 
+#include "yandex/contest/system/execution/Helper.hpp"
+
 #include "yandex/contest/invoker/detail/execution/AsyncProcessGroup.hpp"
 
 #include <boost/noncopyable.hpp>
@@ -71,6 +73,12 @@ namespace yandex{namespace contest{namespace invoker
 
         const ProcessArguments &arguments() const;
         void setArguments(const ProcessArguments &arguments);
+
+        template <typename ... Args>
+        void setArguments(Args &&...args)
+        {
+            setArguments(system::execution::collect(std::forward<Args>(args)...));
+        }
 
         const boost::filesystem::path &currentPath() const;
         void setCurrentPath(const boost::filesystem::path &currentPath);

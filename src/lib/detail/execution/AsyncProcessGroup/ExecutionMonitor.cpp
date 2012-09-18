@@ -100,7 +100,7 @@ namespace yandex{namespace contest{namespace invoker{
         const system::cgroup::Memory memory(controlGroup);
         const system::cgroup::MemorySwap memsw(controlGroup);
         const system::cgroup::CpuAccounting cpuAcct(controlGroup);
-        resourceUsage.memoryUsageBytes = memory.usage();
+        resourceUsage.memoryUsageBytes = memory.maxUsage();
         resourceUsage.timeUsageMillis =
             std::chrono::duration_cast<std::chrono::milliseconds>(
                 cpuAcct.userUsage()).count();

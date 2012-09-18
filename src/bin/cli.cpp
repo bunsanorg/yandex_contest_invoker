@@ -54,7 +54,10 @@ namespace yandex{namespace contest{namespace invoker{namespace cli
                  const boost::filesystem::path &executable,
                  const ProcessArguments &arguments,
                  const ProcessGroup::ResourceLimits &processGroupResourceLimits,
-                 const Process::ResourceLimits &processResourceLimits)
+                 const Process::ResourceLimits &processResourceLimits,
+                 const boost::filesystem::path &inFile,
+                 const boost::filesystem::path &outFile,
+                 const boost::filesystem::path &errFile)
     {
         STREAM_INFO <<
             "Trying to execute " << executable << " with " <<
@@ -70,6 +73,15 @@ namespace yandex{namespace contest{namespace invoker{namespace cli
         ProcessPointer process = processGroup->createProcess(executable);
         process->setArguments(arguments);
         process->setResourceLimits(processResourceLimits);
+        if (inFile != "/dev/null")
+        {
+            container->filesystem().push(inFile, "/stdin", system::unistd::access::Id(0, 0), 0400);
+            process->setStream(0, File("/stdin", AccessMode::READ_ONLY));
+        }
+        if (outFile != "/dev/null")
+            process->setStream(1, File("/stdout", AccessMode::WRITE_ONLY));
+        if (errFile != "/dev/null")
+            process->setStream(2, File("/stderr", AccessMode::WRITE_ONLY));
         const ProcessGroup::Result processGroupResult = processGroup->synchronizedCall();
         const Process::Result processResult = process->result();
         STREAM_INFO << "Process group has terminated";
@@ -78,6 +90,10 @@ namespace yandex{namespace contest{namespace invoker{namespace cli
         printSerializable(std::cout, processGroupResult);
         std::cout << "Process result:" << std::endl;
         printSerializable(std::cout, processResult);
+        if (outFile != "/dev/null")
+            container->filesystem().pull("/stdout", outFile);
+        if (errFile != "/dev/null")
+            container->filesystem().pull("/stderr", errFile);
     }
 }}}}
 
@@ -88,7 +104,7 @@ int main(int argc, char *argv[])
     po::options_description desc("Usage");
     try
     {
-        std::string config, executable;
+        std::string config, executable, inFile, outFile, errFile;
         ya::ProcessGroup::ResourceLimits processGroupResourceLimits;
         ya::Process::ResourceLimits processResourceLimits;
         ya::ProcessArguments arguments;
@@ -103,6 +119,9 @@ int main(int argc, char *argv[])
                 "output limit in bytes")
             ("real-time-limit,l", po::value<std::uint64_t>(&processGroupResourceLimits.realTimeLimitMillis),
                 "real time limit in milliseconds")
+            ("stdin", po::value<std::string>(&inFile)->default_value("/dev/null"), "file for stdin")
+            ("stdout", po::value<std::string>(&outFile)->default_value("/dev/null"), "file for stdout")
+            ("stderr", po::value<std::string>(&errFile)->default_value("/dev/null"), "file for stderr")
             ("argument,a", po::value<ya::ProcessArguments>(&arguments)->composing(), "arguments");
         po::positional_options_description pdesc;
         pdesc.add("argument", -1);
@@ -115,7 +134,8 @@ int main(int argc, char *argv[])
             ya::ContainerConfig::fromEnvironment();
         ya::cli::execute(cfg, executable, arguments,
                          processGroupResourceLimits,
-                         processResourceLimits);
+                         processResourceLimits,
+                         inFile, outFile, errFile);
     }
     catch (po::error &e)
     {

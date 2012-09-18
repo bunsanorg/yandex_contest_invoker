@@ -2,6 +2,7 @@
 
 #include "yandex/contest/tests/BoostExecTest.hpp"
 #include "yandex/contest/tests/Environment.hpp"
+#include "yandex/contest/tests/Utils.hpp"
 
 #include "yandex/contest/Tempfile.hpp"
 
@@ -14,8 +15,6 @@
 #include <algorithm>
 
 #include <boost/test/test_tools.hpp>
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/fstream.hpp>
 
 namespace ya = yandex::contest::invoker::detail::execution;
 
@@ -23,23 +22,6 @@ namespace unistd = yandex::contest::system::unistd;
 
 struct AsyncProcessGroupFixture
 {
-    struct TempDir: private boost::noncopyable
-    {
-        TempDir():
-            path(boost::filesystem::temp_directory_path() / boost::filesystem::unique_path())
-        {
-            BOOST_REQUIRE(boost::filesystem::create_directory(path));
-        }
-
-        ~TempDir()
-        {
-            boost::system::error_code ec;
-            boost::filesystem::remove_all(path, ec);
-        }
-
-        boost::filesystem::path path;
-    };
-
     typedef ya::AsyncProcessGroup PG;
     typedef yandex::contest::invoker::process_group::Result PGR;
     typedef yandex::contest::invoker::process::Result PR;
@@ -62,31 +44,6 @@ struct AsyncProcessGroupFixture
         pr.descriptors[1] = PG::File("/dev/null");
         pr.descriptors[2] = PG::File("/dev/null");
         return pr;
-    }
-
-    static std::string readData(const boost::filesystem::path &path)
-    {
-        BOOST_TEST_CHECKPOINT(BOOST_CURRENT_FUNCTION);
-        boost::filesystem::ifstream fin(path);
-        BOOST_REQUIRE(fin);
-        const std::string rdata{
-            std::istreambuf_iterator<char>(fin),
-            std::istreambuf_iterator<char>()
-        };
-        fin.close();
-        BOOST_REQUIRE(fin);
-        return rdata;
-    }
-
-    static void writeData(const boost::filesystem::path &path, const std::string &data)
-    {
-        BOOST_TEST_CHECKPOINT(BOOST_CURRENT_FUNCTION);
-        boost::filesystem::ofstream fout(path);
-        BOOST_REQUIRE(fout);
-        fout << data << std::flush;
-        BOOST_REQUIRE(fout);
-        fout.close();
-        BOOST_REQUIRE(fout);
     }
 
     void run()

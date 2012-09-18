@@ -23,7 +23,6 @@ list(APPEND libraries
 include_directories(include)
 
 # Targets
-
 add_library(${PROJECT_NAME} SHARED
     src/lib/Container.cpp
     src/lib/Filesystem.cpp
@@ -54,7 +53,7 @@ target_link_libraries(${PROJECT_NAME} ${libraries})
 
 add_binary_targets(bin_targets cli ctl)
 
-# installation
+# Installation
 install(DIRECTORY include DESTINATION .)
 install(TARGETS ${PROJECT_NAME} ${bin_targets}
     RUNTIME DESTINATION bin

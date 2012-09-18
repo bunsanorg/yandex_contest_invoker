@@ -74,10 +74,13 @@ namespace yandex{namespace contest{namespace invoker
         const ProcessArguments &arguments() const;
         void setArguments(const ProcessArguments &arguments);
 
-        template <typename ... Args>
-        void setArguments(Args &&...args)
+        /// \note At least two arguments should be given.
+        template <typename Arg0, typename Arg1, typename ... Args>
+        void setArguments(Arg0 &&arg0, Arg1 &&arg1, Args &&...args)
         {
-            setArguments(system::execution::collect(std::forward<Args>(args)...));
+            setArguments(system::execution::collect(std::forward<Arg0>(arg0),
+                                                    std::forward<Arg1>(arg1),
+                                                    std::forward<Args>(args)...));
         }
 
         const boost::filesystem::path &currentPath() const;

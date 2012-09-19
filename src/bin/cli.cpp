@@ -9,21 +9,18 @@
 #include "yandex/contest/detail/LogHelper.hpp"
 
 #include "yandex/contest/SystemError.hpp"
+#include "yandex/contest/TypeInfo.hpp"
 
 #include "yandex/contest/invoker/detail/VectorToString.hpp"
 
 #include "yandex/contest/config/OutputArchive.hpp"
 
 #include <iostream>
-#include <typeinfo>
 
 #include <boost/filesystem/fstream.hpp>
 #include <boost/program_options.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
-
-// boost::units::detail::demangle
-#include <boost/units/detail/utility.hpp>
 
 namespace yandex{namespace contest{namespace invoker{namespace cli
 {
@@ -145,7 +142,7 @@ int main(int argc, char *argv[])
     catch (std::exception &e)
     {
         std::cerr << "Program terminated due to exception of type \"" <<
-                     boost::units::detail::demangle(typeid(e).name()) << "\"." << std::endl;
+                     yandex::contest::typeinfo::name(e) << "\"." << std::endl;
         std::cerr << "what() returns the following message:" << std::endl <<
                      e.what() << std::endl;
         return 1;

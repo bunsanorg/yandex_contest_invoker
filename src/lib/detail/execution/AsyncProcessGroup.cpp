@@ -2,6 +2,8 @@
 
 #include "yandex/contest/SerializationCast.hpp"
 
+#include "yandex/contest/detail/LogHelper.hpp"
+
 #include <boost/assert.hpp>
 
 namespace yandex{namespace contest{namespace invoker{namespace detail{namespace execution
@@ -10,6 +12,7 @@ namespace yandex{namespace contest{namespace invoker{namespace detail{namespace 
     {
         AsyncProcess::Options apply(AsyncProcess::Options options, const AsyncProcessGroup::Task &task)
         {
+            STREAM_TRACE << "Attempt to execute process group: " << STREAM_OBJECT(task);
             options.in = serialization::serialize(task);
             return options;
         }

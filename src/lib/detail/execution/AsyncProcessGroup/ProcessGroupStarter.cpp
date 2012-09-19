@@ -75,7 +75,10 @@ namespace yandex{namespace contest{namespace invoker{
             for (const Id id: monitor_.running())
             {
                 if (monitor_.runOutOfResourceLimits(id, id2cgroup_[id]))
+                {
                     terminate(id);
+                    monitor_.terminatedBySystem(id);
+                }
             }
             waitForAnyChild(std::bind(waitFor, std::placeholders::_1, waitInterval));
             if (Clock::now() >= realTimeLimitPoint_)
@@ -83,7 +86,10 @@ namespace yandex{namespace contest{namespace invoker{
         }
         // let's terminate each running process
         for (const Id id: monitor_.running())
+        {
             terminate(id);
+            monitor_.terminatedBySystem(id);
+        }
         // let's collect results
         while (monitor_.processesAreRunning())
             waitForAnyChild(wait);

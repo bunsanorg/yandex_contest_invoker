@@ -211,7 +211,7 @@ BOOST_AUTO_TEST_CASE(no_wait)
     process.groupWaitsForTermination = false;
     run();
     verifyPGR(PGR::CompletionStatus::ABNORMAL_EXIT);
-    verifyPRSig(0);
+    verifyPRSig(0, 9, PR::CompletionStatus::TERMINATED_BY_SYSTEM);
 }
 
 BOOST_AUTO_TEST_SUITE(uid_gid)

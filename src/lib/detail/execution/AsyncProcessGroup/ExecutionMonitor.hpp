@@ -32,6 +32,8 @@ namespace yandex{namespace contest{namespace invoker{
         void terminated(const Id id, const int statLoc,
                         system::cgroup::ControlGroup &controlGroup);
 
+        void terminatedBySystem(const Id id);
+
         /// Notify monitor that real time limit was exceeded.
         void realTimeLimitExceeded();
 

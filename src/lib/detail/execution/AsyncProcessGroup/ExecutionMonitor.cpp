@@ -41,10 +41,12 @@ namespace yandex{namespace contest{namespace invoker{
         // collect info
         process::Result &processResult = result_.processResults[id];
         processResult.assign(statLoc);
-        processResult.completionStatus = process::Result::CompletionStatus::OK;
-        if (!processResult)
+        if (processResult.completionStatus != process::Result::CompletionStatus::TERMINATED_BY_SYSTEM)
+            processResult.completionStatus = process::Result::CompletionStatus::OK;
+        if (!static_cast<system::unistd::ProcessResult &>(processResult))
         {
-            processResult.completionStatus = process::Result::CompletionStatus::ABNORMAL_EXIT;
+            if (processResult.completionStatus != process::Result::CompletionStatus::TERMINATED_BY_SYSTEM)
+                processResult.completionStatus = process::Result::CompletionStatus::ABNORMAL_EXIT;
             // may be overwritten after signal or rusage checks (except START_FAILED)
             if (processResult.termSig)
             {
@@ -61,7 +63,8 @@ namespace yandex{namespace contest{namespace invoker{
             }
         }
         // if !START_FAILED data is meaningful, moreover, START_FAILED should not be rewritten
-        if (processResult.completionStatus == process::Result::CompletionStatus::ABNORMAL_EXIT ||
+        if (processResult.completionStatus == process::Result::CompletionStatus::TERMINATED_BY_SYSTEM ||
+            processResult.completionStatus == process::Result::CompletionStatus::ABNORMAL_EXIT ||
             processResult.completionStatus == process::Result::CompletionStatus::OK)
         {
             collectResourceInfo(id, controlGroup);
@@ -75,6 +78,12 @@ namespace yandex{namespace contest{namespace invoker{
                     process_group::Result::CompletionStatus::ABNORMAL_EXIT;
             }
         }
+    }
+
+    void ExecutionMonitor::terminatedBySystem(const Id id)
+    {
+        result_.processResults[id].completionStatus =
+            process::Result::CompletionStatus::TERMINATED_BY_SYSTEM;
     }
 
     void ExecutionMonitor::realTimeLimitExceeded()

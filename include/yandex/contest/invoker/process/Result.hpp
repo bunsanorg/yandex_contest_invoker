@@ -42,6 +42,7 @@ namespace yandex{namespace contest{namespace invoker{namespace process
         (
             OK,
             ABNORMAL_EXIT,
+            TERMINATED_BY_SYSTEM,
             MEMORY_LIMIT_EXCEEDED,
             TIME_LIMIT_EXCEEDED,
             OUTPUT_LIMIT_EXCEEDED,

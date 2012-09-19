@@ -31,7 +31,7 @@ BOOST_AUTO_TEST_CASE(fast_not_ok)
     // fast
     verifyPRExit(0, 1);
     // slow
-    verifyPRSig(1);
+    verifyPRSig(1, 9, PR::CompletionStatus::TERMINATED_BY_SYSTEM);
 }
 
 BOOST_AUTO_TEST_CASE(fast_not_ok_no_terminate)
@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE(fast_not_ok_no_wait)
     // fast
     verifyPRExit(0, 1);
     // slow
-    verifyPRSig(1);
+    verifyPRSig(1, 9, PR::CompletionStatus::TERMINATED_BY_SYSTEM);
 }
 
 BOOST_AUTO_TEST_CASE(fast_not_ok_no_terminate_no_wait)

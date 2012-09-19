@@ -51,7 +51,14 @@ struct ContainerFixture
         verifyPG(pgrcs);
         for (const ya::ProcessPointer &pp: p_)
             if (pp)
+            {
+                BOOST_TEST_MESSAGE("Process [" << pp->id() << "]:");
                 BOOST_CHECK_EQUAL(pp->result().completionStatus, prcs);
+                if (pp->result().exitStatus)
+                    BOOST_TEST_MESSAGE("ExitStatus: " << pp->result().exitStatus.get());
+                if (pp->result().termSig)
+                    BOOST_TEST_MESSAGE("TermSig: " << pp->result().termSig.get());
+            }
     }
 
 #define VERIFY(STATUS) \

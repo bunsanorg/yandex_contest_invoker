@@ -285,6 +285,10 @@ namespace yandex{namespace contest{namespace invoker{
         rlim.rlim_cur = rlim.rlim_max = boost::numeric_cast<rlim_t>(
             resourceLimits_.outputLimitBytes);
         system::unistd::setrlimit(RLIMIT_FSIZE, rlim);
+
+        // stack
+        rlim.rlim_cur = rlim.rlim_max = RLIM_INFINITY;
+        system::unistd::setrlimit(RLIMIT_STACK, rlim);
     }
 
     void ProcessStarter::childSetUpResourceLimitsUser()

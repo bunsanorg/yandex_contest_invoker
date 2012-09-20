@@ -4,6 +4,8 @@
 
 #include "yandex/contest/system/unistd/Operations.hpp"
 
+#include "yandex/contest/detail/LogHelper.hpp"
+
 #include <functional>
 
 #include <boost/assert.hpp>
@@ -70,6 +72,7 @@ namespace yandex{namespace contest{namespace invoker{
 
     void ProcessGroupStarter::executionLoop()
     {
+        STREAM_DEBUG << "Starting execution loop...";
         while (monitor_.processGroupIsRunning())
         {
             for (const Id id: monitor_.running())
@@ -85,20 +88,26 @@ namespace yandex{namespace contest{namespace invoker{
                 monitor_.realTimeLimitExceeded();
         }
         // let's terminate each running process
+        STREAM_DEBUG << "Terminating processes...";
         for (const Id id: monitor_.running())
         {
+            STREAM_TRACE << "Terminating " << id << ".";
             terminate(id);
             monitor_.terminatedBySystem(id);
         }
         // let's collect results
+        STREAM_TRACE << "Collection results...";
         while (monitor_.processesAreRunning())
+        {
             waitForAnyChild(wait);
+        }
     }
 
     void ProcessGroupStarter::terminate(const Id id)
     {
         BOOST_ASSERT(id < id2cgroup_.size());
         const Pid pid = id2pid_[id];
+        STREAM_TRACE << "Attempt to terminate " << id << " (pid = " << pid << ").";
         // sometimes terminate is called before
         // child has attached itself to control group
         if (::kill(pid, SIGKILL) < 0 && errno != ESRCH)
@@ -109,16 +118,14 @@ namespace yandex{namespace contest{namespace invoker{
 
     void ProcessGroupStarter::waitForAnyChild(const WaitFunction &waitFunction)
     {
+        STREAM_TRACE << "Waiting for a child...";
         BOOST_ASSERT(monitor_.processesAreRunning());
         int statLoc;
         const Pid pid = waitFunction(statLoc);
+        STREAM_TRACE << "waitFunction has returned pid = " << pid << ".";
         if (pid != 0)
         {
-            if (pid < 0)
-            {
-                BOOST_ASSERT_MSG(errno != ECHILD, "We have child processes.");
-                BOOST_THROW_EXCEPTION(SystemError("wait") << Error::message("Undocumented error."));
-            }
+            BOOST_ASSERT(pid > 0);
             BOOST_ASSERT_MSG(pid2id_.find(pid) != pid2id_.end(), "We get process we haven't started.");
             const Id id = pid2id_.at(pid);
             // TODO Do we need to check for lost children and report?
@@ -132,6 +139,7 @@ namespace yandex{namespace contest{namespace invoker{
 
     Pid ProcessGroupStarter::wait(int &statLoc)
     {
+        STREAM_TRACE << "Waiting for a child [timeout=infinity]...";
         Pid rpid;
         do
         {
@@ -139,6 +147,11 @@ namespace yandex{namespace contest{namespace invoker{
         }
         while (rpid < 0 && errno == EINTR);
         BOOST_ASSERT_MSG(rpid != 0, "Timeout is not possible.");
+        if (rpid < 0)
+        {
+            BOOST_ASSERT_MSG(errno != ECHILD, "We have child processes.");
+            BOOST_THROW_EXCEPTION(SystemError(errno, "wait") << Error::message("Undocumented error."));
+        }
         return rpid;
     }
 
@@ -215,11 +228,14 @@ namespace yandex{namespace contest{namespace invoker{
 
     Pid ProcessGroupStarter::waitFor(int &statLoc, const Duration &duration)
     {
+        STREAM_TRACE << "Waiting for a child [timeout=" << duration.count() << "]...";
         return waitUntil(statLoc, Clock::now() + duration);
     }
 
     Pid ProcessGroupStarter::waitUntil(int &statLoc, const TimePoint &untilPoint)
     {
+        STREAM_TRACE << "Waiting for a child [until=" <<
+                        untilPoint.time_since_epoch().count() << "]...";
         TimePoint now = Clock::now();
         if (now >= untilPoint)
             return 0;
@@ -240,6 +256,11 @@ namespace yandex{namespace contest{namespace invoker{
         }
         while (rpid < 0 && errno_ == EINTR);
         BOOST_ASSERT_MSG(rpid != 0, "Timeout is not possible.");
+        if (rpid < 0)
+        {
+            BOOST_ASSERT_MSG(errno_ != ECHILD, "We have child processes.");
+            BOOST_THROW_EXCEPTION(SystemError(errno_, "wait") << Error::message("Undocumented error."));
+        }
         return rpid;
     }
 }}}}}}

@@ -7,6 +7,8 @@
 #include "yandex/contest/system/cgroup/Memory.hpp"
 #include "yandex/contest/system/cgroup/MemorySwap.hpp"
 
+#include "yandex/contest/detail/LogHelper.hpp"
+
 #include <signal.h>
 
 #include <boost/assert.hpp>
@@ -16,6 +18,7 @@ namespace yandex{namespace contest{namespace invoker{
 {
     void ExecutionMonitor::started(const Id id, const AsyncProcessGroup::Process &process)
     {
+        STREAM_TRACE << "Started id = " << id << ".";
         BOOST_ASSERT_MSG(running_.find(id) == running_.end(), "This process has already started.");
         running_.insert(id);
         if (process.groupWaitsForTermination)
@@ -27,6 +30,7 @@ namespace yandex{namespace contest{namespace invoker{
     void ExecutionMonitor::terminated(const Id id, const int statLoc,
                                       system::cgroup::ControlGroup &controlGroup)
     {
+        STREAM_TRACE << "Terminated id = " << id << ".";
         BOOST_ASSERT(running_.size() + terminated_.size() ==
                      result_.processResults.size());
         BOOST_ASSERT_MSG(running_.find(id) != running_.end(),
@@ -82,12 +86,14 @@ namespace yandex{namespace contest{namespace invoker{
 
     void ExecutionMonitor::terminatedBySystem(const Id id)
     {
+        STREAM_TRACE << "Terminated by system id = " << id << ".";
         result_.processResults[id].completionStatus =
             process::Result::CompletionStatus::TERMINATED_BY_SYSTEM;
     }
 
     void ExecutionMonitor::realTimeLimitExceeded()
     {
+        STREAM_TRACE << "Real time limit exceeded.";
         result_.processGroupResult.completionStatus =
             process_group::Result::CompletionStatus::REAL_TIME_LIMIT_EXCEEDED;
     }
@@ -95,12 +101,14 @@ namespace yandex{namespace contest{namespace invoker{
     bool ExecutionMonitor::runOutOfResourceLimits(
         const Id id, system::cgroup::ControlGroup &controlGroup)
     {
+        STREAM_TRACE << "Run out of resource limits id = " << id << ".";
         return collectResourceInfo(id, controlGroup) != process::Result::CompletionStatus::OK;
     }
 
     process::Result::CompletionStatus ExecutionMonitor::collectResourceInfo(
         const Id id, system::cgroup::ControlGroup &controlGroup)
     {
+        STREAM_TRACE << "Collecting resource info id = " << id << ".";
         process::Result &result = result_.processResults[id];
         process::Result::CompletionStatus &status = result.completionStatus;
         BOOST_ASSERT(status != process::Result::CompletionStatus::START_FAILED);

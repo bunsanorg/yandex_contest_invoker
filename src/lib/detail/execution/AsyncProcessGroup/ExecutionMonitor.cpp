@@ -121,6 +121,25 @@ namespace yandex{namespace contest{namespace invoker{
         resourceUsage.timeUsageMillis =
             std::chrono::duration_cast<std::chrono::milliseconds>(
                 cpuAcct.userUsage()).count();
+        if (resourceUsage.timeUsageMillis == 0)
+        {
+            // Resolution of userUsage() is lower than of usage(),
+            // but usage() will return user + system time.
+            static_assert(std::ratio_less<system::cgroup::CpuAccounting::Duration::period,
+                                          system::cgroup::CpuAccounting::TickDuration::period
+                                         >::value,
+                          "Resolution of userUsage() is lower than of usage().");
+            resourceUsage.timeUsageMillis =
+                std::chrono::duration_cast<std::chrono::milliseconds>(
+                    cpuAcct.usage()).count();
+            // We should not allow value became greater than one tick (userUsage() step).
+            constexpr std::uint64_t tickMillis =
+                std::chrono::duration_cast<std::chrono::milliseconds>(
+                    system::cgroup::CpuAccounting::TickDuration(1)).count();
+            static_assert(tickMillis > 0, "Resolution of userUsage() is lower than millisecond.");
+            if (resourceUsage.timeUsageMillis > tickMillis)
+                resourceUsage.timeUsageMillis = tickMillis;
+        }
         if (resourceUsage.timeUsageMillis > resourceLimits.timeLimitMillis)
             return status = process::Result::CompletionStatus::TIME_LIMIT_EXCEEDED;
         if (memory.failcnt() || memsw.failcnt())

@@ -46,6 +46,8 @@ namespace yandex{namespace contest{namespace invoker{
             ProcessStarter starter(cg, task.processes[id], pipes_);
             const Pid pid = starter();
             id2pid_[id] = pid;
+            STREAM_TRACE << "Process id mapping was established: " <<
+                            "{id=" << id << "} = {pid=" << pid << "}.";
             BOOST_ASSERT(pid2id_.find(pid) == pid2id_.end());
             pid2id_[pid] = id;
             monitor_.started(id, task.processes[id]);

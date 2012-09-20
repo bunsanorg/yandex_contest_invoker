@@ -3,6 +3,8 @@
 
 #include "yandex/contest/SystemError.hpp"
 
+#include "yandex/contest/detail/LogHelper.hpp"
+
 #include "yandex/contest/system/unistd/Operations.hpp"
 #include "yandex/contest/system/unistd/access/Operations.hpp"
 
@@ -102,6 +104,7 @@ namespace yandex{namespace contest{namespace invoker{
         BOOST_ASSERT(pid >= 0);
         if (pid > 0)
         { // parent
+            STREAM_TRACE << "Child process was started pid = " << pid << ".";
             return pid;
         }
         else

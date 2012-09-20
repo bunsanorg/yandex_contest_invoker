@@ -254,7 +254,7 @@ namespace yandex{namespace contest{namespace invoker{
             // first assignment and check was made at the beginning of the function
             now = Clock::now();
             if (now >= untilPoint)
-                return 0;
+                return rpid > 0 ? rpid : 0;
         }
         while (rpid < 0 && errno_ == EINTR);
         BOOST_ASSERT_MSG(rpid != 0, "Timeout is not possible.");

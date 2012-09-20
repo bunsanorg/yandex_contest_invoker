@@ -53,6 +53,8 @@ namespace yandex{namespace contest{namespace invoker{
          * \brief wait3 analogue except it handles interruptions.
          *
          * \return 0 if until was reached
+         *
+         * \warning Function may return pid even if untilPoint was reached.
          */
         static Pid waitUntil(int &statLoc, const TimePoint &untilPoint);
 

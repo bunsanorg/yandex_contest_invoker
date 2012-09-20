@@ -15,12 +15,16 @@
 
 #include "yandex/contest/SerializationCast.hpp"
 
+#include "yandex/contest/system/Trace.hpp"
+
 #include <iostream>
 
 int main()
 {
     try
     {
+        yandex::contest::system::Trace::handle(SIGABRT);
+        yandex::contest::system::Trace::handle(SIGSEGV);
         using yandex::contest::invoker::detail::execution::AsyncProcessGroup;
         using namespace yandex::contest::serialization;
         AsyncProcessGroup::Task task;

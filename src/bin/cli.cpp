@@ -59,10 +59,7 @@ namespace yandex{namespace contest{namespace invoker{namespace cli
         STREAM_INFO <<
             "Trying to execute " << executable << " with " <<
             detail::vectorToString(arguments) << " arguments where " <<
-            "memory limit = " << processResourceLimits.memoryLimitBytes << " bytes, " <<
-            "time limit = " << processResourceLimits.timeLimitMillis << " milliseconds, " <<
-            "output limit = " << processResourceLimits.outputLimitBytes << " bytes, " <<
-            "real time limit = " << processGroupResourceLimits.realTimeLimitMillis << " milliseconds";
+            STREAM_OBJECT(processResourceLimits);
 
         ContainerPointer container = Container::create(config);
         ProcessGroupPointer processGroup = container->createProcessGroup();
@@ -102,19 +99,21 @@ int main(int argc, char *argv[])
     try
     {
         std::string config, executable, inFile, outFile, errFile;
-        ya::ProcessGroup::ResourceLimits processGroupResourceLimits;
-        ya::Process::ResourceLimits processResourceLimits;
+        std::uint64_t userTimeLimitMillis;
+        std::uint64_t memoryLimitBytes;
+        std::uint64_t outputLimitBytes;
+        std::uint64_t realTimeLimitMillis;
         ya::ProcessArguments arguments;
         desc.add_options()
             ("config,c", po::value<std::string>(&config), "configuration file")
             ("executable,e", po::value<std::string>(&executable)->required(), "executable")
-            ("time-limit,t", po::value<std::uint64_t>(&processResourceLimits.timeLimitMillis),
+            ("time-limit,t", po::value<std::uint64_t>(&userTimeLimitMillis),
                 "time limit in milliseconds")
-            ("memory-limit,m", po::value<std::uint64_t>(&processResourceLimits.memoryLimitBytes),
+            ("memory-limit,m", po::value<std::uint64_t>(&memoryLimitBytes),
                 "memory limit in bytes")
-            ("output-limit,o", po::value<std::uint64_t>(&processResourceLimits.outputLimitBytes),
+            ("output-limit,o", po::value<std::uint64_t>(&outputLimitBytes),
                 "output limit in bytes")
-            ("real-time-limit,l", po::value<std::uint64_t>(&processGroupResourceLimits.realTimeLimitMillis),
+            ("real-time-limit,l", po::value<std::uint64_t>(&realTimeLimitMillis),
                 "real time limit in milliseconds")
             ("stdin", po::value<std::string>(&inFile)->default_value("/dev/null"), "file for stdin")
             ("stdout", po::value<std::string>(&outFile)->default_value("/dev/null"), "file for stdout")
@@ -129,6 +128,27 @@ int main(int argc, char *argv[])
         const ya::ContainerConfig cfg = vm.count("config") ?
             ya::cli::parseConfig(config) :
             ya::ContainerConfig::fromEnvironment();
+
+        ya::Process::ResourceLimits processResourceLimits =
+            cfg.processGroupDefaultSettings.processDefaultSettings.resourceLimits;
+
+        if (vm.count("time-limit"))
+            processResourceLimits.userTimeLimit =
+                std::chrono::milliseconds(userTimeLimitMillis);
+
+        if (vm.count("memory-limit"))
+            processResourceLimits.memoryLimitBytes = memoryLimitBytes;
+
+        if (vm.count("output-limit"))
+            processResourceLimits.outputLimitBytes = outputLimitBytes;
+
+        ya::ProcessGroup::ResourceLimits processGroupResourceLimits =
+            cfg.processGroupDefaultSettings.resourceLimits;
+
+        if (vm.count("real-time-limit"))
+            processGroupResourceLimits.realTimeLimit =
+                std::chrono::milliseconds(realTimeLimitMillis);
+
         ya::cli::execute(cfg, executable, arguments,
                          processGroupResourceLimits,
                          processResourceLimits,

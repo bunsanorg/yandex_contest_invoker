@@ -1,10 +1,33 @@
 #pragma once
 
-#include "yandex/contest/system/unistd/ResourceUsage.hpp"
+#include <chrono>
 
-#include <utility>
+#include <cstdint>
+
+#include <boost/serialization/access.hpp>
+#include <boost/serialization/nvp.hpp>
+#include "yandex/contest/serialization/chrono.hpp"
 
 namespace yandex{namespace contest{namespace invoker{namespace process
 {
-    using system::unistd::ResourceUsage;
+    struct ResourceUsage
+    {
+        template <typename Archive>
+        void serialize(Archive &ar, const unsigned int)
+        {
+            ar & boost::serialization::make_nvp("timeUsageNanos", timeUsage);
+            ar & boost::serialization::make_nvp("userTimeUsageMillis", userTimeUsage);
+            ar & boost::serialization::make_nvp("systemTimeUsageMillis", systemTimeUsage);
+            ar & BOOST_SERIALIZATION_NVP(memoryUsageBytes);
+        }
+
+        ResourceUsage()=default;
+        ResourceUsage(const ResourceUsage &)=default;
+        ResourceUsage &operator=(const ResourceUsage &)=default;
+
+        std::chrono::nanoseconds timeUsage;
+        std::chrono::milliseconds userTimeUsage;
+        std::chrono::milliseconds systemTimeUsage;
+        std::uint64_t memoryUsageBytes = 0;
+    };
 }}}}

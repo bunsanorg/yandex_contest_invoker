@@ -76,8 +76,8 @@ BOOST_AUTO_TEST_SUITE(resource_limits)
 BOOST_AUTO_TEST_CASE(real_time_limit)
 {
     process.executable = "sleep";
-    process.arguments = {"sleep", decaSleepTime};
-    task.resourceLimits.realTimeLimitMillis = sleepTimeMillis;
+    process.arguments = {"sleep", decaSleepTimeStr};
+    task.resourceLimits.realTimeLimit = sleepTime;
     run();
     verifyPGR(PGR::CompletionStatus::REAL_TIME_LIMIT_EXCEEDED);
 }
@@ -89,29 +89,28 @@ BOOST_AUTO_TEST_CASE(busy_beaver)
     process.executable = "perl";
     // busy beaver
     process.arguments = {"perl", "-e", "while (true) {}"};
-    task.resourceLimits.realTimeLimitMillis = 10 * std::max(cpuLimitResolutionMillis,
-                                                            decaSleepTimeMillis);
-    task.processes[0].resourceLimits.timeLimitMillis = sleepTimeMillis;
+    task.resourceLimits.realTimeLimit = 10 * std::max(cpuLimitResolution, decaSleepTime);
+    task.processes[0].resourceLimits.userTimeLimit = sleepTime;
     run();
     verifyPGR(PGR::CompletionStatus::ABNORMAL_EXIT);
-    verifyPR(0, PR::CompletionStatus::TIME_LIMIT_EXCEEDED);
+    verifyPR(0, PR::CompletionStatus::USER_TIME_LIMIT_EXCEEDED);
 }
 
+// TODO deprecated test
 BOOST_AUTO_TEST_CASE(unstable)
 {
     process.executable = "perl";
     // busy beaver
     process.arguments = {"perl", "-e", "while (true) {}"};
-    task.resourceLimits.realTimeLimitMillis = 10 * cpuLimitResolutionMillis;
-    // 1 second (from setrlimit(3)::RLIMIT_CPU resolution)
-    process.resourceLimits.timeLimitMillis = cpuLimitResolutionMillis;
+    task.resourceLimits.realTimeLimit = 10 * cpuLimitResolution;
+    process.resourceLimits.userTimeLimit = cpuLimitResolution;
     // this happens sometimes
     // so we need statically reliable test
     for (std::size_t i = 0; i < 5; ++i)
     {
         run();
         verifyPGR(PGR::CompletionStatus::ABNORMAL_EXIT);
-        verifyPR(0, PR::CompletionStatus::TIME_LIMIT_EXCEEDED);
+        verifyPR(0, PR::CompletionStatus::USER_TIME_LIMIT_EXCEEDED);
     }
 }
 
@@ -120,20 +119,19 @@ BOOST_AUTO_TEST_CASE(exec)
     process.executable = testsResourcesBinaryDir / "exec";
     TMP tmpfile;
     process.descriptors[2] = PG::File(tmpfile.path());
-    process.resourceLimits.timeLimitMillis = 10 * std::max(decaSleepTimeMillis,
-                                                           cpuLimitResolutionMillis);
-    task.resourceLimits.realTimeLimitMillis = 10 * process.resourceLimits.timeLimitMillis;
+    process.resourceLimits.userTimeLimit = 10 * std::max(decaSleepTime, cpuLimitResolution);
+    task.resourceLimits.realTimeLimit = 10 * process.resourceLimits.userTimeLimit;
     // single execution is OK
-    std::uint64_t singleCpuUsage;
+    std::chrono::milliseconds singleCpuUsage;
     {
         process.arguments = {process.executable.string(), "-1"};
         run();
         verifyPGR();
         verifyPRExit(0);
         BOOST_REQUIRE_EQUAL(result.processGroupResult.completionStatus, PGR::CompletionStatus::OK);
-        singleCpuUsage = pr(0).resourceUsage.timeUsageMillis;
-        BOOST_REQUIRE_GT(singleCpuUsage, 0);
-        BOOST_TEST_MESSAGE("Single cpu usage: " << singleCpuUsage);
+        singleCpuUsage = pr(0).resourceUsage.userTimeUsage;
+        BOOST_REQUIRE_GT(singleCpuUsage.count(), 0);
+        BOOST_TEST_MESSAGE("Single cpu usage: " << singleCpuUsage.count());
     }
     // but a lot of exec are not
     {
@@ -143,17 +141,17 @@ BOOST_AUTO_TEST_CASE(exec)
         const std::size_t execNumber2x = std::count(output.begin(), output.end(), '\n');
         BOOST_REQUIRE_GT(execNumber2x, 2 * 4);
         BOOST_TEST_MESSAGE("Exec number: " << static_cast<double>(execNumber2x) / 2);
-        std::uint64_t multipleCpuUsage = pr(0).resourceUsage.timeUsageMillis;
-        BOOST_TEST_MESSAGE("Multiple cpu usage: " << multipleCpuUsage);
-        BOOST_REQUIRE_GT(multipleCpuUsage, 0);
-        std::uint64_t estimatedMultipleCpuUsage = (singleCpuUsage * execNumber2x) / 2;
-        BOOST_TEST_MESSAGE("Estimated multiple cpu usage: " << estimatedMultipleCpuUsage);
-        double multipleCpuUsageError = std::fabs(static_cast<double>(multipleCpuUsage) -
-                                                 estimatedMultipleCpuUsage) / multipleCpuUsage;
+        std::chrono::milliseconds multipleCpuUsage = pr(0).resourceUsage.userTimeUsage;
+        BOOST_TEST_MESSAGE("Multiple cpu usage: " << multipleCpuUsage.count());
+        BOOST_REQUIRE_GT(multipleCpuUsage.count(), 0);
+        std::chrono::milliseconds estimatedMultipleCpuUsage = (singleCpuUsage * execNumber2x) / 2;
+        BOOST_TEST_MESSAGE("Estimated multiple cpu usage: " << estimatedMultipleCpuUsage.count());
+        const double multipleCpuUsageError = std::fabs(
+            (multipleCpuUsage - estimatedMultipleCpuUsage).count()) / multipleCpuUsage.count();
         BOOST_TEST_MESSAGE("Estimated multiple cpu usage error: " << multipleCpuUsageError);
         BOOST_CHECK_SMALL(multipleCpuUsageError, 0.5);
         verifyPGR(PGR::CompletionStatus::ABNORMAL_EXIT);
-        verifyPR(0, PR::CompletionStatus::TIME_LIMIT_EXCEEDED);
+        verifyPR(0, PR::CompletionStatus::USER_TIME_LIMIT_EXCEEDED);
     }
 }
 
@@ -168,7 +166,7 @@ BOOST_AUTO_TEST_CASE(forker)
     process.ownerId = uniqueOwnerId;
     process.descriptors[1] = PG::File(tmpfile.path());
     process.resourceLimits.numberOfProcesses = 10;
-    task.resourceLimits.realTimeLimitMillis = decaSleepTimeMillis;
+    task.resourceLimits.realTimeLimit = decaSleepTime;
     run();
     verifyPGR();
     verifyPRExit(0);
@@ -193,7 +191,7 @@ BOOST_AUTO_TEST_CASE(exec_1)
     process.ownerId = uniqueOwnerId;
     process.resourceLimits.numberOfProcesses = 1;
     process.arguments = {process.executable.string(), "0"};
-    task.resourceLimits.realTimeLimitMillis = decaSleepTimeMillis; // python is slowpoke...
+    task.resourceLimits.realTimeLimit = decaSleepTime; // python is slowpoke...
     run();
     verifyPGR();
     verifyPRExit(0);
@@ -207,7 +205,7 @@ BOOST_AUTO_TEST_CASE(no_wait)
 {
     process.executable = "sleep";
     // it will be visible if process is not killed instantly
-    process.arguments = {"sleep", decaSleepTime};
+    process.arguments = {"sleep", decaSleepTimeStr};
     process.groupWaitsForTermination = false;
     run();
     verifyPGR(PGR::CompletionStatus::ABNORMAL_EXIT);

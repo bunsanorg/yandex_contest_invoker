@@ -118,30 +118,15 @@ namespace yandex{namespace contest{namespace invoker{
         const system::cgroup::MemorySwap memsw(controlGroup);
         const system::cgroup::CpuAccounting cpuAcct(controlGroup);
         resourceUsage.memoryUsageBytes = memory.maxUsage();
-        resourceUsage.timeUsageMillis =
-            std::chrono::duration_cast<std::chrono::milliseconds>(
-                cpuAcct.userUsage()).count();
-        if (resourceUsage.timeUsageMillis == 0)
-        {
-            // Resolution of userUsage() is lower than of usage(),
-            // but usage() will return user + system time.
-            static_assert(std::ratio_less<system::cgroup::CpuAccounting::Duration::period,
-                                          system::cgroup::CpuAccounting::TickDuration::period
-                                         >::value,
-                          "Resolution of userUsage() is lower than of usage().");
-            resourceUsage.timeUsageMillis =
-                std::chrono::duration_cast<std::chrono::milliseconds>(
-                    cpuAcct.usage()).count();
-            // We should not allow value became greater than one tick (userUsage() step).
-            constexpr std::uint64_t tickMillis =
-                std::chrono::duration_cast<std::chrono::milliseconds>(
-                    system::cgroup::CpuAccounting::TickDuration(1)).count();
-            static_assert(tickMillis > 0, "Resolution of userUsage() is lower than millisecond.");
-            if (resourceUsage.timeUsageMillis > tickMillis)
-                resourceUsage.timeUsageMillis = tickMillis;
-        }
-        if (resourceUsage.timeUsageMillis > resourceLimits.timeLimitMillis)
-            return status = process::Result::CompletionStatus::TIME_LIMIT_EXCEEDED;
+        const auto cpuAcctStat = cpuAcct.stat();
+        resourceUsage.userTimeUsage =
+            std::chrono::duration_cast<std::chrono::milliseconds>(cpuAcctStat.userUsage);
+        resourceUsage.systemTimeUsage =
+            std::chrono::duration_cast<std::chrono::milliseconds>(cpuAcctStat.systemUsage);
+        resourceUsage.timeUsage =
+            std::chrono::duration_cast<std::chrono::nanoseconds>(cpuAcct.usage());
+        if (resourceUsage.userTimeUsage > resourceLimits.userTimeLimit)
+            return status = process::Result::CompletionStatus::USER_TIME_LIMIT_EXCEEDED;
         if (memory.failcnt() || memsw.failcnt())
             return status = process::Result::CompletionStatus::MEMORY_LIMIT_EXCEEDED;
         // note: do not overwrite by OK

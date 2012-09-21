@@ -26,8 +26,8 @@ BOOST_AUTO_TEST_CASE(false_)
 BOOST_AUTO_TEST_CASE(slow)
 {
     ya::ProcessGroup::ResourceLimits pgrl;
-    pgrl.realTimeLimitMillis = sleepTimeMillis / 2;
-    p(0, "sleep", sleepTime);
+    pgrl.realTimeLimit = sleepTime / 2;
+    p(0, "sleep", sleepTimeStr);
     pg->setResourceLimits(pgrl);
     CALL_CHECKPOINT(pg->start());
     verifyPG(PGR::CompletionStatus::REAL_TIME_LIMIT_EXCEEDED);
@@ -35,7 +35,7 @@ BOOST_AUTO_TEST_CASE(slow)
 
 BOOST_AUTO_TEST_CASE(freezing)
 {
-    p(0, "sleep", sleepTime);
+    p(0, "sleep", sleepTimeStr);
     CALL_CHECKPOINT(pg->start());
     // note: this is not stable.
     // Increasing sleepTime can help
@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_CASE(freezing)
 
 BOOST_AUTO_TEST_CASE(stop)
 {
-    p(0, "sleep", sleepTime);
+    p(0, "sleep", sleepTimeStr);
     CALL_CHECKPOINT(pg->start());
     CALL_CHECKPOINT(pg->stop());
     verifySTOPPED();;
@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE(stop)
 
 BOOST_AUTO_TEST_CASE(freeze_stop)
 {
-    p(0, "sleep", sleepTime);
+    p(0, "sleep", sleepTimeStr);
     CALL_CHECKPOINT(pg->start());
     CALL_CHECKPOINT(pg->freeze());
     CALL_CHECKPOINT(pg->stop());
@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE(freeze_stop)
 
 BOOST_AUTO_TEST_CASE(freeze_wait)
 {
-    p(0, "sleep", sleepTime);
+    p(0, "sleep", sleepTimeStr);
     pg->start();
     pg->freeze();
     BOOST_CHECK_THROW(pg->wait(), ya::ContainerIllegalStateError);

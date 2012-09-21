@@ -4,6 +4,7 @@
 #include "yandex/contest/SystemError.hpp"
 
 #include "yandex/contest/detail/LogHelper.hpp"
+#include "yandex/contest/detail/NullLog.hpp"
 
 #include "yandex/contest/system/unistd/Operations.hpp"
 #include "yandex/contest/system/unistd/access/Operations.hpp"
@@ -120,6 +121,11 @@ namespace yandex{namespace contest{namespace invoker{
     {
         try
         {
+            {
+                // FIXME workaround, should be transmitted to control process
+                const LogPointer log(new contest::detail::NullLog);
+                Log::registerInstance(log);
+            }
             childSetUpFDs();
             // TODO verify has permissions to execute
             childSetUpResourceLimits();

@@ -25,7 +25,7 @@ BOOST_AUTO_TEST_CASE(fast_not_ok)
 {
     p0.executable = "false";
     p1.executable = "sleep";
-    p1.arguments = {"sleep", sleepTime};
+    p1.arguments = {"sleep", sleepTimeStr};
     run();
     verifyPGR(PGR::CompletionStatus::ABNORMAL_EXIT);
     // fast
@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_CASE(fast_not_ok_no_terminate)
     p0.executable = "false";
     p0.terminateGroupOnCrash = false;
     p1.executable = "sleep";
-    p1.arguments = {"sleep", sleepTime};
+    p1.arguments = {"sleep", sleepTimeStr};
     run();
     verifyPGR();
     // fast
@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(fast_not_ok_no_wait)
     p0.executable = "false";
     p0.groupWaitsForTermination = false;
     p1.executable = "sleep";
-    p1.arguments = {"sleep", sleepTime};
+    p1.arguments = {"sleep", sleepTimeStr};
     run();
     verifyPGR(PGR::CompletionStatus::ABNORMAL_EXIT);
     // fast
@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE(fast_not_ok_no_terminate_no_wait)
     p0.groupWaitsForTermination = false;
     p0.terminateGroupOnCrash = false;
     p1.executable = "sleep";
-    p1.arguments = {"sleep", sleepTime};
+    p1.arguments = {"sleep", sleepTimeStr};
     run();
     verifyPGR();
     // fast
@@ -187,8 +187,8 @@ struct SendRecvFixture: BenchmarkFixture
         p1.executable = client;
         p1.descriptors[2] = PG::File("client.log", PG::AccessMode::WRITE_ONLY);
         p1.arguments = {"client", boost::lexical_cast<std::string>(count)};
-        task.resourceLimits.realTimeLimitMillis = 60 * 1000;
-        p0.resourceLimits.timeLimitMillis = 60 * 1000;
+        task.resourceLimits.realTimeLimit = std::chrono::seconds(60);
+        p0.resourceLimits.userTimeLimit = std::chrono::seconds(60);
         p1.resourceLimits = p0.resourceLimits;
         p1.currentPath = p0.currentPath = tmpdir.path;
         const TimePoint beginPoint = now();
@@ -203,9 +203,11 @@ struct SendRecvFixture: BenchmarkFixture
         BOOST_TEST_MESSAGE(static_cast<double>(count) /
             std::chrono::duration_cast<std::chrono::seconds>(time).count() << " messages per second.");
         BOOST_TEST_MESSAGE("echoServer: " << 1000 * static_cast<double>(count) /
-            pr(0).resourceUsage.timeUsageMillis << " messages per cpu second.");
+            std::chrono::duration_cast<std::chrono::milliseconds>(
+                pr(0).resourceUsage.userTimeUsage).count() << " messages per cpu second.");
         BOOST_TEST_MESSAGE("client: " << 1000 * static_cast<double>(count) /
-            pr(1).resourceUsage.timeUsageMillis << " messages per cpu second.");
+            std::chrono::duration_cast<std::chrono::milliseconds>(
+                pr(1).resourceUsage.userTimeUsage).count() << " messages per cpu second.");
     }
 };
 

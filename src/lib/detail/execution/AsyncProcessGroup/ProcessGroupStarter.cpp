@@ -62,8 +62,7 @@ namespace yandex{namespace contest{namespace invoker{
         if (sigaction(SIGALRM, &act, nullptr) < 0)
             BOOST_THROW_EXCEPTION(SystemError("sigaction"));
         // real time limit
-        realTimeLimitPoint_ = std::chrono::steady_clock::now() +
-            std::chrono::milliseconds(task.resourceLimits.realTimeLimitMillis);
+        realTimeLimitPoint_ = std::chrono::steady_clock::now() + task.resourceLimits.realTimeLimit;
     }
 
     ProcessGroupStarter::~ProcessGroupStarter()

@@ -78,8 +78,8 @@ public:
     ya::ContainerPointer cnt;
     ya::ProcessGroupPointer pg;
 
-    const char *const sleepTime = "0.1";
-    const int sleepTimeMillis = 100;
+    const char *const sleepTimeStr = "0.2";
+    const std::chrono::milliseconds sleepTime = std::chrono::milliseconds(200);
 
 private:
     std::vector<ya::ProcessPointer> p_;

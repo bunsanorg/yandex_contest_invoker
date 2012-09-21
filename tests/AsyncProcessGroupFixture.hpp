@@ -120,11 +120,11 @@ struct AsyncProcessGroupFixture
     PG::Task task;
     PG::Result result;
 
-    const char *const sleepTime = "0.2";
-    const std::uint64_t sleepTimeMillis = 200;
-    const char *const decaSleepTime = "2";
-    const std::uint64_t decaSleepTimeMillis = 2000;
-    const std::uint64_t cpuLimitResolutionMillis = 1000;
+    const char *const sleepTimeStr = "0.2";
+    const std::chrono::milliseconds sleepTime = std::chrono::milliseconds(200);
+    const char *const decaSleepTimeStr = "2";
+    const std::chrono::milliseconds decaSleepTime = std::chrono::seconds(2);
+    const std::chrono::milliseconds cpuLimitResolution = std::chrono::seconds(1);
 
     // unique ids, no other processes should use these
     const unistd::access::Id uniqueOwnerId{12345, 12345};

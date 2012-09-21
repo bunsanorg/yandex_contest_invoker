@@ -3,9 +3,8 @@
 
 namespace yandex{namespace contest{namespace invoker{namespace process
 {
-    Result::Result(const int statLoc, const ::rusage &rusage):
-        system::unistd::ProcessResult(statLoc),
-        resourceUsage(rusage) {}
+    Result::Result(const int statLoc):
+        system::unistd::ProcessResult(statLoc) {}
 
     Result::operator bool() const
     {

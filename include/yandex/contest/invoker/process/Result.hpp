@@ -15,8 +15,6 @@
 
 namespace yandex{namespace contest{namespace invoker{namespace process
 {
-    struct ResourceLimits;
-
     struct Result: system::unistd::ProcessResult
     {
         friend class boost::serialization::access;
@@ -30,7 +28,7 @@ namespace yandex{namespace contest{namespace invoker{namespace process
             ar & BOOST_SERIALIZATION_NVP(resourceUsage);
         }
 
-        Result(const int statLoc, const ::rusage &rusage);
+        explicit Result(const int statLoc);
 
         Result()=default;
         Result(const Result &)=default;

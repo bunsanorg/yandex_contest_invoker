@@ -57,6 +57,7 @@ struct ContainerFixture
     void infoP(const std::size_t i)
     {
         const ya::ProcessPointer pp = p(i);
+        BOOST_TEST_MESSAGE("CompletionStatus: " << pp->result().completionStatus);
         if (pp->result().exitStatus)
             BOOST_TEST_MESSAGE("ExitStatus: " << pp->result().exitStatus.get());
         if (pp->result().termSig)

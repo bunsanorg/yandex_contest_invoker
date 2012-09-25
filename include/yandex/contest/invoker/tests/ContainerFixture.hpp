@@ -64,7 +64,7 @@ struct ContainerFixture
             BOOST_TEST_MESSAGE("TermSig: " << pp->result().termSig.get());
     }
 
-    void verifyP(const std::size_t i, const PR::CompletionStatus prcs)
+    void verifyP(const std::size_t i, const PR::CompletionStatus prcs=PR::CompletionStatus::OK)
     {
         BOOST_ASSERT(i < p_.size());
         const ya::ProcessPointer pp = p_[i].process;

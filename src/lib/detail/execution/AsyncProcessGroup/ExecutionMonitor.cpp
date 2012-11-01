@@ -101,7 +101,7 @@ namespace yandex{namespace contest{namespace invoker{
     bool ExecutionMonitor::runOutOfResourceLimits(
         const Id id, system::cgroup::ControlGroup &controlGroup)
     {
-        STREAM_TRACE << "Run out of resource limits id = " << id << ".";
+        STREAM_TRACE << "Check if id = " << id << " run out of resource limits.";
         return collectResourceInfo(id, controlGroup) != process::Result::CompletionStatus::OK;
     }
 
@@ -126,9 +126,15 @@ namespace yandex{namespace contest{namespace invoker{
         resourceUsage.timeUsage =
             std::chrono::duration_cast<std::chrono::nanoseconds>(cpuAcct.usage());
         if (resourceUsage.userTimeUsage > resourceLimits.userTimeLimit)
+        {
+            STREAM_TRACE << "Id = " << id << " run out of user time limit.";
             return status = process::Result::CompletionStatus::USER_TIME_LIMIT_EXCEEDED;
+        }
         if (memory.failcnt() || memsw.failcnt())
+        {
+            STREAM_TRACE << "Id = " << id << " run out of memory limit.";
             return status = process::Result::CompletionStatus::MEMORY_LIMIT_EXCEEDED;
+        }
         // note: do not overwrite by OK
         return process::Result::CompletionStatus::OK;
     }

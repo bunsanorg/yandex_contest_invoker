@@ -67,8 +67,7 @@ namespace yandex{namespace contest{namespace invoker{
 
     ProcessGroupStarter::~ProcessGroupStarter()
     {
-        for (const system::cgroup::ControlGroup &cg: id2cgroup_)
-            BOOST_ASSERT_MSG(!cg, "Every control group should be terminated and closed.");
+        // nothing
     }
 
     void ProcessGroupStarter::executionLoop()
@@ -102,6 +101,10 @@ namespace yandex{namespace contest{namespace invoker{
         {
             waitForAnyChild(wait);
         }
+        // end of function
+        // let's check everything is OK
+        for (const system::cgroup::ControlGroup &cg: id2cgroup_)
+            BOOST_ASSERT_MSG(!cg, "Every control group should be terminated and closed.");
     }
 
     void ProcessGroupStarter::terminate(const Id id)

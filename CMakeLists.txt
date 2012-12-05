@@ -6,24 +6,15 @@ cmake_minimum_required(VERSION 2.8)
 
 include(YandexContestCommon)
 
-# BOOST
-set(Boost_USE_STATIC_LIBS OFF)
-set(Boost_USE_MULTITHREADED ON)
-find_package(Boost COMPONENTS system filesystem serialization unit_test_framework program_options REQUIRED)
-include_directories(${Boost_INCLUDE_DIRS})
-list(APPEND libraries ${Boost_LIBRARIES})
+bunsan_use_boost(system filesystem serialization unit_test_framework program_options)
 
-# yandex_contest_*
-list(APPEND libraries
+bunsan_use_bunsan(common)
+bunsan_use(
     yandex_contest_common
     yandex_contest_system
 )
 
-# Local
-include_directories(include)
-
-# Targets
-add_library(${PROJECT_NAME} SHARED
+bunsan_add_shared_library(${PROJECT_NAME}
     src/lib/Container.cpp
     src/lib/Filesystem.cpp
     src/lib/ProcessGroup.cpp
@@ -49,15 +40,10 @@ add_library(${PROJECT_NAME} SHARED
     src/lib/detail/execution/AsyncProcessGroup/ExecutionMonitor.cpp
     src/lib/detail/execution/AsyncProcessGroup/Streams.cpp
 )
-target_link_libraries(${PROJECT_NAME} ${libraries})
 
-add_binary_targets(bin_targets cli ctl)
+yandex_contest_add_binary_targets(bin_targets cli ctl)
 
-# Installation
-install(DIRECTORY include DESTINATION .)
-install(TARGETS ${PROJECT_NAME} ${bin_targets}
-    RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib)
+bunsan_install_headers()
+bunsan_install_targets(${PROJECT_NAME} ${bin_targets})
 
-yandex_contest_tests()
+bunsan_include_tests()

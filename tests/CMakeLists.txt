@@ -1,1 +1,1 @@
-yandex_contest_tests_cmake()
+bunsan_tests_project()

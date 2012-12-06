@@ -8,16 +8,17 @@
 
 #include "yandex/contest/detail/LogHelper.hpp"
 
-#include "yandex/contest/SystemError.hpp"
 #include "yandex/contest/TypeInfo.hpp"
 
 #include "yandex/contest/invoker/detail/VectorToString.hpp"
 
 #include "yandex/contest/config/OutputArchive.hpp"
 
+#include "bunsan/enable_error_info.hpp"
+#include "bunsan/filesystem/fstream.hpp"
+
 #include <iostream>
 
-#include <boost/filesystem/fstream.hpp>
 #include <boost/program_options.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
@@ -28,13 +29,13 @@ namespace yandex{namespace contest{namespace invoker{namespace cli
     {
         STREAM_INFO << "Trying to load configuration file at " << config << ".";
         ContainerConfig cfg;
-        boost::filesystem::ifstream cfgin(config);
-        if (!cfgin)
-            BOOST_THROW_EXCEPTION(SystemError("open"));
-        cfgin >> cfg;
-        cfgin.close();
-        if (!cfgin)
-            BOOST_THROW_EXCEPTION(SystemError("close"));
+        BUNSAN_EXCEPTIONS_WRAP_BEGIN()
+        {
+            bunsan::filesystem::ifstream cfgin(config);
+            cfgin >> cfg;
+            cfgin.close();
+        }
+        BUNSAN_EXCEPTIONS_WRAP_END()
         return cfg;
     }
 

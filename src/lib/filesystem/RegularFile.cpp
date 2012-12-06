@@ -5,12 +5,12 @@
 #include "yandex/contest/invoker/filesystem/RegularFile.hpp"
 #include "yandex/contest/invoker/filesystem/Error.hpp"
 
-#include "yandex/contest/SystemError.hpp"
-
 #include "yandex/contest/system/unistd/Operations.hpp"
 
+#include "bunsan/enable_error_info.hpp"
+#include "bunsan/filesystem/fstream.hpp"
+
 #include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/fstream.hpp>
 
 namespace yandex{namespace contest{namespace invoker{namespace filesystem
 {
@@ -30,12 +30,12 @@ namespace yandex{namespace contest{namespace invoker{namespace filesystem
         }
         else
         {
-            boost::filesystem::ofstream fout(path);
-            if (!fout)
-                BOOST_THROW_EXCEPTION(SystemError("open"));
-            fout.close();
-            if (!fout)
-                BOOST_THROW_EXCEPTION(SystemError("close"));
+            BUNSAN_EXCEPTIONS_WRAP_BEGIN()
+            {
+                bunsan::filesystem::ofstream fout(path);
+                fout.close();
+            }
+            BUNSAN_EXCEPTIONS_WRAP_END()
         }
         chmod();
     }

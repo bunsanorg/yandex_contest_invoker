@@ -1,12 +1,12 @@
 #include "yandex/contest/invoker/ContainerConfig.hpp"
 #include "yandex/contest/invoker/ConfigurationError.hpp"
 
-#include "yandex/contest/SystemError.hpp"
-
 #include "yandex/contest/config/InputArchive.hpp"
 #include "yandex/contest/config/OutputArchive.hpp"
 
-#include <boost/filesystem/fstream.hpp>
+#include "bunsan/enable_error_info.hpp"
+#include "bunsan/filesystem/fstream.hpp"
+
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 
@@ -194,13 +194,13 @@ namespace yandex{namespace contest{namespace invoker
         const char *const cfgPathC = std::getenv(env);
         if (cfgPathC)
         {
-            boost::filesystem::ifstream fin(cfgPathC);
-            if (!fin)
-                BOOST_THROW_EXCEPTION(SystemError("open"));
-            fin >> cfg;
-            fin.close();
-            if (!fin)
-                BOOST_THROW_EXCEPTION(SystemError("close"));
+            BUNSAN_EXCEPTIONS_WRAP_BEGIN()
+            {
+                bunsan::filesystem::ifstream fin(cfgPathC);
+                fin >> cfg;
+                fin.close();
+            }
+            BUNSAN_EXCEPTIONS_WRAP_END()
         }
         return cfg;
     }

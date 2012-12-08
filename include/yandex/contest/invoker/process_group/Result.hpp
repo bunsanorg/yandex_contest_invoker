@@ -2,7 +2,7 @@
 
 #include "yandex/contest/invoker/process_group/ResourceUsage.hpp"
 
-#include "yandex/contest/StreamEnum.hpp"
+#include "bunsan/stream_enum.hpp"
 
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/nvp.hpp>
@@ -20,7 +20,7 @@ namespace yandex{namespace contest{namespace invoker{namespace process_group
             ar & BOOST_SERIALIZATION_NVP(resourceUsage);
         }
 
-        YANDEX_CONTEST_INCLASS_STREAM_ENUM_CLASS(CompletionStatus,
+        BUNSAN_INCLASS_STREAM_ENUM_CLASS(CompletionStatus,
         (
             OK,
             ABNORMAL_EXIT,

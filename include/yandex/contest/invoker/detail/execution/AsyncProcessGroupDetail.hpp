@@ -2,8 +2,6 @@
 
 #include "yandex/contest/invoker/detail/CommonTypedefs.hpp"
 
-#include "yandex/contest/StreamEnum.hpp"
-
 #include "yandex/contest/config/TypeTraits.hpp"
 
 #include "yandex/contest/invoker/process_group/ResourceLimits.hpp"
@@ -13,6 +11,8 @@
 #include "yandex/contest/invoker/process/Result.hpp"
 
 #include "yandex/contest/system/unistd/access/Id.hpp"
+
+#include "bunsan/stream_enum.hpp"
 
 #include <iostream>
 #include <vector>
@@ -30,7 +30,7 @@
 
 namespace yandex{namespace contest{namespace invoker{namespace detail{namespace execution{namespace async_process_group_detail
 {
-    YANDEX_CONTEST_STREAM_ENUM_CLASS(AccessMode,
+    BUNSAN_STREAM_ENUM_CLASS(AccessMode,
     (
         READ_ONLY,
         WRITE_ONLY,
@@ -66,7 +66,7 @@ namespace yandex{namespace contest{namespace invoker{namespace detail{namespace 
                 ar & BOOST_SERIALIZATION_NVP(end);
             }
 
-            YANDEX_CONTEST_INCLASS_STREAM_ENUM(Type,
+            BUNSAN_INCLASS_STREAM_ENUM(Type,
             (
                 READ,
                 WRITE

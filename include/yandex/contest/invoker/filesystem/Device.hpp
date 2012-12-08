@@ -2,7 +2,7 @@
 
 #include "yandex/contest/invoker/filesystem/File.hpp"
 
-#include "yandex/contest/StreamEnum.hpp"
+#include "bunsan/stream_enum.hpp"
 
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/nvp.hpp>
@@ -13,7 +13,7 @@ namespace yandex{namespace contest{namespace invoker{namespace filesystem
     /// See mknod(3), makedev(3).
     struct Device: File
     {
-        YANDEX_CONTEST_INCLASS_STREAM_ENUM(Type,
+        BUNSAN_INCLASS_STREAM_ENUM(Type,
         (
             CHAR,
             BLOCK

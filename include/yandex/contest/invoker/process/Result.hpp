@@ -2,9 +2,9 @@
 
 #include "yandex/contest/invoker/process/ResourceUsage.hpp"
 
-#include "yandex/contest/StreamEnum.hpp"
-
 #include "yandex/contest/system/unistd/ProcessResult.hpp"
+
+#include "bunsan/stream_enum.hpp"
 
 #include <utility>
 
@@ -36,7 +36,7 @@ namespace yandex{namespace contest{namespace invoker{namespace process
 
         explicit operator bool() const;
 
-        YANDEX_CONTEST_INCLASS_STREAM_ENUM_CLASS(CompletionStatus,
+        BUNSAN_INCLASS_STREAM_ENUM_CLASS(CompletionStatus,
         (
             OK,
             ABNORMAL_EXIT,

@@ -7,7 +7,7 @@
 #include "yandex/contest/invoker/filesystem/Directory.hpp"
 #include "yandex/contest/invoker/filesystem/FIFO.hpp"
 
-#include "yandex/contest/config/TypeTraits.hpp"
+#include "bunsan/config/traits.hpp"
 
 #include <boost/serialization/access.hpp>
 #include <boost/variant.hpp>
@@ -59,22 +59,22 @@ namespace yandex{namespace contest{namespace invoker{namespace filesystem
     typedef std::vector<CreateFile> CreateFiles;
 }}}}
 
-YANDEX_CONTEST_CONFIG_EXPORT(
+BUNSAN_CONFIG_EXPORT(
     yandex::contest::invoker::filesystem::CreateFile::Variant,
     yandex::contest::invoker::filesystem::RegularFile, "RegularFile")
 
-YANDEX_CONTEST_CONFIG_EXPORT(
+BUNSAN_CONFIG_EXPORT(
     yandex::contest::invoker::filesystem::CreateFile::Variant,
     yandex::contest::invoker::filesystem::SymLink, "SymLink")
 
-YANDEX_CONTEST_CONFIG_EXPORT(
+BUNSAN_CONFIG_EXPORT(
     yandex::contest::invoker::filesystem::CreateFile::Variant,
     yandex::contest::invoker::filesystem::Device, "Device")
 
-YANDEX_CONTEST_CONFIG_EXPORT(
+BUNSAN_CONFIG_EXPORT(
     yandex::contest::invoker::filesystem::CreateFile::Variant,
     yandex::contest::invoker::filesystem::Directory, "Directory")
 
-YANDEX_CONTEST_CONFIG_EXPORT(
+BUNSAN_CONFIG_EXPORT(
     yandex::contest::invoker::filesystem::CreateFile::Variant,
     yandex::contest::invoker::filesystem::FIFO, "FIFO")

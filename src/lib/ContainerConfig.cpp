@@ -1,8 +1,8 @@
 #include "yandex/contest/invoker/ContainerConfig.hpp"
 #include "yandex/contest/invoker/ConfigurationError.hpp"
 
-#include "yandex/contest/config/InputArchive.hpp"
-#include "yandex/contest/config/OutputArchive.hpp"
+#include "bunsan/config/input_archive.hpp"
+#include "bunsan/config/output_archive.hpp"
 
 #include "bunsan/enable_error_info.hpp"
 #include "bunsan/filesystem/fstream.hpp"
@@ -10,12 +10,12 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 
-namespace yandex{namespace contest{namespace config{namespace traits
+namespace bunsan{namespace config{namespace traits
 {
     template <>
-    struct directAssign<system::unistd::MountEntry>:
+    struct direct_assign<yandex::contest::system::unistd::MountEntry>:
         std::integral_constant<bool, true> {};
-}}}}
+}}}
 
 namespace boost{namespace property_tree
 {
@@ -216,14 +216,14 @@ namespace yandex{namespace contest{namespace invoker
         {
             BOOST_THROW_EXCEPTION(ConfigurationError() << Error::message(e.what()));
         }
-        config::InputArchive<boost::property_tree::ptree>::loadFromPtree(config, cfg);
+        bunsan::config::input_archive<boost::property_tree::ptree>::load_from_ptree(config, cfg);
         return in;
     }
 
     std::ostream &operator<<(std::ostream &out, const ContainerConfig &config)
     {
         boost::property_tree::ptree cfg;
-        config::OutputArchive<boost::property_tree::ptree>::saveToPtree(config, cfg);
+        bunsan::config::output_archive<boost::property_tree::ptree>::save_to_ptree(config, cfg);
         boost::property_tree::write_json(out, cfg);
         return out;
     }

@@ -12,8 +12,7 @@
 
 #include "yandex/contest/invoker/detail/VectorToString.hpp"
 
-#include "yandex/contest/config/OutputArchive.hpp"
-
+#include "bunsan/config/output_archive.hpp"
 #include "bunsan/enable_error_info.hpp"
 #include "bunsan/filesystem/fstream.hpp"
 
@@ -43,7 +42,7 @@ namespace yandex{namespace contest{namespace invoker{namespace cli
     void printSerializable(std::ostream &out, const T &obj)
     {
         boost::property_tree::ptree ptree;
-        config::OutputArchive<boost::property_tree::ptree> oa(ptree);
+        bunsan::config::output_archive<boost::property_tree::ptree> oa(ptree);
         oa << obj;
         boost::property_tree::write_json(out, ptree);
     }

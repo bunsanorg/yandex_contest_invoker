@@ -2,8 +2,6 @@
 
 #include "yandex/contest/invoker/detail/CommonTypedefs.hpp"
 
-#include "yandex/contest/config/TypeTraits.hpp"
-
 #include "yandex/contest/invoker/process_group/ResourceLimits.hpp"
 #include "yandex/contest/invoker/process_group/Result.hpp"
 
@@ -12,6 +10,7 @@
 
 #include "yandex/contest/system/unistd/access/Id.hpp"
 
+#include "bunsan/config/traits.hpp"
 #include "bunsan/stream_enum.hpp"
 
 #include <iostream>
@@ -177,22 +176,22 @@ namespace yandex{namespace contest{namespace invoker{namespace detail{namespace 
     };
 }}}}}}
 
-YANDEX_CONTEST_CONFIG_EXPORT(
+BUNSAN_CONFIG_EXPORT(
     yandex::contest::invoker::detail::execution::async_process_group_detail::Stream,
     yandex::contest::invoker::detail::execution::async_process_group_detail::File, "File")
 
-YANDEX_CONTEST_CONFIG_EXPORT(
+BUNSAN_CONFIG_EXPORT(
     yandex::contest::invoker::detail::execution::async_process_group_detail::Stream,
     yandex::contest::invoker::detail::execution::async_process_group_detail::Pipe::End, "PipeEnd")
 
-YANDEX_CONTEST_CONFIG_EXPORT(
+BUNSAN_CONFIG_EXPORT(
     yandex::contest::invoker::detail::execution::async_process_group_detail::Stream,
     yandex::contest::invoker::detail::execution::async_process_group_detail::FDAlias, "FDAlias")
 
-YANDEX_CONTEST_CONFIG_EXPORT(
+BUNSAN_CONFIG_EXPORT(
     yandex::contest::invoker::detail::execution::async_process_group_detail::NonPipeStream,
     yandex::contest::invoker::detail::execution::async_process_group_detail::File, "File")
 
-YANDEX_CONTEST_CONFIG_EXPORT(
+BUNSAN_CONFIG_EXPORT(
     yandex::contest::invoker::detail::execution::async_process_group_detail::NonPipeStream,
     yandex::contest::invoker::detail::execution::async_process_group_detail::FDAlias, "FDAlias")

@@ -13,7 +13,7 @@
 namespace bunsan{namespace config{namespace traits
 {
     template <>
-    struct direct_assign<yandex::contest::system::unistd::MountEntry>:
+    struct is_direct_assignable<yandex::contest::system::unistd::MountEntry>:
         std::integral_constant<bool, true> {};
 }}}
 

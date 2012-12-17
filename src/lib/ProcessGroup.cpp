@@ -75,9 +75,9 @@ namespace yandex{namespace contest{namespace invoker
         }
         container_.reset();
         result_ = detail::execution::AsyncProcessGroup::Result();
-        result_.get().processGroupResult.completionStatus = ProcessGroup::Result::CompletionStatus::STOPPED;
-        result_.get().processResults.resize(task_.processes.size());
-        for (Process::Result &pr: result_.get().processResults)
+        result_->processGroupResult.completionStatus = ProcessGroup::Result::CompletionStatus::STOPPED;
+        result_->processResults.resize(task_.processes.size());
+        for (Process::Result &pr: result_->processResults)
             pr.completionStatus = Process::Result::CompletionStatus::STOPPED;
     }
 
@@ -145,7 +145,7 @@ namespace yandex{namespace contest{namespace invoker
         if (result_)
         {
             container_.reset();
-            return result_.get().processGroupResult;
+            return result_->processGroupResult;
         }
         else
         {
@@ -167,7 +167,7 @@ namespace yandex{namespace contest{namespace invoker
             container_.reset();
         }
         BOOST_ASSERT(result_);
-        return result_.get().processGroupResult;
+        return result_->processGroupResult;
     }
 
     const ProcessGroup::Result &ProcessGroup::result()
@@ -179,7 +179,7 @@ namespace yandex{namespace contest{namespace invoker
             else
                 BOOST_THROW_EXCEPTION(ProcessGroupHasNotTerminatedError());
         }
-        return result_.get().processGroupResult;
+        return result_->processGroupResult;
     }
 
     const ProcessGroup::ResourceLimits &ProcessGroup::resourceLimits() const
@@ -218,8 +218,8 @@ namespace yandex{namespace contest{namespace invoker
             else
                 BOOST_THROW_EXCEPTION(ProcessGroupHasNotTerminatedError());
         }
-        BOOST_ASSERT(result_.get().processResults.size() == task_.processes.size());
-        BOOST_ASSERT(id < result_.get().processResults.size());
-        return result_.get().processResults[id];
+        BOOST_ASSERT(result_->processResults.size() == task_.processes.size());
+        BOOST_ASSERT(id < result_->processResults.size());
+        return result_->processResults[id];
     }
 }}}

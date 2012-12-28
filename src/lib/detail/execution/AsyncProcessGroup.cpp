@@ -25,14 +25,14 @@ namespace yandex{namespace contest{namespace invoker{namespace detail{namespace 
 
     AsyncProcessGroup::AsyncProcessGroup(AsyncProcessGroup &&processGroup)
     {
-        this->swap(processGroup);
+        swap(processGroup);
     }
 
     AsyncProcessGroup &AsyncProcessGroup::operator=(AsyncProcessGroup &&processGroup)
     {
         if (*this)
-            this->stop();
-        this->swap(processGroup);
+            stop();
+        swap(processGroup);
         return *this;
     }
 

@@ -1,10 +1,10 @@
 #pragma once
 
-#include <utility>
-
 #include "yandex/contest/invoker/Error.hpp"
 
 #include "yandex/contest/system/execution/ResultError.hpp"
+
+#include "bunsan/forward_constructor.hpp"
 
 namespace yandex{namespace contest{namespace invoker
 {
@@ -15,9 +15,7 @@ namespace yandex{namespace contest{namespace invoker
 
     struct ContainerUtilityError: virtual Error, virtual system::execution::ResultError
     {
-        template <typename ... Args>
-        explicit ContainerUtilityError(Args &&...args):
-            system::execution::ResultError(std::forward<Args>(args)...) {}
+        BUNSAN_INHERIT_EXPLICIT_CONSTRUCTOR(ContainerUtilityError, system::execution::ResultError)
     };
 
     struct ContainerIllegalStateError: virtual ContainerError {};

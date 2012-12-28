@@ -7,7 +7,7 @@
 #include "yandex/contest/system/execution/ResultError.hpp"
 #include "yandex/contest/system/execution/AsyncProcess.hpp"
 
-#include <utility>
+#include "bunsan/forward_constructor.hpp"
 
 namespace yandex{namespace contest{namespace invoker{namespace detail{namespace execution
 {
@@ -19,9 +19,7 @@ namespace yandex{namespace contest{namespace invoker{namespace detail{namespace 
         virtual AsyncProcessGroupError,
         virtual ResultError
     {
-        template <typename ... Args>
-        explicit AsyncProcessGroupControlProcessError(Args &&...args):
-            ResultError(std::forward<Args>(args)...) {}
+        BUNSAN_INHERIT_EXPLICIT_CONSTRUCTOR(AsyncProcessGroupControlProcessError, ResultError)
     };
 
     class AsyncProcessGroup

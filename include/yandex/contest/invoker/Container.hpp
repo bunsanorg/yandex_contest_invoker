@@ -12,11 +12,11 @@
 
 #include "yandex/contest/invoker/detail/execution/AsyncProcessGroup.hpp"
 
-#include <boost/noncopyable.hpp>
+#include "yandex/contest/IntrusivePointeeBase.hpp"
 
 namespace yandex{namespace contest{namespace invoker
 {
-    class Container: private boost::noncopyable
+    class Container: public IntrusivePointeeBase
     {
     public:
         /*!
@@ -121,11 +121,6 @@ namespace yandex{namespace contest{namespace invoker
          * \see create()
          */
         Container(std::unique_ptr<system::lxc::LXC> &&lxcPtr, const ContainerConfig &config);
-
-    private:
-        friend void intrusive_ptr_add_ref(Container *) noexcept;
-        friend void intrusive_ptr_release(Container *) noexcept;
-        std::size_t refCount_ = 0;
 
     private:
         Filesystem filesystem_;

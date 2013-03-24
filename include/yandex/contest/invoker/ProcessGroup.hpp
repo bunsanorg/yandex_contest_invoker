@@ -12,7 +12,8 @@
 
 #include "yandex/contest/invoker/detail/execution/AsyncProcessGroup.hpp"
 
-#include <boost/noncopyable.hpp>
+#include "yandex/contest/IntrusivePointeeBase.hpp"
+
 #include <boost/optional.hpp>
 #include <boost/filesystem/path.hpp>
 
@@ -36,7 +37,7 @@ namespace yandex{namespace contest{namespace invoker
         class DefaultSettings;
     }
 
-    class ProcessGroup: private boost::noncopyable
+    class ProcessGroup: public IntrusivePointeeBase
     {
     public:
         typedef process_group::Result Result;
@@ -163,11 +164,6 @@ namespace yandex{namespace contest{namespace invoker
 
         ProcessTask &processTask(const std::size_t id);
         const process::Result &processResult(const std::size_t id);
-
-    private:
-        friend void intrusive_ptr_add_ref(ProcessGroup *) noexcept;
-        friend void intrusive_ptr_release(ProcessGroup *) noexcept;
-        std::size_t refCount_ = 0;
 
     private:
         /// If pointer is null process group has terminated.

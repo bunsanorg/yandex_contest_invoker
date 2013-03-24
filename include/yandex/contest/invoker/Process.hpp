@@ -11,7 +11,8 @@
 
 #include "yandex/contest/invoker/detail/execution/AsyncProcessGroup.hpp"
 
-#include <boost/noncopyable.hpp>
+#include "yandex/contest/IntrusivePointeeBase.hpp"
+
 #include <boost/filesystem/path.hpp>
 
 namespace yandex{namespace contest{namespace invoker
@@ -26,7 +27,7 @@ namespace yandex{namespace contest{namespace invoker
      * ProcessPointer is possibly excess class.
      * It should be checked. -- ProcessHandle
      */
-    class Process: private boost::noncopyable
+    class Process: public IntrusivePointeeBase
     {
     public:
         typedef process::Result Result;
@@ -146,11 +147,6 @@ namespace yandex{namespace contest{namespace invoker
          * class uses own reference-counting mechanism.
          */
         explicit Process(const ProcessGroupPointer &processGroup, const Id id);
-
-    private:
-        friend void intrusive_ptr_add_ref(Process *) noexcept;
-        friend void intrusive_ptr_release(Process *) noexcept;
-        std::size_t refCount_ = 0;
 
     private:
         ProcessGroupPointer processGroup_;

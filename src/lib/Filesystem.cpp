@@ -1,6 +1,5 @@
 // warning: need to be the first include
-#include <boost/config.hpp>
-#define BOOST_NO_SCOPED_ENUMS
+#include "bunsan/config.hpp"
 
 #include "yandex/contest/invoker/Filesystem.hpp"
 

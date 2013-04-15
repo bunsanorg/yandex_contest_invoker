@@ -1,6 +1,5 @@
-// hack to get correct signature for boost::filesystem::copy_file()
-#include <boost/config.hpp>
-#define BOOST_NO_SCOPED_ENUMS
+// warning: need to be the first include
+#include "bunsan/config.hpp"
 
 #include "yandex/contest/invoker/filesystem/RegularFile.hpp"
 #include "yandex/contest/invoker/filesystem/Error.hpp"

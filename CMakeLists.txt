@@ -4,7 +4,7 @@ include(${CMAKE_SOURCE_DIR}/system-config.cmake OPTIONAL)
 
 cmake_minimum_required(VERSION 2.8)
 
-include(YandexContestCommon)
+include(BunsanCommon)
 
 bunsan_use_boost(system filesystem serialization program_options)
 

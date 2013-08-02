@@ -3,10 +3,17 @@
 
 #include "AsyncProcessGroupSingleFixture.hpp"
 
-#include <csignal>
-#include <cerrno>
+#include "bunsan/testing/environment.hpp"
+#include "bunsan/testing/filesystem/read_data.hpp"
+#include "bunsan/testing/filesystem/tempdir.hpp"
 
 #include <boost/lexical_cast.hpp>
+#include <boost/filesystem/operations.hpp>
+
+#include <cerrno>
+#include <csignal>
+
+using namespace bunsan::testing;
 
 BOOST_FIXTURE_TEST_SUITE(single, AsyncProcessGroupSingleFixture)
 
@@ -45,12 +52,12 @@ BOOST_AUTO_TEST_CASE(currentPath)
     run();
     verifyPGR();
     verifyPRExit(0);
-    BOOST_CHECK_EQUAL(readData(output.path()), process.currentPath.string());
+    BOOST_CHECK_EQUAL(filesystem::read_data(output.path()), process.currentPath.string());
 }
 
 BOOST_AUTO_TEST_CASE(currentPathNoX)
 {
-    TempDir tmpdir;
+    filesystem::tempdir tmpdir;
     process.executable = "sh";
     process.arguments = {"sh", "-ce", "echo -n \"$PWD\""};
     process.currentPath = tmpdir.path;
@@ -62,7 +69,7 @@ BOOST_AUTO_TEST_CASE(currentPathNoX)
     run();
     verifyPGR();
     verifyPRExit(0);
-    BOOST_CHECK_EQUAL(process.currentPath.string(), readData(output.path()));
+    BOOST_CHECK_EQUAL(process.currentPath.string(), filesystem::read_data(output.path()));
 }
 
 BOOST_AUTO_TEST_SUITE(resource_usage)
@@ -116,7 +123,7 @@ BOOST_AUTO_TEST_CASE(unstable)
 
 BOOST_AUTO_TEST_CASE(exec)
 {
-    process.executable = testsResourcesBinaryDir / "exec";
+    process.executable = dir::tests::resources::binary() / "exec";
     TMP tmpfile;
     process.descriptors[2] = PG::File(tmpfile.path());
     process.resourceLimits.userTimeLimit = 10 * std::max(decaSleepTime, cpuLimitResolution);
@@ -137,7 +144,7 @@ BOOST_AUTO_TEST_CASE(exec)
     {
         process.arguments = {process.executable.string(), "0"};
         run();
-        const std::string output = readData(tmpfile.path());
+        const std::string output = filesystem::read_data(tmpfile.path());
         const std::size_t execNumber2x = std::count(output.begin(), output.end(), '\n');
         BOOST_REQUIRE_GT(execNumber2x, 2 * 4);
         BOOST_TEST_MESSAGE("Exec number: " << static_cast<double>(execNumber2x) / 2);
@@ -162,7 +169,7 @@ BOOST_AUTO_TEST_SUITE(number_of_processes)
 BOOST_AUTO_TEST_CASE(forker)
 {
     TMP tmpfile;
-    process.executable = testsResourcesSourceDir / "forker.py";
+    process.executable = dir::tests::resources::source() / "forker.py";
     process.ownerId = uniqueOwnerId;
     process.descriptors[1] = PG::File(tmpfile.path());
     process.resourceLimits.numberOfProcesses = 10;
@@ -170,7 +177,7 @@ BOOST_AUTO_TEST_CASE(forker)
     run();
     verifyPGR();
     verifyPRExit(0);
-    const std::uint64_t output = boost::lexical_cast<std::uint64_t>(readData(tmpfile.path()));
+    const std::uint64_t output = boost::lexical_cast<std::uint64_t>(filesystem::read_data(tmpfile.path()));
     // interpreter + number of created processes
     BOOST_CHECK_EQUAL(output + 1, process.resourceLimits.numberOfProcesses);
 }
@@ -187,7 +194,7 @@ BOOST_AUTO_TEST_CASE(true_1)
 
 BOOST_AUTO_TEST_CASE(exec_1)
 {
-    process.executable = testsResourcesSourceDir / "exec_1.py";
+    process.executable = dir::tests::resources::source() / "exec_1.py";
     process.ownerId = uniqueOwnerId;
     process.resourceLimits.numberOfProcesses = 1;
     process.arguments = {process.executable.string(), "0"};
@@ -223,7 +230,7 @@ BOOST_AUTO_TEST_CASE(default_)
     run();
     verifyPGR();
     verifyPRExit(0);
-    BOOST_CHECK_EQUAL(readData(output.path()), "0:0:0:0");
+    BOOST_CHECK_EQUAL(filesystem::read_data(output.path()), "0:0:0:0");
 }
 
 BOOST_AUTO_TEST_CASE(drop)
@@ -237,7 +244,7 @@ BOOST_AUTO_TEST_CASE(drop)
     run();
     verifyPGR();
     verifyPRExit(0);
-    BOOST_CHECK_EQUAL(readData(output.path()), "1234:1235:1234:1235");
+    BOOST_CHECK_EQUAL(filesystem::read_data(output.path()), "1234:1235:1234:1235");
 }
 
 BOOST_AUTO_TEST_SUITE_END() // uid_gid
@@ -252,7 +259,7 @@ BOOST_AUTO_TEST_CASE(open_files)
     run();
     verifyPGR();
     verifyPRExit(0);
-    BOOST_CHECK_EQUAL(readData(output.path()), data);
+    BOOST_CHECK_EQUAL(filesystem::read_data(output.path()), data);
 }
 
 BOOST_AUTO_TEST_CASE(start_failed)
@@ -271,13 +278,13 @@ BOOST_AUTO_TEST_SUITE(fd_alias)
 BOOST_AUTO_TEST_CASE(stderr_to_stdout)
 {
     const TMP tmpfile;
-    process.executable = testsResourcesSourceDir / "stderr_to_stdout.py";
+    process.executable = dir::tests::resources::source() / "stderr_to_stdout.py";
     process.descriptors[1] = PG::File(tmpfile.path());
     process.descriptors[2] = PG::FDAlias(1);
     run();
     verifyPGR();
     verifyPRExit(0);
-    BOOST_CHECK_EQUAL(readData(tmpfile.path()), "stdoutstderr");
+    BOOST_CHECK_EQUAL(filesystem::read_data(tmpfile.path()), "stdoutstderr");
 }
 
 // Note: tests validate the message of exception.
@@ -321,13 +328,13 @@ BOOST_AUTO_TEST_SUITE(security)
 
 BOOST_AUTO_TEST_CASE(lost_child)
 {
-    process.executable = testsResourcesSourceDir / "lost_child.py";
+    process.executable = dir::tests::resources::source() / "lost_child.py";
     TMP tmpfile;
     process.descriptors[1] = PG::File(tmpfile.path());
     run();
     verifyPGR();// FIXME which???
     verifyPRExit(0);
-    const pid_t pid = boost::lexical_cast<pid_t>(readData(tmpfile.path()));
+    const pid_t pid = boost::lexical_cast<pid_t>(filesystem::read_data(tmpfile.path()));
     const int ret = kill(pid, 0);
     const int errno_ = errno;
     BOOST_CHECK_LT(ret, 0);

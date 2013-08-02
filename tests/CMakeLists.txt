@@ -1,1 +1,1 @@
-bunsan_tests_project()
+bunsan_testing_project()

@@ -3,9 +3,14 @@
 
 #include "AsyncProcessGroupMultipleFixture.hpp"
 
-#include <chrono>
+#include "bunsan/testing/environment.hpp"
+#include "bunsan/testing/filesystem/tempdir.hpp"
 
 #include <boost/lexical_cast.hpp>
+
+#include <chrono>
+
+using namespace bunsan::testing;
 
 BOOST_FIXTURE_TEST_SUITE(multiple, AsyncProcessGroupMultipleFixture)
 
@@ -175,7 +180,7 @@ struct SendRecvFixture: BenchmarkFixture
 
     void benchmark(const boost::filesystem::path &client, const boost::filesystem::path &echoServer)
     {
-        TempDir tmpdir;
+        filesystem::tempdir tmpdir;
         // run benchmark
         p0 = p1 = defaultProcess();
         p0.executable = echoServer;
@@ -215,14 +220,14 @@ BOOST_FIXTURE_TEST_SUITE(send_recv, SendRecvFixture)
 
 BOOST_AUTO_TEST_CASE(posix)
 {
-    benchmark(testsResourcesBinaryDir / "benchmark" / "posixClient",
-              testsResourcesBinaryDir / "benchmark" / "posixEchoServer");
+    benchmark(dir::tests::resources::binary() / "benchmark" / "posixClient",
+              dir::tests::resources::binary() / "benchmark" / "posixEchoServer");
 }
 
 BOOST_AUTO_TEST_CASE(cxx)
 {
-    benchmark(testsResourcesBinaryDir / "benchmark" / "cxxClient",
-              testsResourcesBinaryDir / "benchmark" / "cxxEchoServer");
+    benchmark(dir::tests::resources::binary() / "benchmark" / "cxxClient",
+              dir::tests::resources::binary() / "benchmark" / "cxxEchoServer");
 }
 
 BOOST_AUTO_TEST_SUITE_END() // send_recv

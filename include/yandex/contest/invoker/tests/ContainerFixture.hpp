@@ -1,8 +1,8 @@
 #pragma once
 
-#include "yandex/contest/tests/BoostExecTest.hpp"
-
 #include "yandex/contest/invoker/All.hpp"
+
+#include "bunsan/testing/exec_test.hpp"
 
 namespace ya = yandex::contest::invoker;
 

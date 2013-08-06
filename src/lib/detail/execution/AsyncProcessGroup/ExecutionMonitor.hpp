@@ -1,8 +1,8 @@
 #pragma once
 
-#include "yandex/contest/invoker/detail/execution/AsyncProcessGroup.hpp"
+#include <yandex/contest/invoker/detail/execution/AsyncProcessGroup.hpp>
 
-#include "yandex/contest/system/cgroup/ControlGroup.hpp"
+#include <yandex/contest/system/cgroup/ControlGroup.hpp>
 
 #include <unordered_set>
 

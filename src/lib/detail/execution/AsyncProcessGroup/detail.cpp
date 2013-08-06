@@ -1,4 +1,4 @@
-#include "yandex/contest/invoker/detail/execution/AsyncProcessGroupDetail.hpp"
+#include <yandex/contest/invoker/detail/execution/AsyncProcessGroupDetail.hpp>
 
 namespace yandex{namespace contest{namespace invoker{
     namespace detail{namespace execution{namespace async_process_group_detail

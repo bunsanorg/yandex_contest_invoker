@@ -1,6 +1,6 @@
 #pragma once
 
-#include "yandex/contest/system/execution/CommonTypedefs.hpp"
+#include <yandex/contest/system/execution/CommonTypedefs.hpp>
 
 namespace yandex{namespace contest{namespace invoker
 {

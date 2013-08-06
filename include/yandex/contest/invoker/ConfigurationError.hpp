@@ -1,6 +1,6 @@
 #pragma once
 
-#include "yandex/contest/invoker/Error.hpp"
+#include <yandex/contest/invoker/Error.hpp>
 
 namespace yandex{namespace contest{namespace invoker
 {

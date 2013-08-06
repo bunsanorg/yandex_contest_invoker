@@ -1,11 +1,11 @@
 #pragma once
 
-#include "yandex/contest/invoker/ControlProcessConfig.hpp"
-#include "yandex/contest/invoker/filesystem/Config.hpp"
+#include <yandex/contest/invoker/ControlProcessConfig.hpp>
+#include <yandex/contest/invoker/filesystem/Config.hpp>
 
-#include "yandex/contest/invoker/process_group/DefaultSettings.hpp"
+#include <yandex/contest/invoker/process_group/DefaultSettings.hpp>
 
-#include "yandex/contest/system/lxc/Config.hpp"
+#include <yandex/contest/system/lxc/Config.hpp>
 
 #include <iostream>
 

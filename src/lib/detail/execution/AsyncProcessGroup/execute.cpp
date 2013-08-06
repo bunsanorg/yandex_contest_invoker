@@ -1,4 +1,4 @@
-#include "yandex/contest/invoker/detail/execution/AsyncProcessGroup.hpp"
+#include <yandex/contest/invoker/detail/execution/AsyncProcessGroup.hpp>
 
 #include "ProcessGroupStarter.hpp"
 

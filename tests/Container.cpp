@@ -1,7 +1,7 @@
 #define BOOST_TEST_MODULE Container
 #include <boost/test/unit_test.hpp>
 
-#include "yandex/contest/invoker/tests/ContainerFixture.hpp"
+#include <yandex/contest/invoker/tests/ContainerFixture.hpp>
 
 #define CALL_CHECKPOINT(F) BOOST_TEST_CHECKPOINT(#F); F;
 

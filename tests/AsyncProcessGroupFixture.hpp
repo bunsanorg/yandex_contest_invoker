@@ -1,12 +1,12 @@
 #pragma once
 
-#include "yandex/contest/Tempfile.hpp"
+#include <yandex/contest/Tempfile.hpp>
 
-#include "yandex/contest/invoker/detail/execution/AsyncProcessGroup.hpp"
+#include <yandex/contest/invoker/detail/execution/AsyncProcessGroup.hpp>
 
-#include "yandex/contest/system/unistd/Operations.hpp"
+#include <yandex/contest/system/unistd/Operations.hpp>
 
-#include "bunsan/testing/exec_test.hpp"
+#include <bunsan/testing/exec_test.hpp>
 
 #include <sstream>
 #include <iterator>

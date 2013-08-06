@@ -1,10 +1,10 @@
 #pragma once
 
-#include "yandex/contest/invoker/Forward.hpp"
+#include <yandex/contest/invoker/Forward.hpp>
 
-#include "yandex/contest/invoker/process_group/ResourceLimits.hpp"
+#include <yandex/contest/invoker/process_group/ResourceLimits.hpp>
 
-#include "yandex/contest/invoker/process/DefaultSettings.hpp"
+#include <yandex/contest/invoker/process/DefaultSettings.hpp>
 
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/nvp.hpp>

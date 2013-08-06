@@ -1,6 +1,6 @@
 #pragma once
 
-#include "yandex/contest/system/execution/AsyncProcess.hpp"
+#include <yandex/contest/system/execution/AsyncProcess.hpp>
 
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/nvp.hpp>

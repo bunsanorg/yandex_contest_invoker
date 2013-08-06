@@ -1,8 +1,8 @@
 #pragma once
 
-#include "yandex/contest/system/unistd/Pipe.hpp"
+#include <yandex/contest/system/unistd/Pipe.hpp>
 
-#include "yandex/contest/system/cgroup/ControlGroup.hpp"
+#include <yandex/contest/system/cgroup/ControlGroup.hpp>
 
 #include "ExecutionMonitor.hpp"
 #include "ProcessStarter.hpp"

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "yandex/contest/invoker/filesystem/CreateFile.hpp"
+#include <yandex/contest/invoker/filesystem/CreateFile.hpp>
 
 #include <iostream>
 #include <memory>

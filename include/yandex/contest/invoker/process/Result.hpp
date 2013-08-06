@@ -1,10 +1,10 @@
 #pragma once
 
-#include "yandex/contest/invoker/process/ResourceUsage.hpp"
+#include <yandex/contest/invoker/process/ResourceUsage.hpp>
 
-#include "yandex/contest/system/unistd/ProcessResult.hpp"
+#include <yandex/contest/system/unistd/ProcessResult.hpp>
 
-#include "bunsan/stream_enum.hpp"
+#include <bunsan/stream_enum.hpp>
 
 #include <utility>
 

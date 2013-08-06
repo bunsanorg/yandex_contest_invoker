@@ -3,11 +3,11 @@
 // SIG_START_FAILED
 #include "ProcessStarter.hpp"
 
-#include "yandex/contest/system/cgroup/CpuAccounting.hpp"
-#include "yandex/contest/system/cgroup/Memory.hpp"
-#include "yandex/contest/system/cgroup/MemorySwap.hpp"
+#include <yandex/contest/system/cgroup/CpuAccounting.hpp>
+#include <yandex/contest/system/cgroup/Memory.hpp>
+#include <yandex/contest/system/cgroup/MemorySwap.hpp>
 
-#include "yandex/contest/detail/LogHelper.hpp"
+#include <yandex/contest/detail/LogHelper.hpp>
 
 #include <signal.h>
 

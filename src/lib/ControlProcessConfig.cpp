@@ -1,4 +1,4 @@
-#include "yandex/contest/invoker/ControlProcessConfig.hpp"
+#include <yandex/contest/invoker/ControlProcessConfig.hpp>
 
 namespace yandex{namespace contest{namespace invoker
 {

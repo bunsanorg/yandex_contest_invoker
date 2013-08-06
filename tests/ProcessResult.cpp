@@ -1,7 +1,7 @@
 #define BOOST_TEST_MODULE ProcessResult
 #include <boost/test/unit_test.hpp>
 
-#include "yandex/contest/invoker/process/Result.hpp"
+#include <yandex/contest/invoker/process/Result.hpp>
 
 namespace ya = yandex::contest::invoker::process;
 

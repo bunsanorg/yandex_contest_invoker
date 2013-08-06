@@ -1,10 +1,10 @@
 #include "ProcessGroupStarter.hpp"
 
-#include "yandex/contest/SystemError.hpp"
+#include <yandex/contest/SystemError.hpp>
 
-#include "yandex/contest/system/unistd/Operations.hpp"
+#include <yandex/contest/system/unistd/Operations.hpp>
 
-#include "yandex/contest/detail/LogHelper.hpp"
+#include <yandex/contest/detail/LogHelper.hpp>
 
 #include <functional>
 

@@ -1,6 +1,6 @@
-#include "yandex/contest/invoker/process/DefaultSettings.hpp"
+#include <yandex/contest/invoker/process/DefaultSettings.hpp>
 
-#include "yandex/contest/invoker/Process.hpp"
+#include <yandex/contest/invoker/Process.hpp>
 
 #include <boost/assert.hpp>
 

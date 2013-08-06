@@ -1,21 +1,17 @@
 #pragma once
 
-#include <yandex/contest/invoker/Forward.hpp>
 #include <yandex/contest/invoker/ContainerError.hpp>
-
-#include <yandex/contest/invoker/process_group/Result.hpp>
-#include <yandex/contest/invoker/process_group/ResourceLimits.hpp>
-
-#include <yandex/contest/invoker/process/DefaultSettings.hpp>
-
+#include <yandex/contest/invoker/Forward.hpp>
 #include <yandex/contest/invoker/detail/CommonProcessTypedefs.hpp>
-
 #include <yandex/contest/invoker/detail/execution/AsyncProcessGroup.hpp>
+#include <yandex/contest/invoker/process/DefaultSettings.hpp>
+#include <yandex/contest/invoker/process_group/ResourceLimits.hpp>
+#include <yandex/contest/invoker/process_group/Result.hpp>
 
 #include <yandex/contest/IntrusivePointeeBase.hpp>
 
-#include <boost/optional.hpp>
 #include <boost/filesystem/path.hpp>
+#include <boost/optional.hpp>
 
 namespace yandex{namespace contest{namespace invoker
 {

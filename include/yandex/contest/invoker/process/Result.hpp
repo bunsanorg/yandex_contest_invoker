@@ -6,12 +6,12 @@
 
 #include <bunsan/stream_enum.hpp>
 
-#include <utility>
-
+#include <boost/optional.hpp>
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/nvp.hpp>
-#include <boost/optional.hpp>
 #include <boost/serialization/optional.hpp>
+
+#include <utility>
 
 namespace yandex{namespace contest{namespace invoker{namespace process
 {

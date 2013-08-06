@@ -1,18 +1,18 @@
 #pragma once
 
-#include <yandex/contest/Tempfile.hpp>
-
 #include <yandex/contest/invoker/detail/execution/AsyncProcessGroup.hpp>
 
 #include <yandex/contest/system/unistd/Operations.hpp>
 
+#include <yandex/contest/Tempfile.hpp>
+
 #include <bunsan/testing/exec_test.hpp>
 
-#include <sstream>
-#include <iterator>
-#include <algorithm>
-
 #include <boost/test/test_tools.hpp>
+
+#include <algorithm>
+#include <iterator>
+#include <sstream>
 
 namespace ya = yandex::contest::invoker::detail::execution;
 

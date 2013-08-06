@@ -9,9 +9,9 @@
 
 #include <yandex/contest/detail/LogHelper.hpp>
 
-#include <signal.h>
-
 #include <boost/assert.hpp>
+
+#include <signal.h>
 
 namespace yandex{namespace contest{namespace invoker{
     namespace detail{namespace execution{namespace async_process_group_detail

@@ -1,4 +1,5 @@
 #include <yandex/contest/invoker/ContainerConfig.hpp>
+
 #include <yandex/contest/invoker/ConfigurationError.hpp>
 
 #include <bunsan/config/input_archive.hpp>
@@ -7,8 +8,8 @@
 #include <bunsan/enable_error_info.hpp>
 #include <bunsan/filesystem/fstream.hpp>
 
-#include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
+#include <boost/property_tree/ptree.hpp>
 
 namespace bunsan{namespace config{namespace traits
 {

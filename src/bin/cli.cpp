@@ -5,22 +5,20 @@
  */
 
 #include <yandex/contest/invoker/All.hpp>
+#include <yandex/contest/invoker/detail/VectorToString.hpp>
 
 #include <yandex/contest/detail/LogHelper.hpp>
-
 #include <yandex/contest/TypeInfo.hpp>
-
-#include <yandex/contest/invoker/detail/VectorToString.hpp>
 
 #include <bunsan/config/output_archive.hpp>
 #include <bunsan/enable_error_info.hpp>
 #include <bunsan/filesystem/fstream.hpp>
 
-#include <iostream>
-
 #include <boost/program_options.hpp>
-#include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
+#include <boost/property_tree/ptree.hpp>
+
+#include <iostream>
 
 namespace yandex{namespace contest{namespace invoker{namespace cli
 {

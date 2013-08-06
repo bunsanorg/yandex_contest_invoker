@@ -7,9 +7,8 @@
  * and yandex::contest::invoker::Process.
  */
 
-#include <yandex/contest/invoker/process/Result.hpp>
-
 #include <yandex/contest/invoker/detail/execution/AsyncProcessGroup.hpp>
+#include <yandex/contest/invoker/process/Result.hpp>
 
 namespace yandex{namespace contest{namespace invoker
 {

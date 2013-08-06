@@ -2,7 +2,6 @@
 #include <bunsan/config.hpp>
 
 #include <yandex/contest/invoker/Filesystem.hpp>
-
 #include <yandex/contest/invoker/filesystem/Operations.hpp>
 
 #include <yandex/contest/system/unistd/Operations.hpp>

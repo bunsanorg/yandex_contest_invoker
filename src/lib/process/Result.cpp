@@ -1,4 +1,5 @@
 #include <yandex/contest/invoker/process/Result.hpp>
+
 #include <yandex/contest/invoker/process/ResourceLimits.hpp>
 
 namespace yandex{namespace contest{namespace invoker{namespace process

@@ -1,12 +1,10 @@
 #pragma once
 
+#include <yandex/contest/invoker/detail/CommonProcessTypedefs.hpp>
 #include <yandex/contest/invoker/Forward.hpp>
-
 #include <yandex/contest/invoker/process/ResourceLimits.hpp>
 
 #include <yandex/contest/system/unistd/access/Id.hpp>
-
-#include <yandex/contest/invoker/detail/CommonProcessTypedefs.hpp>
 
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/nvp.hpp>

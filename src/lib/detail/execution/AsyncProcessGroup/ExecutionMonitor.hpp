@@ -4,9 +4,9 @@
 
 #include <yandex/contest/system/cgroup/ControlGroup.hpp>
 
-#include <unordered_set>
-
 #include <boost/noncopyable.hpp>
+
+#include <unordered_set>
 
 namespace yandex{namespace contest{namespace invoker{
     namespace detail{namespace execution{namespace async_process_group_detail

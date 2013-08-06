@@ -1,9 +1,9 @@
 #pragma once
 
+#include <yandex/contest/invoker/detail/execution/AsyncProcessGroup.hpp>
+
 #include <yandex/contest/system/unistd/Descriptor.hpp>
 #include <yandex/contest/system/unistd/Pipe.hpp>
-
-#include <yandex/contest/invoker/detail/execution/AsyncProcessGroup.hpp>
 
 #include <boost/variant/static_visitor.hpp>
 

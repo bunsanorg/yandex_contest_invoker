@@ -2,7 +2,7 @@
 
 #include <yandex/contest/system/unistd/Operations.hpp>
 
-#include "sys/stat.h"
+#include <sys/stat.h>
 
 namespace yandex{namespace contest{namespace invoker{namespace filesystem
 {

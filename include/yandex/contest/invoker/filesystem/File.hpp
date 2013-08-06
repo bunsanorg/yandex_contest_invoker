@@ -6,7 +6,7 @@
 #include <boost/serialization/nvp.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/serialization/variant.hpp>
-#include "yandex/contest/serialization/path.hpp"
+#include "bunsan/serialization/path.hpp"
 
 #include <sys/types.h>
 

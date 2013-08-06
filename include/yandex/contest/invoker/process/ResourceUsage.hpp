@@ -6,7 +6,7 @@
 
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/nvp.hpp>
-#include "yandex/contest/serialization/chrono.hpp"
+#include "bunsan/serialization/chrono.hpp"
 
 namespace yandex{namespace contest{namespace invoker{namespace process
 {

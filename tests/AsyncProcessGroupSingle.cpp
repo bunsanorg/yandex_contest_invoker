@@ -97,6 +97,14 @@ BOOST_AUTO_TEST_CASE(busy_beaver)
     // busy beaver
     process.arguments = {"perl", "-e", "while (true) {}"};
     task.resourceLimits.realTimeLimit = 10 * std::max(cpuLimitResolution, decaSleepTime);
+
+    task.processes[0].resourceLimits.timeLimit = sleepTime;
+    task.processes[0].resourceLimits.userTimeLimit = 10 * sleepTime;
+    run();
+    verifyPGR(PGR::CompletionStatus::ABNORMAL_EXIT);
+    verifyPR(0, PR::CompletionStatus::TIME_LIMIT_EXCEEDED);
+
+    task.processes[0].resourceLimits.timeLimit = 10 * sleepTime;
     task.processes[0].resourceLimits.userTimeLimit = sleepTime;
     run();
     verifyPGR(PGR::CompletionStatus::ABNORMAL_EXIT);
@@ -126,19 +134,20 @@ BOOST_AUTO_TEST_CASE(exec)
     process.executable = dir::tests::resources::binary() / "exec";
     TMP tmpfile;
     process.descriptors[2] = PG::File(tmpfile.path());
-    process.resourceLimits.userTimeLimit = 10 * std::max(decaSleepTime, cpuLimitResolution);
-    task.resourceLimits.realTimeLimit = 10 * process.resourceLimits.userTimeLimit;
+    const auto timeLimit = 10 * std::max(decaSleepTime, cpuLimitResolution);
+    process.resourceLimits.timeLimit = timeLimit;
+    task.resourceLimits.realTimeLimit = 10 * timeLimit;
     // single execution is OK
-    std::chrono::milliseconds singleCpuUsage;
+    std::chrono::nanoseconds singleCpuUsage;
     {
         process.arguments = {process.executable.string(), "-1"};
         run();
         verifyPGR();
         verifyPRExit(0);
         BOOST_REQUIRE_EQUAL(result.processGroupResult.completionStatus, PGR::CompletionStatus::OK);
-        singleCpuUsage = pr(0).resourceUsage.userTimeUsage;
+        singleCpuUsage = pr(0).resourceUsage.timeUsage;
         BOOST_REQUIRE_GT(singleCpuUsage.count(), 0);
-        BOOST_TEST_MESSAGE("Single cpu usage: " << singleCpuUsage.count());
+        BOOST_TEST_MESSAGE("Single cpu usage: " << singleCpuUsage.count() << "us");
     }
     // but a lot of exec are not
     {
@@ -148,17 +157,17 @@ BOOST_AUTO_TEST_CASE(exec)
         const std::size_t execNumber2x = std::count(output.begin(), output.end(), '\n');
         BOOST_REQUIRE_GT(execNumber2x, 2 * 4);
         BOOST_TEST_MESSAGE("Exec number: " << static_cast<double>(execNumber2x) / 2);
-        std::chrono::milliseconds multipleCpuUsage = pr(0).resourceUsage.userTimeUsage;
-        BOOST_TEST_MESSAGE("Multiple cpu usage: " << multipleCpuUsage.count());
+        std::chrono::nanoseconds multipleCpuUsage = pr(0).resourceUsage.timeUsage;
+        BOOST_TEST_MESSAGE("Multiple cpu usage: " << multipleCpuUsage.count() << "us");
         BOOST_REQUIRE_GT(multipleCpuUsage.count(), 0);
-        std::chrono::milliseconds estimatedMultipleCpuUsage = (singleCpuUsage * execNumber2x) / 2;
-        BOOST_TEST_MESSAGE("Estimated multiple cpu usage: " << estimatedMultipleCpuUsage.count());
+        std::chrono::nanoseconds estimatedMultipleCpuUsage = (singleCpuUsage * execNumber2x) / 2;
+        BOOST_TEST_MESSAGE("Estimated multiple cpu usage: " << estimatedMultipleCpuUsage.count() << "us");
         const double multipleCpuUsageError = std::fabs(
             (multipleCpuUsage - estimatedMultipleCpuUsage).count()) / multipleCpuUsage.count();
         BOOST_TEST_MESSAGE("Estimated multiple cpu usage error: " << multipleCpuUsageError);
         BOOST_CHECK_SMALL(multipleCpuUsageError, 0.5);
         verifyPGR(PGR::CompletionStatus::ABNORMAL_EXIT);
-        verifyPR(0, PR::CompletionStatus::USER_TIME_LIMIT_EXCEEDED);
+        verifyPR(0, PR::CompletionStatus::TIME_LIMIT_EXCEEDED);
     }
 }
 

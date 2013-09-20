@@ -125,10 +125,20 @@ namespace yandex{namespace contest{namespace invoker{
             std::chrono::duration_cast<std::chrono::milliseconds>(cpuAcctStat.systemUsage);
         resourceUsage.timeUsage =
             std::chrono::duration_cast<std::chrono::nanoseconds>(cpuAcct.usage());
+        if (resourceUsage.timeUsage > resourceLimits.timeLimit)
+        {
+            STREAM_TRACE << "Id = " << id << " run out of time limit.";
+            return status = process::Result::CompletionStatus::TIME_LIMIT_EXCEEDED;
+        }
         if (resourceUsage.userTimeUsage > resourceLimits.userTimeLimit)
         {
             STREAM_TRACE << "Id = " << id << " run out of user time limit.";
             return status = process::Result::CompletionStatus::USER_TIME_LIMIT_EXCEEDED;
+        }
+        if (resourceUsage.systemTimeUsage > resourceLimits.systemTimeLimit)
+        {
+            STREAM_TRACE << "Id = " << id << " run out of system time limit.";
+            return status = process::Result::CompletionStatus::SYSTEM_TIME_LIMIT_EXCEEDED;
         }
         if (memory.failcnt() || memsw.failcnt())
         {

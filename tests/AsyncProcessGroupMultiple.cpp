@@ -193,7 +193,7 @@ struct SendRecvFixture: BenchmarkFixture
         p1.descriptors[2] = PG::File("client.log", PG::AccessMode::WRITE_ONLY);
         p1.arguments = {"client", boost::lexical_cast<std::string>(count)};
         task.resourceLimits.realTimeLimit = std::chrono::seconds(60);
-        p0.resourceLimits.userTimeLimit = std::chrono::seconds(60);
+        p0.resourceLimits.timeLimit = std::chrono::seconds(60);
         p1.resourceLimits = p0.resourceLimits;
         p1.currentPath = p0.currentPath = tmpdir.path;
         const TimePoint beginPoint = now();

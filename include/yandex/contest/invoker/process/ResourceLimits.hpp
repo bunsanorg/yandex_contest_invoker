@@ -15,13 +15,17 @@ namespace yandex{namespace contest{namespace invoker{namespace process
         template <typename Archive>
         void serialize(Archive &ar, const unsigned int)
         {
+            ar & boost::serialization::make_nvp("timeLimitNanos", timeLimit);
             ar & boost::serialization::make_nvp("userTimeLimitMillis", userTimeLimit);
+            ar & boost::serialization::make_nvp("systemTimeLimitMillis", systemTimeLimit);
             ar & BOOST_SERIALIZATION_NVP(memoryLimitBytes);
             ar & BOOST_SERIALIZATION_NVP(outputLimitBytes);
             ar & BOOST_SERIALIZATION_NVP(numberOfProcesses);
         }
 
-        std::chrono::milliseconds userTimeLimit = std::chrono::seconds(2);
+        std::chrono::nanoseconds timeLimit = std::chrono::seconds(2);
+        std::chrono::milliseconds userTimeLimit = std::chrono::hours(1);
+        std::chrono::milliseconds systemTimeLimit = std::chrono::hours(1);
         std::uint64_t memoryLimitBytes = 256 * 1024 * 1024; // 256 MiB
         std::uint64_t outputLimitBytes = 2 * 1024 * 1024;   // 2 MiB
 

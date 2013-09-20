@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
     try
     {
         std::string config, executable, inFile, outFile, errFile;
-        std::uint64_t userTimeLimitMillis;
+        std::uint64_t timeLimitNanos;
         std::uint64_t memoryLimitBytes;
         std::uint64_t outputLimitBytes;
         std::uint64_t realTimeLimitMillis;
@@ -105,8 +105,8 @@ int main(int argc, char *argv[])
         desc.add_options()
             ("config,c", po::value<std::string>(&config), "configuration file")
             ("executable,e", po::value<std::string>(&executable)->required(), "executable")
-            ("time-limit,t", po::value<std::uint64_t>(&userTimeLimitMillis),
-                "time limit in milliseconds")
+            ("time-limit,t", po::value<std::uint64_t>(&timeLimitNanos),
+                "time limit in nanoseconds")
             ("memory-limit,m", po::value<std::uint64_t>(&memoryLimitBytes),
                 "memory limit in bytes")
             ("output-limit,o", po::value<std::uint64_t>(&outputLimitBytes),
@@ -131,8 +131,8 @@ int main(int argc, char *argv[])
             cfg.processGroupDefaultSettings.processDefaultSettings.resourceLimits;
 
         if (vm.count("time-limit"))
-            processResourceLimits.userTimeLimit =
-                std::chrono::milliseconds(userTimeLimitMillis);
+            processResourceLimits.timeLimit =
+                std::chrono::nanoseconds(timeLimitNanos);
 
         if (vm.count("memory-limit"))
             processResourceLimits.memoryLimitBytes = memoryLimitBytes;

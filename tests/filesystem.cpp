@@ -8,10 +8,15 @@
 
 #include <yandex/contest/system/unistd/Operations.hpp>
 
-#include <boost/filesystem/fstream.hpp>
+#include <bunsan/testing/filesystem/read_data.hpp>
+#include <bunsan/testing/filesystem/tempdir.hpp>
+#include <bunsan/testing/filesystem/write_data.hpp>
+
 #include <boost/filesystem/operations.hpp>
 
 #include <iterator>
+
+using namespace bunsan::testing;
 
 namespace ya = yandex::contest::invoker::filesystem;
 namespace unistd = yandex::contest::system::unistd;
@@ -37,11 +42,9 @@ struct CreateFileFixture
     CreateFileFixture()
     {
         BOOST_REQUIRE_EQUAL(unistd::getuid(), 0);
-        root = boost::filesystem::temp_directory_path() / boost::filesystem::unique_path();
-        BOOST_REQUIRE(boost::filesystem::create_directory(root));
-        source = root / "source";
-        path = root / "path";
-        target = root / "target";
+        source = root.path / "source";
+        path = root.path / "path";
+        target = root.path / "target";
     }
 
     void verifyStatus(const ya::File &file, const boost::filesystem::path &path)
@@ -52,12 +55,8 @@ struct CreateFileFixture
         BOOST_CHECK_EQUAL(status.ownerId, file.ownerId);
     }
 
-    ~CreateFileFixture()
-    {
-        boost::filesystem::remove_all(root);
-    }
-
-    boost::filesystem::path root, source, path, target;
+    filesystem::tempdir root;
+    boost::filesystem::path source, path, target;
 };
 
 BOOST_FIXTURE_TEST_SUITE(CreateFile, CreateFileFixture)
@@ -73,54 +72,29 @@ BOOST_AUTO_TEST_CASE(RegularFileEmpty)
 
 BOOST_AUTO_TEST_CASE(RegularFileSource)
 {
-    boost::filesystem::ofstream fout(source);
-    BOOST_REQUIRE(fout);
     const std::string s = "Hello, world!";
-    fout << s;
-    fout.close();
-    BOOST_REQUIRE(fout);
-    BOOST_REQUIRE(boost::filesystem::exists(source));
+    filesystem::write_data(source, s);
     ya::RegularFile file;
     file.path = target;
     file.mode = 0375;
     file.source = source;
     file.create();
     verifyStatus(file, target);
-    boost::filesystem::ifstream fin(target);
-    BOOST_REQUIRE(fin);
-    const std::string r{std::istreambuf_iterator<char>(fin), std::istreambuf_iterator<char>()};
-    fin.close();
-    BOOST_REQUIRE(fin);
-    BOOST_CHECK_EQUAL(r, s);
+    BOOST_CHECK_EQUAL(filesystem::read_data(target), s);
 }
 
 BOOST_AUTO_TEST_CASE(RegularFileOverwrite)
 {
-    boost::filesystem::ofstream fout(target);
-    BOOST_REQUIRE(fout);
-    fout << "will not be empty";
-    fout.close();
-    BOOST_REQUIRE(fout);
-    BOOST_REQUIRE(boost::filesystem::exists(target));
-    fout.open(source);
-    BOOST_REQUIRE(fout);
+    filesystem::write_data(target, "will not be empty");
     const std::string s = "Hello, world!";
-    fout << s;
-    fout.close();
-    BOOST_REQUIRE(fout);
-    BOOST_REQUIRE(boost::filesystem::exists(source));
+    filesystem::write_data(source, s);
     ya::RegularFile file;
     file.path = target;
     file.mode = 0735;
     file.source = source;
     file.create();
     verifyStatus(file, target);
-    boost::filesystem::ifstream fin(target);
-    BOOST_REQUIRE(fin);
-    const std::string r{std::istreambuf_iterator<char>(fin), std::istreambuf_iterator<char>()};
-    fin.close();
-    BOOST_REQUIRE(fin);
-    BOOST_CHECK_EQUAL(r, s);
+    BOOST_CHECK_EQUAL(filesystem::read_data(target), s);
 }
 
 BOOST_AUTO_TEST_CASE(Directory)
@@ -201,7 +175,7 @@ BOOST_AUTO_TEST_CASE(CreateFile__create1)
     ya::RegularFile file;
     file.path = path.filename();
     create = file;
-    create.create(root);
+    create.create(root.path);
     BOOST_CHECK(boost::filesystem::exists(path));
 }
 

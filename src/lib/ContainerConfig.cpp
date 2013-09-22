@@ -5,7 +5,6 @@
 #include <bunsan/config/input_archive.hpp>
 #include <bunsan/config/output_archive.hpp>
 
-#include <bunsan/enable_error_info.hpp>
 #include <bunsan/filesystem/fstream.hpp>
 
 #include <boost/property_tree/json_parser.hpp>
@@ -195,13 +194,13 @@ namespace yandex{namespace contest{namespace invoker
         const char *const cfgPathC = std::getenv(env);
         if (cfgPathC)
         {
-            BUNSAN_EXCEPTIONS_WRAP_BEGIN()
+            bunsan::filesystem::ifstream fin(cfgPathC);
+            BUNSAN_FILESYSTEM_FSTREAM_WRAP_BEGIN(fin)
             {
-                bunsan::filesystem::ifstream fin(cfgPathC);
                 fin >> cfg;
-                fin.close();
             }
-            BUNSAN_EXCEPTIONS_WRAP_END()
+            BUNSAN_FILESYSTEM_FSTREAM_WRAP_END(fin)
+            fin.close();
         }
         return cfg;
     }

@@ -11,7 +11,6 @@
 #include <yandex/contest/TypeInfo.hpp>
 
 #include <bunsan/config/output_archive.hpp>
-#include <bunsan/enable_error_info.hpp>
 #include <bunsan/filesystem/fstream.hpp>
 
 #include <boost/program_options.hpp>
@@ -26,13 +25,13 @@ namespace yandex{namespace contest{namespace invoker{namespace cli
     {
         STREAM_INFO << "Trying to load configuration file at " << config << ".";
         ContainerConfig cfg;
-        BUNSAN_EXCEPTIONS_WRAP_BEGIN()
+        bunsan::filesystem::ifstream cfgin(config);
+        BUNSAN_FILESYSTEM_FSTREAM_WRAP_BEGIN(cfgin)
         {
-            bunsan::filesystem::ifstream cfgin(config);
             cfgin >> cfg;
-            cfgin.close();
         }
-        BUNSAN_EXCEPTIONS_WRAP_END()
+        BUNSAN_FILESYSTEM_FSTREAM_WRAP_END(cfgin)
+        cfgin.close();
         return cfg;
     }
 

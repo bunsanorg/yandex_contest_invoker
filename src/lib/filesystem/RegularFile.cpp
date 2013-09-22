@@ -6,7 +6,6 @@
 
 #include <yandex/contest/system/unistd/Operations.hpp>
 
-#include <bunsan/enable_error_info.hpp>
 #include <bunsan/filesystem/fstream.hpp>
 
 #include <boost/filesystem/operations.hpp>
@@ -29,12 +28,8 @@ namespace yandex{namespace contest{namespace invoker{namespace filesystem
         }
         else
         {
-            BUNSAN_EXCEPTIONS_WRAP_BEGIN()
-            {
-                bunsan::filesystem::ofstream fout(path);
-                fout.close();
-            }
-            BUNSAN_EXCEPTIONS_WRAP_END()
+            bunsan::filesystem::ofstream touch(path);
+            touch.close();
         }
         chmod();
     }

@@ -29,8 +29,7 @@ namespace yandex{namespace contest{namespace invoker{
 
     ProcessGroupStarter::ProcessGroupStarter(const AsyncProcessGroup::Task &task):
         thisCgroup_(system::cgroup::ControlGroup::getControlGroup(system::unistd::getpid())),
-        id2cgroup_(task.processes.size()),
-        id2pid_(task.processes.size()),
+        id2processInfo_(task.processes.size()),
         monitor_(task.processes)
     {
         std::vector<system::unistd::Pipe> pipes_(task.pipesNumber);
@@ -39,10 +38,10 @@ namespace yandex{namespace contest{namespace invoker{
             const std::string cid = str(boost::format("id_%1%") % id);
             // we don't children to have access to cgroups
             system::cgroup::ControlGroup &cg =
-                id2cgroup_[id] = thisCgroup_.createChild(cid, 0700);
+                id2processInfo_[id].controlGroup = thisCgroup_.createChild(cid, 0700);
             ProcessStarter starter(cg, task.processes[id], pipes_);
             const Pid pid = starter();
-            id2pid_[id] = pid;
+            id2processInfo_[id].pid = pid;
             STREAM_TRACE << "Process id mapping was established: " <<
                             "{id=" << id << "} = {pid=" << pid << "}.";
             BOOST_ASSERT(pid2id_.find(pid) == pid2id_.end());
@@ -74,7 +73,7 @@ namespace yandex{namespace contest{namespace invoker{
         {
             for (const Id id: monitor_.running())
             {
-                if (monitor_.runOutOfResourceLimits(id, id2cgroup_[id]))
+                if (monitor_.runOutOfResourceLimits(id, id2processInfo_[id]))
                 {
                     terminate(id);
                     monitor_.terminatedBySystem(id);
@@ -100,21 +99,22 @@ namespace yandex{namespace contest{namespace invoker{
         }
         // end of function
         // let's check everything is OK
-        for (const system::cgroup::ControlGroup &cg: id2cgroup_)
-            BOOST_ASSERT_MSG(!cg, "Every control group should be terminated and closed.");
+        for (const ProcessInfo &processInfo: id2processInfo_)
+            BOOST_ASSERT_MSG(!processInfo.controlGroup,
+                             "Every control group should be terminated and closed.");
     }
 
     void ProcessGroupStarter::terminate(const Id id)
     {
-        BOOST_ASSERT(id < id2cgroup_.size());
-        const Pid pid = id2pid_[id];
+        BOOST_ASSERT(id < id2processInfo_.size());
+        const Pid pid = id2processInfo_[id].pid;
         STREAM_TRACE << "Attempt to terminate " << id << " (pid = " << pid << ").";
         // sometimes terminate is called before
         // child has attached itself to control group
         if (::kill(pid, SIGKILL) < 0 && errno != ESRCH)
             BOOST_THROW_EXCEPTION(SystemError("kill") <<
                                   Error::message("This should not happen."));
-        id2cgroup_[id].terminate();
+        id2processInfo_[id].controlGroup.terminate();
     }
 
     void ProcessGroupStarter::waitForAnyChild(const WaitFunction &waitFunction)
@@ -132,9 +132,9 @@ namespace yandex{namespace contest{namespace invoker{
             // TODO Do we need to check for lost children and report?
             // terminate lost children
             terminate(id);
-            monitor_.terminated(id, statLoc, id2cgroup_[id]);
+            monitor_.terminated(id, statLoc, id2processInfo_[id]);
             // control group will not be used after that
-            id2cgroup_[id].close();
+            id2processInfo_[id].controlGroup.close();
         }
     }
 

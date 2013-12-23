@@ -1,8 +1,5 @@
 #include "ExecutionMonitor.hpp"
 
-// SIG_START_FAILED
-#include "ProcessStarter.hpp"
-
 #include <yandex/contest/system/cgroup/CpuAccounting.hpp>
 #include <yandex/contest/system/cgroup/Memory.hpp>
 #include <yandex/contest/system/cgroup/MemorySwap.hpp>
@@ -27,8 +24,7 @@ namespace yandex{namespace contest{namespace invoker{
             terminateGroupOnCrash_.insert(id);
     }
 
-    void ExecutionMonitor::terminated(const Id id, const int statLoc,
-                                      system::cgroup::ControlGroup &controlGroup)
+    void ExecutionMonitor::terminated(const Id id, const int statLoc, ProcessInfo &processInfo)
     {
         STREAM_TRACE << "Terminated id = " << id << ".";
         BOOST_ASSERT(running_.size() + terminated_.size() ==
@@ -71,7 +67,7 @@ namespace yandex{namespace contest{namespace invoker{
             processResult.completionStatus == process::Result::CompletionStatus::ABNORMAL_EXIT ||
             processResult.completionStatus == process::Result::CompletionStatus::OK)
         {
-            collectResourceInfo(id, controlGroup);
+            collectResourceInfo(id, processInfo);
         }
         // group checks
         if (result_.processGroupResult.completionStatus == process_group::Result::CompletionStatus::OK)
@@ -98,15 +94,14 @@ namespace yandex{namespace contest{namespace invoker{
             process_group::Result::CompletionStatus::REAL_TIME_LIMIT_EXCEEDED;
     }
 
-    bool ExecutionMonitor::runOutOfResourceLimits(
-        const Id id, system::cgroup::ControlGroup &controlGroup)
+    bool ExecutionMonitor::runOutOfResourceLimits(const Id id, ProcessInfo &processInfo)
     {
         STREAM_TRACE << "Check if id = " << id << " run out of resource limits.";
-        return collectResourceInfo(id, controlGroup) != process::Result::CompletionStatus::OK;
+        return collectResourceInfo(id, processInfo) != process::Result::CompletionStatus::OK;
     }
 
     process::Result::CompletionStatus ExecutionMonitor::collectResourceInfo(
-        const Id id, system::cgroup::ControlGroup &controlGroup)
+        const Id id, ProcessInfo &processInfo)
     {
         STREAM_TRACE << "Collecting resource info id = " << id << ".";
         process::Result &result = result_.processResults[id];
@@ -114,9 +109,9 @@ namespace yandex{namespace contest{namespace invoker{
         BOOST_ASSERT(status != process::Result::CompletionStatus::START_FAILED);
         process::ResourceUsage &resourceUsage = result.resourceUsage;
         const process::ResourceLimits &resourceLimits = resourceLimits_[id];
-        const system::cgroup::Memory memory(controlGroup);
-        const system::cgroup::MemorySwap memsw(controlGroup);
-        const system::cgroup::CpuAccounting cpuAcct(controlGroup);
+        const system::cgroup::Memory memory(processInfo.controlGroup);
+        const system::cgroup::MemorySwap memsw(processInfo.controlGroup);
+        const system::cgroup::CpuAccounting cpuAcct(processInfo.controlGroup);
         resourceUsage.memoryUsageBytes = memory.maxUsage();
         const auto cpuAcctStat = cpuAcct.stat();
         resourceUsage.userTimeUsage =

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ExecutionMonitor.hpp"
+#include "ProcessInfo.hpp"
 #include "ProcessStarter.hpp"
 
 #include <yandex/contest/system/cgroup/ControlGroup.hpp>
@@ -62,9 +63,8 @@ namespace yandex{namespace contest{namespace invoker{
 
     private:
         system::cgroup::ControlGroup thisCgroup_;
-        std::vector<system::cgroup::ControlGroup> id2cgroup_;
+        std::vector<ProcessInfo> id2processInfo_;
         std::unordered_map<Pid, Id> pid2id_;
-        std::vector<Pid> id2pid_;
         ExecutionMonitor monitor_;
         process_group::ResourceLimits resourceLimits_;
         TimePoint realTimeLimitPoint_;

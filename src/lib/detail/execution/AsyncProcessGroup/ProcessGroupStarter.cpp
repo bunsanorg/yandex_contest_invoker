@@ -38,10 +38,11 @@ namespace yandex{namespace contest{namespace invoker{
             const std::string cid = str(boost::format("id_%1%") % id);
             // we don't children to have access to cgroups
             system::cgroup::ControlGroup &cg =
-                id2processInfo_[id].controlGroup = thisCgroup_.createChild(cid, 0700);
+                id2processInfo_[id].controlGroup() =
+                    thisCgroup_.createChild(cid, 0700);
             ProcessStarter starter(cg, task.processes[id], pipes_);
             const Pid pid = starter();
-            id2processInfo_[id].pid = pid;
+            id2processInfo_[id].setPid(pid);
             STREAM_TRACE << "Process id mapping was established: " <<
                             "{id=" << id << "} = {pid=" << pid << "}.";
             BOOST_ASSERT(pid2id_.find(pid) == pid2id_.end());
@@ -58,7 +59,8 @@ namespace yandex{namespace contest{namespace invoker{
         if (sigaction(SIGALRM, &act, nullptr) < 0)
             BOOST_THROW_EXCEPTION(SystemError("sigaction"));
         // real time limit
-        realTimeLimitPoint_ = std::chrono::steady_clock::now() + task.resourceLimits.realTimeLimit;
+        realTimeLimitPoint_ =
+            std::chrono::steady_clock::now() + task.resourceLimits.realTimeLimit;
     }
 
     ProcessGroupStarter::~ProcessGroupStarter()
@@ -99,22 +101,20 @@ namespace yandex{namespace contest{namespace invoker{
         }
         // end of function
         // let's check everything is OK
-        for (const ProcessInfo &processInfo: id2processInfo_)
-            BOOST_ASSERT_MSG(!processInfo.controlGroup,
-                             "Every control group should be terminated and closed.");
+        for (ProcessInfo &processInfo: id2processInfo_)
+        {
+            BOOST_ASSERT_MSG(processInfo.terminated(),
+                             "Every process should be terminated.");
+            processInfo.controlGroup().close();
+        }
     }
 
     void ProcessGroupStarter::terminate(const Id id)
     {
         BOOST_ASSERT(id < id2processInfo_.size());
-        const Pid pid = id2processInfo_[id].pid;
-        STREAM_TRACE << "Attempt to terminate " << id << " (pid = " << pid << ").";
-        // sometimes terminate is called before
-        // child has attached itself to control group
-        if (::kill(pid, SIGKILL) < 0 && errno != ESRCH)
-            BOOST_THROW_EXCEPTION(SystemError("kill") <<
-                                  Error::message("This should not happen."));
-        id2processInfo_[id].controlGroup.terminate();
+        STREAM_TRACE << "Attempt to terminate " << id <<
+                        " (pid = " << id2processInfo_[id].pid() << ").";
+        id2processInfo_[id].terminate();
     }
 
     void ProcessGroupStarter::waitForAnyChild(const WaitFunction &waitFunction)
@@ -127,14 +127,11 @@ namespace yandex{namespace contest{namespace invoker{
         if (pid != 0)
         {
             BOOST_ASSERT(pid > 0);
-            BOOST_ASSERT_MSG(pid2id_.find(pid) != pid2id_.end(), "We get process we haven't started.");
+            BOOST_ASSERT_MSG(pid2id_.find(pid) != pid2id_.end(),
+                             "We received process we haven't started.");
             const Id id = pid2id_.at(pid);
-            // TODO Do we need to check for lost children and report?
-            // terminate lost children
             terminate(id);
             monitor_.terminated(id, statLoc, id2processInfo_[id]);
-            // control group will not be used after that
-            id2processInfo_[id].controlGroup.close();
         }
     }
 
@@ -151,7 +148,8 @@ namespace yandex{namespace contest{namespace invoker{
         if (rpid < 0)
         {
             BOOST_ASSERT_MSG(errno != ECHILD, "We have child processes.");
-            BOOST_THROW_EXCEPTION(SystemError(errno, "wait") << Error::message("Undocumented error."));
+            BOOST_THROW_EXCEPTION(SystemError(errno, "wait") <<
+                                  Error::message("Undocumented error."));
         }
         return rpid;
     }
@@ -260,7 +258,8 @@ namespace yandex{namespace contest{namespace invoker{
         if (rpid < 0)
         {
             BOOST_ASSERT_MSG(errno_ != ECHILD, "We have child processes.");
-            BOOST_THROW_EXCEPTION(SystemError(errno_, "wait") << Error::message("Undocumented error."));
+            BOOST_THROW_EXCEPTION(SystemError(errno_, "wait") <<
+                                  Error::message("Undocumented error."));
         }
         return rpid;
     }

@@ -2,6 +2,8 @@
 
 #include <yandex/contest/system/cgroup/ControlGroup.hpp>
 
+#include <atomic>
+
 #include <sys/types.h>
 
 namespace yandex{namespace contest{namespace invoker{
@@ -24,9 +26,21 @@ namespace yandex{namespace contest{namespace invoker{
      */
     extern const int SIG_START_FAILED;
 
-    struct ProcessInfo
+    class ProcessInfo
     {
-        Pid pid;
-        system::cgroup::ControlGroup controlGroup;
+    public:
+        Pid pid() const;
+        void setPid(const Pid &pid);
+
+        const system::cgroup::ControlGroup &controlGroup() const;
+        system::cgroup::ControlGroup &controlGroup();
+
+        void terminate();
+        bool terminated() const;
+
+    private:
+        Pid pid_{0};
+        system::cgroup::ControlGroup controlGroup_;
+        std::atomic<bool> terminated_{false};
     };
 }}}}}}

@@ -109,9 +109,9 @@ namespace yandex{namespace contest{namespace invoker{
         BOOST_ASSERT(status != process::Result::CompletionStatus::START_FAILED);
         process::ResourceUsage &resourceUsage = result.resourceUsage;
         const process::ResourceLimits &resourceLimits = resourceLimits_[id];
-        const system::cgroup::Memory memory(processInfo.controlGroup);
-        const system::cgroup::MemorySwap memsw(processInfo.controlGroup);
-        const system::cgroup::CpuAccounting cpuAcct(processInfo.controlGroup);
+        const system::cgroup::Memory memory(processInfo.controlGroup());
+        const system::cgroup::MemorySwap memsw(processInfo.controlGroup());
+        const system::cgroup::CpuAccounting cpuAcct(processInfo.controlGroup());
         resourceUsage.memoryUsageBytes = memory.maxUsage();
         const auto cpuAcctStat = cpuAcct.stat();
         resourceUsage.userTimeUsage =

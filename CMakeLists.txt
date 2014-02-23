@@ -37,6 +37,7 @@ bunsan_add_shared_library(${PROJECT_NAME}
     src/lib/detail/execution/AsyncProcessGroup/execute.cpp
     src/lib/detail/execution/AsyncProcessGroup/ProcessGroupStarter.cpp
     src/lib/detail/execution/AsyncProcessGroup/ProcessStarter.cpp
+    src/lib/detail/execution/AsyncProcessGroup/ProcessInfo.cpp
     src/lib/detail/execution/AsyncProcessGroup/ExecutionMonitor.cpp
     src/lib/detail/execution/AsyncProcessGroup/Streams.cpp
 )

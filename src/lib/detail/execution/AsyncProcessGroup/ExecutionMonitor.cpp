@@ -1,8 +1,6 @@
 #include "ExecutionMonitor.hpp"
 
 #include <yandex/contest/system/cgroup/CpuAccounting.hpp>
-#include <yandex/contest/system/cgroup/Memory.hpp>
-#include <yandex/contest/system/cgroup/MemorySwap.hpp>
 
 #include <yandex/contest/detail/LogHelper.hpp>
 
@@ -109,10 +107,8 @@ namespace yandex{namespace contest{namespace invoker{
         BOOST_ASSERT(status != process::Result::CompletionStatus::START_FAILED);
         process::ResourceUsage &resourceUsage = result.resourceUsage;
         const process::ResourceLimits &resourceLimits = resourceLimits_[id];
-        const system::cgroup::Memory memory(processInfo.controlGroup());
-        const system::cgroup::MemorySwap memsw(processInfo.controlGroup());
         const system::cgroup::CpuAccounting cpuAcct(processInfo.controlGroup());
-        resourceUsage.memoryUsageBytes = memory.maxUsage();
+        resourceUsage.memoryUsageBytes = processInfo.maxMemoryUsageBytes();
         const auto cpuAcctStat = cpuAcct.stat();
         resourceUsage.userTimeUsage =
             std::chrono::duration_cast<std::chrono::milliseconds>(cpuAcctStat.userUsage);
@@ -135,7 +131,7 @@ namespace yandex{namespace contest{namespace invoker{
             STREAM_TRACE << "Id = " << id << " run out of system time limit.";
             return status = process::Result::CompletionStatus::SYSTEM_TIME_LIMIT_EXCEEDED;
         }
-        if (memory.failcnt() || memsw.failcnt())
+        if (resourceUsage.memoryUsageBytes > resourceLimits.memoryLimitBytes)
         {
             STREAM_TRACE << "Id = " << id << " run out of memory limit.";
             return status = process::Result::CompletionStatus::MEMORY_LIMIT_EXCEEDED;

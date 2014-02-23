@@ -272,15 +272,12 @@ namespace yandex{namespace contest{namespace invoker{
         cpuSet.setMems(parentCpuSet.mems());
 
         const system::cgroup::Memory memory(controlGroup_);
-        const system::cgroup::MemorySwap memorySwap(controlGroup_);
-        memory.setLimit(resourceLimits_.memoryLimitBytes);
-        memorySwap.setLimit(resourceLimits_.memoryLimitBytes);
 
         // we do not want to count memory used by control process
         cpuSet.setMemoryMigrate(false);
         memory.setMoveChargeAtImmigrate(false, false);
 
-        // wee need oom-killer
+        // we need oom-killer
         memory.setOomKillDisable(false);
     }
 

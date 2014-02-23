@@ -4,6 +4,8 @@
 
 #include <atomic>
 
+#include <cstdint>
+
 #include <sys/types.h>
 
 namespace yandex{namespace contest{namespace invoker{
@@ -38,9 +40,17 @@ namespace yandex{namespace contest{namespace invoker{
         void terminate();
         bool terminated() const;
 
+        std::uint64_t maxMemoryUsageBytes() const;
+        void updateMaxMemoryUsageFromMemoryStat();
+
+    private:
+        void updateMaxMemoryUsageBytes(const std::uint64_t &memoryUsageBytes);
+        bool setMaxMemoryUsageBytesIfZero(const std::uint64_t &memoryUsageBytes);
+
     private:
         Pid pid_{0};
         system::cgroup::ControlGroup controlGroup_;
         std::atomic<bool> terminated_{false};
+        std::atomic<std::uint64_t> maxMemoryUsageBytes_{0};
     };
 }}}}}}

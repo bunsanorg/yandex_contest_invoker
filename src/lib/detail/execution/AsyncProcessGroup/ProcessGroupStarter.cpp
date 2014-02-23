@@ -32,6 +32,7 @@ namespace yandex{namespace contest{namespace invoker{
         id2processInfo_(task.processes.size()),
         monitor_(task.processes)
     {
+        // TODO restrict memory usage of process group (excluding control process)
         std::vector<system::unistd::Pipe> pipes_(task.pipesNumber);
         for (std::size_t id = 0; id < task.processes.size(); ++id)
         {
@@ -71,6 +72,13 @@ namespace yandex{namespace contest{namespace invoker{
     void ProcessGroupStarter::executionLoop()
     {
         STREAM_DEBUG << "Starting execution loop...";
+
+        memoryUsageLoader_ = std::thread(
+            &ProcessGroupStarter::memoryUsageLoader,
+            this
+        );
+
+        STREAM_TRACE << "Waiting loop...";
         while (monitor_.processGroupIsRunning())
         {
             for (const Id id: monitor_.running())
@@ -85,7 +93,8 @@ namespace yandex{namespace contest{namespace invoker{
             if (Clock::now() >= realTimeLimitPoint_)
                 monitor_.realTimeLimitExceeded();
         }
-        // let's terminate each running process
+
+        // terminate each running process
         STREAM_DEBUG << "Terminating processes...";
         for (const Id id: monitor_.running())
         {
@@ -93,13 +102,20 @@ namespace yandex{namespace contest{namespace invoker{
             terminate(id);
             monitor_.terminatedBySystem(id);
         }
-        // let's collect results
+
+        // collect results
         STREAM_TRACE << "Collection results...";
         while (monitor_.processesAreRunning())
         {
             waitForAnyChild(wait);
         }
         // end of function
+
+        STREAM_TRACE << "Joining memory usage loader...";
+        // everything is terminated, wait for worker thread
+        memoryUsageLoader_.join();
+
+        STREAM_TRACE << "Closing control groups...";
         // let's check everything is OK
         for (ProcessInfo &processInfo: id2processInfo_)
         {
@@ -107,6 +123,7 @@ namespace yandex{namespace contest{namespace invoker{
                              "Every process should be terminated.");
             processInfo.controlGroup().close();
         }
+        STREAM_TRACE << "Execution loop has completed.";
     }
 
     void ProcessGroupStarter::terminate(const Id id)
@@ -262,5 +279,25 @@ namespace yandex{namespace contest{namespace invoker{
                                   Error::message("Undocumented error."));
         }
         return rpid;
+    }
+
+    void ProcessGroupStarter::memoryUsageLoader()
+    {
+        bool found;
+        do
+        {
+            found = false;
+            for (ProcessInfo &processInfo: id2processInfo_)
+            {
+                if (!processInfo.terminated())
+                {
+                    found = true;
+                    processInfo.updateMaxMemoryUsageFromMemoryStat();
+                }
+            }
+            // FIXME hardcode
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        }
+        while (found);
     }
 }}}}}}

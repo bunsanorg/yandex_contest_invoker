@@ -11,6 +11,7 @@
 
 #include <chrono>
 #include <functional>
+#include <thread>
 
 namespace yandex{namespace contest{namespace invoker{
     namespace detail{namespace execution{namespace async_process_group_detail
@@ -58,10 +59,13 @@ namespace yandex{namespace contest{namespace invoker{
          */
         static Pid waitUntil(int &statLoc, const TimePoint &untilPoint);
 
+        void memoryUsageLoader();
+
     private:
         static const Duration waitInterval;
 
     private:
+        std::thread memoryUsageLoader_;
         system::cgroup::ControlGroup thisCgroup_;
         std::vector<ProcessInfo> id2processInfo_;
         std::unordered_map<Pid, Id> pid2id_;

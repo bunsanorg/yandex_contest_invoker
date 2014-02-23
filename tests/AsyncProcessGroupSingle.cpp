@@ -333,6 +333,37 @@ BOOST_AUTO_TEST_CASE(InvalidTargetFDAliasErrorTest)
 
 BOOST_AUTO_TEST_SUITE_END() // fd_alias
 
+BOOST_AUTO_TEST_SUITE(memory)
+
+BOOST_AUTO_TEST_CASE(consumer)
+{
+    process.executable = dir::tests::resources::source() / "memory_consumer.py";
+    run();
+    verifyPGR(PGR::CompletionStatus::ABNORMAL_EXIT);
+    verifyPR(0, PR::CompletionStatus::MEMORY_LIMIT_EXCEEDED);
+}
+
+BOOST_AUTO_TEST_CASE(file_cache)
+{
+    process.executable = "/usr/bin/env";
+    TMP tmpfile;
+    process.arguments = {
+        "env",
+        "dd",
+        "if=/dev/zero",
+        "of=" + tmpfile.path().string(),
+        "bs=1M",
+        "count=64"
+    };
+    task.processes[0].resourceLimits.memoryLimitBytes = 32 * 1024 * 1024;
+    task.processes[0].resourceLimits.outputLimitBytes = 128 * 1024 * 1024;
+    run();
+    verifyPGR();
+    verifyPRExit(0);
+}
+
+BOOST_AUTO_TEST_SUITE_END() // memory
+
 BOOST_AUTO_TEST_SUITE(security)
 
 BOOST_AUTO_TEST_CASE(lost_child)

@@ -44,14 +44,15 @@ namespace yandex{namespace contest{namespace invoker{namespace cli
         boost::property_tree::write_json(out, ptree);
     }
 
-    void execute(const ContainerConfig &config,
-                 const boost::filesystem::path &executable,
-                 const ProcessArguments &arguments,
-                 const ProcessGroup::ResourceLimits &processGroupResourceLimits,
-                 const Process::ResourceLimits &processResourceLimits,
-                 const boost::filesystem::path &inFile,
-                 const boost::filesystem::path &outFile,
-                 const boost::filesystem::path &errFile)
+    void execute(
+        const ContainerConfig &config,
+        const boost::filesystem::path &executable,
+        const ProcessArguments &arguments,
+        const ProcessGroup::ResourceLimits &processGroupResourceLimits,
+        const Process::ResourceLimits &processResourceLimits,
+        const boost::filesystem::path &inFile,
+        const boost::filesystem::path &outFile,
+        const boost::filesystem::path &errFile)
     {
         STREAM_INFO <<
             "Trying to execute " << executable << " with " <<
@@ -66,15 +67,22 @@ namespace yandex{namespace contest{namespace invoker{namespace cli
         process->setResourceLimits(processResourceLimits);
         if (inFile != "/dev/null")
         {
-            container->filesystem().push(inFile, "/stdin", system::unistd::access::Id(0, 0), 0400);
+            container->filesystem().push(
+                inFile,
+                "/stdin",
+                system::unistd::access::Id(0, 0),
+                0400
+            );
             process->setStream(0, File("/stdin", AccessMode::READ_ONLY));
         }
         if (outFile != "/dev/null")
             process->setStream(1, File("/stdout", AccessMode::WRITE_ONLY));
         if (errFile != "/dev/null")
             process->setStream(2, File("/stderr", AccessMode::WRITE_ONLY));
-        const ProcessGroup::Result processGroupResult = processGroup->synchronizedCall();
-        const Process::Result processResult = process->result();
+        const ProcessGroup::Result processGroupResult =
+            processGroup->synchronizedCall();
+        const Process::Result processResult =
+            process->result();
         STREAM_INFO << "Process group has terminated";
         // output results
         std::cout << "Process group result:" << std::endl;
@@ -102,24 +110,65 @@ int main(int argc, char *argv[])
         std::uint64_t realTimeLimitMillis;
         ya::ProcessArguments arguments;
         desc.add_options()
-            ("config,c", po::value<std::string>(&config), "configuration file")
-            ("executable,e", po::value<std::string>(&executable)->required(), "executable")
-            ("time-limit,t", po::value<std::uint64_t>(&timeLimitNanos),
-                "time limit in nanoseconds")
-            ("memory-limit,m", po::value<std::uint64_t>(&memoryLimitBytes),
+            (
+                "config,c",
+                po::value<std::string>(&config),
+                "configuration file"
+            )
+            (
+                "executable,e",
+                po::value<std::string>(&executable)->required(),
+                "executable"
+            )
+            (
+                "time-limit,t",
+                po::value<std::uint64_t>(&timeLimitNanos),
+                "time limit in nanoseconds"
+            )
+            (
+                "memory-limit,m",
+                po::value<std::uint64_t>(&memoryLimitBytes),
                 "memory limit in bytes")
-            ("output-limit,o", po::value<std::uint64_t>(&outputLimitBytes),
-                "output limit in bytes")
-            ("real-time-limit,l", po::value<std::uint64_t>(&realTimeLimitMillis),
-                "real time limit in milliseconds")
-            ("stdin", po::value<std::string>(&inFile)->default_value("/dev/null"), "file for stdin")
-            ("stdout", po::value<std::string>(&outFile)->default_value("/dev/null"), "file for stdout")
-            ("stderr", po::value<std::string>(&errFile)->default_value("/dev/null"), "file for stderr")
-            ("argument,a", po::value<ya::ProcessArguments>(&arguments)->composing(), "arguments");
+            (
+                "output-limit,o",
+                po::value<std::uint64_t>(&outputLimitBytes),
+                "output limit in bytes"
+            )
+            (
+                "real-time-limit,l",
+                po::value<std::uint64_t>(&realTimeLimitMillis),
+                "real time limit in milliseconds"
+            )
+            (
+                "stdin",
+                po::value<std::string>(&inFile)->default_value("/dev/null"),
+                "file for stdin"
+            )
+            (
+                "stdout",
+                po::value<std::string>(&outFile)->default_value("/dev/null"),
+                "file for stdout"
+            )
+            (
+                "stderr",
+                po::value<std::string>(&errFile)->default_value("/dev/null"),
+                "file for stderr"
+            )
+            (
+                "argument,a",
+                po::value<ya::ProcessArguments>(&arguments)->composing(),
+                "arguments"
+            );
         po::positional_options_description pdesc;
         pdesc.add("argument", -1);
         po::variables_map vm;
-        po::store(po::command_line_parser(argc, argv).options(desc).positional(pdesc).run(), vm);
+        po::store(
+            po::command_line_parser(argc, argv).
+            options(desc).
+            positional(pdesc).
+            run(),
+            vm
+        );
         po::notify(vm);
 
         const ya::ContainerConfig cfg = vm.count("config") ?

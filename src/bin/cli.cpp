@@ -153,18 +153,26 @@ int main(int argc, char *argv[])
                 "stderr",
                 po::value<std::string>(&errFile)->default_value("/dev/null"),
                 "file for stderr"
-            )
+            );
+
+        po::options_description hdesc;
+        hdesc.add_options()
             (
                 "argument,a",
                 po::value<ya::ProcessArguments>(&arguments)->composing(),
                 "arguments"
             );
+
         po::positional_options_description pdesc;
         pdesc.add("argument", -1);
+
+        po::options_description fdesc;
+        fdesc.add(desc).add(hdesc);
+
         po::variables_map vm;
         po::store(
             po::command_line_parser(argc, argv).
-            options(desc).
+            options(fdesc).
             positional(pdesc).
             run(),
             vm

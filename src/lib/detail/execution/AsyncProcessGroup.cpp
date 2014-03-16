@@ -86,11 +86,11 @@ namespace yandex{namespace contest{namespace invoker{
             {
                 result_ = serialization::deserialize<Result>(result.out);
             }
-            catch (std::exception &e)
+            catch (std::exception &)
             {
                 BOOST_THROW_EXCEPTION(
                     AsyncProcessGroupControlProcessError(result) <<
-                    Error::message(e.what()));
+                    bunsan::enable_nested_current());
             }
         }
         else

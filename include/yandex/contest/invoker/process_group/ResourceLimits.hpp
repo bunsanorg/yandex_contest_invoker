@@ -13,7 +13,9 @@ namespace yandex{namespace contest{namespace invoker{namespace process_group
         template <typename Archive>
         void serialize(Archive &ar, const unsigned int)
         {
-            ar & boost::serialization::make_nvp("realTimeLimitMillis", realTimeLimit);
+            using boost::serialization::make_nvp;
+
+            ar & make_nvp("realTimeLimitMillis", realTimeLimit);
         }
 
         std::chrono::milliseconds realTimeLimit = std::chrono::seconds(10);

@@ -50,7 +50,13 @@ namespace yandex{namespace contest{namespace invoker{namespace filesystem
         }
 
     public:
-        typedef boost::variant<RegularFile, SymLink, Device, Directory, FIFO> Variant;
+        typedef boost::variant<
+            RegularFile,
+            SymLink,
+            Device,
+            Directory,
+            FIFO
+        > Variant;
 
     private:
         Variant file_;

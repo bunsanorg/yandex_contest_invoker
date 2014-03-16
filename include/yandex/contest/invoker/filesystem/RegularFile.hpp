@@ -14,7 +14,10 @@ namespace yandex{namespace contest{namespace invoker{namespace filesystem
     {
         struct InvalidSourceError: virtual Error
         {
-            typedef boost::error_info<struct sourceTag, boost::filesystem::path> source;
+            typedef boost::error_info<
+                struct sourceTag,
+                boost::filesystem::path
+            > source;
         };
         struct SourceDoesNotExistsError: virtual InvalidSourceError {};
         struct SourceIsNotRegularFileError: virtual InvalidSourceError {};

@@ -25,7 +25,8 @@
 #include <unordered_map>
 #include <vector>
 
-namespace yandex{namespace contest{namespace invoker{namespace detail{namespace execution{namespace async_process_group_detail
+namespace yandex{namespace contest{namespace invoker{
+    namespace detail{namespace execution{namespace async_process_group_detail
 {
     BUNSAN_STREAM_ENUM_CLASS(AccessMode,
     (
@@ -43,8 +44,10 @@ namespace yandex{namespace contest{namespace invoker{namespace detail{namespace 
             ar & BOOST_SERIALIZATION_NVP(accessMode);
         }
 
-        explicit File(const boost::filesystem::path &path_=boost::filesystem::path(),
-                      const AccessMode accessMode_=AccessMode::READ_WRITE);
+        explicit File(
+            const boost::filesystem::path &path_=boost::filesystem::path(),
+            const AccessMode accessMode_=AccessMode::READ_WRITE);
+
         File(const File &)=default;
         File &operator=(const File &)=default;
 
@@ -175,21 +178,31 @@ namespace yandex{namespace contest{namespace invoker{namespace detail{namespace 
 }}}}}}
 
 BUNSAN_CONFIG_EXPORT(
-    yandex::contest::invoker::detail::execution::async_process_group_detail::Stream,
-    yandex::contest::invoker::detail::execution::async_process_group_detail::File, "File")
+    yandex::contest::invoker::
+        detail::execution::async_process_group_detail::Stream,
+    yandex::contest::invoker::
+        detail::execution::async_process_group_detail::File, "File")
 
 BUNSAN_CONFIG_EXPORT(
-    yandex::contest::invoker::detail::execution::async_process_group_detail::Stream,
-    yandex::contest::invoker::detail::execution::async_process_group_detail::Pipe::End, "PipeEnd")
+    yandex::contest::invoker::
+        detail::execution::async_process_group_detail::Stream,
+    yandex::contest::invoker::
+        detail::execution::async_process_group_detail::Pipe::End, "PipeEnd")
 
 BUNSAN_CONFIG_EXPORT(
-    yandex::contest::invoker::detail::execution::async_process_group_detail::Stream,
-    yandex::contest::invoker::detail::execution::async_process_group_detail::FDAlias, "FDAlias")
+    yandex::contest::invoker::
+        detail::execution::async_process_group_detail::Stream,
+    yandex::contest::invoker::
+        detail::execution::async_process_group_detail::FDAlias, "FDAlias")
 
 BUNSAN_CONFIG_EXPORT(
-    yandex::contest::invoker::detail::execution::async_process_group_detail::NonPipeStream,
-    yandex::contest::invoker::detail::execution::async_process_group_detail::File, "File")
+    yandex::contest::invoker::
+        detail::execution::async_process_group_detail::NonPipeStream,
+    yandex::contest::invoker::
+        detail::execution::async_process_group_detail::File, "File")
 
 BUNSAN_CONFIG_EXPORT(
-    yandex::contest::invoker::detail::execution::async_process_group_detail::NonPipeStream,
-    yandex::contest::invoker::detail::execution::async_process_group_detail::FDAlias, "FDAlias")
+    yandex::contest::invoker::
+        detail::execution::async_process_group_detail::NonPipeStream,
+    yandex::contest::invoker::
+        detail::execution::async_process_group_detail::FDAlias, "FDAlias")

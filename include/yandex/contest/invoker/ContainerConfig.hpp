@@ -27,11 +27,13 @@ namespace yandex{namespace contest{namespace invoker
         template <typename Archive>
         void serialize(Archive &ar, const unsigned int)
         {
+            using boost::serialization::make_nvp;
+
             ar & BOOST_SERIALIZATION_NVP(containersDir);
-            ar & boost::serialization::make_nvp("lxc", lxcConfig);
+            ar & make_nvp("lxc", lxcConfig);
             ar & BOOST_SERIALIZATION_NVP(processGroupDefaultSettings);
-            ar & boost::serialization::make_nvp("controlProcess", controlProcessConfig);
-            ar & boost::serialization::make_nvp("filesystem", filesystemConfig);
+            ar & make_nvp("controlProcess", controlProcessConfig);
+            ar & make_nvp("filesystem", filesystemConfig);
         }
 
         boost::filesystem::path containersDir;

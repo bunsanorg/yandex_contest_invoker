@@ -116,7 +116,8 @@ namespace yandex{namespace contest{namespace invoker
          *
          * \see create()
          */
-        Container(std::unique_ptr<system::lxc::LXC> &&lxcPtr, const ContainerConfig &config);
+        Container(std::unique_ptr<system::lxc::LXC> &&lxcPtr,
+                  const ContainerConfig &config);
 
     private:
         Filesystem filesystem_;

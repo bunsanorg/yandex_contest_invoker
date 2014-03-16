@@ -5,20 +5,25 @@
 
 #include <boost/assert.hpp>
 
-namespace yandex{namespace contest{namespace invoker{namespace detail{namespace execution
+namespace yandex{namespace contest{namespace invoker{
+    namespace detail{namespace execution
 {
     namespace
     {
-        AsyncProcess::Options apply(AsyncProcess::Options options, const AsyncProcessGroup::Task &task)
+        AsyncProcess::Options apply(
+            AsyncProcess::Options options,
+            const AsyncProcessGroup::Task &task)
         {
-            STREAM_TRACE << "Attempt to execute process group: " << STREAM_OBJECT(task);
+            STREAM_TRACE << "Attempt to execute process group: " <<
+                            STREAM_OBJECT(task);
             options.in = serialization::serialize(task);
             return options;
         }
     }
 
-    AsyncProcessGroup::AsyncProcessGroup(const AsyncProcess::Options &options, const Task &task):
-        controlProcess_(apply(options, task))
+    AsyncProcessGroup::AsyncProcessGroup(
+        const AsyncProcess::Options &options, const Task &task):
+            controlProcess_(apply(options, task))
     {
     }
 
@@ -27,7 +32,8 @@ namespace yandex{namespace contest{namespace invoker{namespace detail{namespace 
         swap(processGroup);
     }
 
-    AsyncProcessGroup &AsyncProcessGroup::operator=(AsyncProcessGroup &&processGroup)
+    AsyncProcessGroup &AsyncProcessGroup::operator=(
+        AsyncProcessGroup &&processGroup)
     {
         if (*this)
             stop();
@@ -82,13 +88,15 @@ namespace yandex{namespace contest{namespace invoker{namespace detail{namespace 
             }
             catch (std::exception &e)
             {
-                BOOST_THROW_EXCEPTION(AsyncProcessGroupControlProcessError(result) <<
-                                      Error::message(e.what()));
+                BOOST_THROW_EXCEPTION(
+                    AsyncProcessGroupControlProcessError(result) <<
+                    Error::message(e.what()));
             }
         }
         else
         {
-            BOOST_THROW_EXCEPTION(AsyncProcessGroupControlProcessError(result));
+            BOOST_THROW_EXCEPTION(
+                AsyncProcessGroupControlProcessError(result));
         }
     }
 

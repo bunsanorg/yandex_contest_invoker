@@ -15,9 +15,11 @@ namespace yandex{namespace contest{namespace invoker{namespace process
         template <typename Archive>
         void serialize(Archive &ar, const unsigned int)
         {
-            ar & boost::serialization::make_nvp("timeUsageNanos", timeUsage);
-            ar & boost::serialization::make_nvp("userTimeUsageMillis", userTimeUsage);
-            ar & boost::serialization::make_nvp("systemTimeUsageMillis", systemTimeUsage);
+            using boost::serialization::make_nvp;
+
+            ar & make_nvp("timeUsageNanos", timeUsage);
+            ar & make_nvp("userTimeUsageMillis", userTimeUsage);
+            ar & make_nvp("systemTimeUsageMillis", systemTimeUsage);
             ar & BOOST_SERIALIZATION_NVP(memoryUsageBytes);
         }
 

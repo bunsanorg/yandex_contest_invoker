@@ -4,8 +4,6 @@
 
 #include <yandex/contest/system/execution/ResultError.hpp>
 
-#include <bunsan/forward_constructor.hpp>
-
 namespace yandex{namespace contest{namespace invoker
 {
     struct ContainerError: virtual Error
@@ -13,9 +11,11 @@ namespace yandex{namespace contest{namespace invoker
         typedef boost::error_info<struct nameTag, std::string> name;
     };
 
-    struct ContainerUtilityError: virtual Error, virtual system::execution::ResultError
+    struct ContainerUtilityError:
+        system::execution::ResultError,
+        virtual Error
     {
-        BUNSAN_INHERIT_EXPLICIT_CONSTRUCTOR(ContainerUtilityError, system::execution::ResultError)
+        using system::execution::ResultError::ResultError;
     };
 
     struct ContainerIllegalStateError: virtual ContainerError {};

@@ -1,12 +1,11 @@
 #pragma once
 
+#include <yandex/contest/invoker/ContainerError.hpp>
 #include <yandex/contest/invoker/detail/execution/AsyncProcessGroupDetail.hpp>
 #include <yandex/contest/invoker/Error.hpp>
 
 #include <yandex/contest/system/execution/AsyncProcess.hpp>
 #include <yandex/contest/system/execution/ResultError.hpp>
-
-#include <bunsan/forward_constructor.hpp>
 
 namespace yandex{namespace contest{namespace invoker{
     namespace detail{namespace execution
@@ -16,12 +15,10 @@ namespace yandex{namespace contest{namespace invoker{
     struct AsyncProcessGroupError: virtual Error {};
 
     struct AsyncProcessGroupControlProcessError:
-        virtual AsyncProcessGroupError,
-        virtual ResultError
+        ContainerUtilityError,
+        virtual AsyncProcessGroupError
     {
-        BUNSAN_INHERIT_EXPLICIT_CONSTRUCTOR(
-            AsyncProcessGroupControlProcessError,
-            ResultError)
+        using ContainerUtilityError::ContainerUtilityError;
     };
 
     class AsyncProcessGroup

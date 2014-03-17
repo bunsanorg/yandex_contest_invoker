@@ -8,7 +8,7 @@
 #include <yandex/contest/invoker/process_group/DefaultSettings.hpp>
 
 #include <yandex/contest/IntrusivePointeeBase.hpp>
-#include <yandex/contest/system/lxc/LXC.hpp>
+#include <yandex/contest/system/lxc/Lxc.hpp>
 
 namespace yandex{namespace contest{namespace invoker
 {
@@ -95,17 +95,17 @@ namespace yandex{namespace contest{namespace invoker
         detail::execution::AsyncProcessGroup execute(
             const detail::execution::AsyncProcessGroup::Task &task);
 
-        /// \copydoc system::lxc::LXC::freeze()
+        /// \copydoc system::lxc::Lxc::freeze()
         void freeze();
 
-        /// \copydoc system::lxc::LXC::unfreeze()
+        /// \copydoc system::lxc::Lxc::unfreeze()
         void unfreeze();
 
-        /// \copydoc system::lxc::LXC::stop()
+        /// \copydoc system::lxc::Lxc::stop()
         void stop();
 
-        /// \copydoc system::lxc::LXC::state()
-        system::lxc::LXC::State state();
+        /// \copydoc system::lxc::Lxc::state()
+        system::lxc::Lxc::State state();
 
     private:
         /*!
@@ -116,13 +116,13 @@ namespace yandex{namespace contest{namespace invoker
          *
          * \see create()
          */
-        Container(std::unique_ptr<system::lxc::LXC> &&lxcPtr,
+        Container(std::unique_ptr<system::lxc::Lxc> &&lxcPtr,
                   const ContainerConfig &config);
 
     private:
         Filesystem filesystem_;
         const detail::execution::AsyncProcess::Options controlProcessOptions_;
         process_group::DefaultSettings processGroupDefaultSettings_;
-        std::unique_ptr<system::lxc::LXC> lxcPtr_;
+        std::unique_ptr<system::lxc::Lxc> lxcPtr_;
     };
 }}}

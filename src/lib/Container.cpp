@@ -37,13 +37,13 @@ namespace yandex{namespace contest{namespace invoker
             STREAM_ERROR << "New container was not created due to name collisions, throwing an exception.";
             BOOST_THROW_EXCEPTION(Error() << Error::message("Unable to create unique container"));
         }
-        // create LXC
-        std::unique_ptr<system::lxc::LXC> lxcPtr;
+        // create Lxc
+        std::unique_ptr<system::lxc::Lxc> lxcPtr;
         try
         {
             STREAM_INFO << "New container directory was created: " << path << ".";
             STREAM_INFO << "Trying to create LXC at " << path << " .";
-            lxcPtr.reset(new system::lxc::LXC(path.filename().string(), path, config.lxcConfig));
+            lxcPtr.reset(new system::lxc::Lxc(path.filename().string(), path, config.lxcConfig));
         }
         catch (...)
         {
@@ -78,7 +78,7 @@ namespace yandex{namespace contest{namespace invoker
         return create(ContainerConfig());
     }
 
-    Container::Container(std::unique_ptr<system::lxc::LXC> &&lxcPtr, const ContainerConfig &config):
+    Container::Container(std::unique_ptr<system::lxc::Lxc> &&lxcPtr, const ContainerConfig &config):
         filesystem_(lxcPtr->rootfs(), config.filesystemConfig),
         controlProcessOptions_(config.controlProcessConfig),
         processGroupDefaultSettings_(config.processGroupDefaultSettings),
@@ -133,7 +133,7 @@ namespace yandex{namespace contest{namespace invoker
         lxcPtr_->stop();
     }
 
-    system::lxc::LXC::State Container::state()
+    system::lxc::Lxc::State Container::state()
     {
         return lxcPtr_->state();
     }

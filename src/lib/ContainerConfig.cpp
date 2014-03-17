@@ -55,7 +55,7 @@ namespace yandex{namespace contest{namespace invoker
             return getWordSize() == 32 ? system::lxc::Config::Arch::x86 : system::lxc::Config::Arch::x86_64;
         }
 
-        system::lxc::MountConfig getLXCMountConfig()
+        system::lxc::MountConfig getLxcMountConfig()
         {
             system::lxc::MountConfig st;
             st.entries = {
@@ -69,7 +69,7 @@ namespace yandex{namespace contest{namespace invoker
             return st;
         }
 
-        system::lxc::Config getLXCConfig()
+        system::lxc::Config getLxcConfig()
         {
             system::lxc::Config st;
             st.arch = getArch();
@@ -78,7 +78,7 @@ namespace yandex{namespace contest{namespace invoker
             // TODO pts
             // TODO console
             // TODO tty
-            st.mount = getLXCMountConfig();
+            st.mount = getLxcMountConfig();
             // TODO rootfs
             // TODO cgroup
             // TODO cap_drop
@@ -180,7 +180,7 @@ namespace yandex{namespace contest{namespace invoker
 
     ContainerConfig::ContainerConfig():
         containersDir("/tmp"),
-        lxcConfig(getLXCConfig()),
+        lxcConfig(getLxcConfig()),
         processGroupDefaultSettings(getProcessGroupDefaultSettings()),
         controlProcessConfig(getControlProcessConfig()),
         filesystemConfig(getFilesystemConfig())

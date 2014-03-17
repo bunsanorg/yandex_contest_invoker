@@ -98,7 +98,7 @@ namespace yandex{namespace contest{namespace invoker
         try
         {
             // process has not started yet
-            while (container_->state() == system::lxc::LXC::State::STOPPED)
+            while (container_->state() == system::lxc::Lxc::State::STOPPED)
             {
                 if (poll())
                 {
@@ -108,8 +108,8 @@ namespace yandex{namespace contest{namespace invoker
                 // FIXME hardcode
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
             }
-            const system::lxc::LXC::State state = container_->state();
-            if (state != system::lxc::LXC::State::RUNNING)
+            const system::lxc::Lxc::State state = container_->state();
+            if (state != system::lxc::Lxc::State::RUNNING)
                 BOOST_THROW_EXCEPTION(ContainerIllegalStateError() <<
                                       system::lxc::IllegalStateError::state(state));
             container_->freeze();
@@ -130,8 +130,8 @@ namespace yandex{namespace contest{namespace invoker
             BOOST_THROW_EXCEPTION(ProcessGroupHasNotStartedError());
         if (!container_)
             BOOST_THROW_EXCEPTION(ProcessGroupHasAlreadyTerminatedError());
-        const system::lxc::LXC::State state = container_->state();
-        if (state != system::lxc::LXC::State::FROZEN)
+        const system::lxc::Lxc::State state = container_->state();
+        if (state != system::lxc::Lxc::State::FROZEN)
             BOOST_THROW_EXCEPTION(ContainerIllegalStateError() <<
                                   system::lxc::IllegalStateError::state(state));
         container_->unfreeze();
@@ -160,8 +160,8 @@ namespace yandex{namespace contest{namespace invoker
             BOOST_THROW_EXCEPTION(ProcessGroupHasNotStartedError());
         if (!result_)
         {
-            const system::lxc::LXC::State state = container_->state();
-            if (state == system::lxc::LXC::State::FROZEN)
+            const system::lxc::Lxc::State state = container_->state();
+            if (state == system::lxc::Lxc::State::FROZEN)
                 BOOST_THROW_EXCEPTION(ContainerIllegalStateError() <<
                                       system::lxc::IllegalStateError::state(state));
             result_ = processGroup_.wait();

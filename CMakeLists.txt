@@ -29,7 +29,7 @@ bunsan_add_shared_library(${PROJECT_NAME}
     src/lib/filesystem/Device.cpp
     src/lib/filesystem/Directory.cpp
     src/lib/filesystem/SymLink.cpp
-    src/lib/filesystem/FIFO.cpp
+    src/lib/filesystem/Fifo.cpp
     src/lib/filesystem/CreateFile.cpp
     src/lib/filesystem/Operations.cpp
     src/lib/detail/execution/AsyncProcessGroup.cpp

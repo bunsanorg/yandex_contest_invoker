@@ -8,7 +8,7 @@
 
 namespace yandex{namespace contest{namespace invoker{namespace filesystem
 {
-    struct FIFO: File
+    struct Fifo: File
     {
         template <typename Archive>
         void serialize(Archive &ar, const unsigned int)

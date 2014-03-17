@@ -2,7 +2,7 @@
 
 #include <yandex/contest/invoker/filesystem/Device.hpp>
 #include <yandex/contest/invoker/filesystem/Directory.hpp>
-#include <yandex/contest/invoker/filesystem/FIFO.hpp>
+#include <yandex/contest/invoker/filesystem/Fifo.hpp>
 #include <yandex/contest/invoker/filesystem/File.hpp>
 #include <yandex/contest/invoker/filesystem/RegularFile.hpp>
 #include <yandex/contest/invoker/filesystem/SymLink.hpp>
@@ -55,7 +55,7 @@ namespace yandex{namespace contest{namespace invoker{namespace filesystem
             SymLink,
             Device,
             Directory,
-            FIFO
+            Fifo
         > Variant;
 
     private:
@@ -83,4 +83,4 @@ BUNSAN_CONFIG_EXPORT(
 
 BUNSAN_CONFIG_EXPORT(
     yandex::contest::invoker::filesystem::CreateFile::Variant,
-    yandex::contest::invoker::filesystem::FIFO, "FIFO")
+    yandex::contest::invoker::filesystem::Fifo, "Fifo")

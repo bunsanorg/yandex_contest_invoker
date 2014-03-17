@@ -18,5 +18,5 @@ namespace yandex{namespace contest{namespace invoker
     typedef detail::execution::AsyncProcessGroup::Pipe Pipe;
     typedef detail::execution::AsyncProcessGroup::AccessMode AccessMode;
     typedef detail::execution::AsyncProcessGroup::File File;
-    typedef detail::execution::AsyncProcessGroup::FDAlias FDAlias;
+    typedef detail::execution::AsyncProcessGroup::FdAlias FdAlias;
 }}}

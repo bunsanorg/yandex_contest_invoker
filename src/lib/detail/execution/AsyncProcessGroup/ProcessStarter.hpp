@@ -31,9 +31,9 @@ namespace yandex{namespace contest{namespace invoker{
         /// Never returns.
         void startChild() noexcept;
 
-        void childCloseFDs();
+        void childCloseFds();
 
-        void childSetUpFDs();
+        void childSetUpFds();
 
         void setUpControlGroup();
 
@@ -47,8 +47,8 @@ namespace yandex{namespace contest{namespace invoker{
         system::unistd::access::Id ownerId_;
         system::unistd::Exec exec_;
         std::unordered_map<int, int> descriptors_;
-        std::vector<system::unistd::Descriptor> allocatedFDs_;
-        std::unordered_set<int> childCloseFDs_;
+        std::vector<system::unistd::Descriptor> allocatedFds_;
+        std::unordered_set<int> childCloseFds_;
         boost::filesystem::path currentPath_;
         process::ResourceLimits resourceLimits_;
     };

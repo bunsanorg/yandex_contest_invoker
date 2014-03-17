@@ -289,7 +289,7 @@ BOOST_AUTO_TEST_CASE(stderr_to_stdout)
     const TMP tmpfile;
     process.executable = dir::tests::resources::source() / "stderr_to_stdout.py";
     process.descriptors[1] = PG::File(tmpfile.path());
-    process.descriptors[2] = PG::FDAlias(1);
+    process.descriptors[2] = PG::FdAlias(1);
     run();
     verifyPGR();
     verifyPRExit(0);
@@ -302,33 +302,33 @@ BOOST_AUTO_TEST_CASE(stderr_to_stdout)
 
 namespace
 {
-    bool checkUnresolvedFDAliasError(const ya::ResultError &e)
+    bool checkUnresolvedFdAliasError(const ya::ResultError &e)
     {
-        return std::string(e.what()).find("UnresolvedFDAliasError") != std::string::npos;
+        return std::string(e.what()).find("UnresolvedFdAliasError") != std::string::npos;
     }
 }
 
-BOOST_AUTO_TEST_CASE(UnresolvedFDAliasErrorTest)
+BOOST_AUTO_TEST_CASE(UnresolvedFdAliasErrorTest)
 {
     process.executable = "true";
-    process.descriptors[2] = PG::FDAlias(3);
-    BOOST_CHECK_EXCEPTION(run(), ya::ResultError, checkUnresolvedFDAliasError);
+    process.descriptors[2] = PG::FdAlias(3);
+    BOOST_CHECK_EXCEPTION(run(), ya::ResultError, checkUnresolvedFdAliasError);
 }
 
 namespace
 {
-    bool checkInvalidTargetFDAliasError(const ya::ResultError &e)
+    bool checkInvalidTargetFdAliasError(const ya::ResultError &e)
     {
-        return std::string(e.what()).find("InvalidTargetFDAliasError") != std::string::npos;
+        return std::string(e.what()).find("InvalidTargetFdAliasError") != std::string::npos;
     }
 }
 
-BOOST_AUTO_TEST_CASE(InvalidTargetFDAliasErrorTest)
+BOOST_AUTO_TEST_CASE(InvalidTargetFdAliasErrorTest)
 {
     process.executable = "true";
-    process.descriptors[2] = PG::FDAlias(3);
-    process.descriptors[3] = PG::FDAlias(1);
-    BOOST_CHECK_EXCEPTION(run(), ya::ResultError, checkInvalidTargetFDAliasError);
+    process.descriptors[2] = PG::FdAlias(3);
+    process.descriptors[3] = PG::FdAlias(1);
+    BOOST_CHECK_EXCEPTION(run(), ya::ResultError, checkInvalidTargetFdAliasError);
 }
 
 BOOST_AUTO_TEST_SUITE_END() // fd_alias

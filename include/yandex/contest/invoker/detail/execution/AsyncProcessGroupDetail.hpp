@@ -87,7 +87,7 @@ namespace yandex{namespace contest{namespace invoker{
         End writeEnd() const;
     };
 
-    struct FDAlias
+    struct FdAlias
     {
         template <typename Archive>
         void serialize(Archive &ar, const unsigned int)
@@ -95,16 +95,16 @@ namespace yandex{namespace contest{namespace invoker{
             ar & BOOST_SERIALIZATION_NVP(fd);
         }
 
-        explicit FDAlias(const int fd_=0);
+        explicit FdAlias(const int fd_=0);
 
-        FDAlias(const FDAlias &)=default;
-        FDAlias &operator=(const FDAlias &)=default;
+        FdAlias(const FdAlias &)=default;
+        FdAlias &operator=(const FdAlias &)=default;
 
         int fd;
     };
 
-    typedef boost::variant<Pipe::End, File, FDAlias> Stream;
-    typedef boost::variant<File, FDAlias> NonPipeStream;
+    typedef boost::variant<Pipe::End, File, FdAlias> Stream;
+    typedef boost::variant<File, FdAlias> NonPipeStream;
 
     struct Process
     {
@@ -193,7 +193,7 @@ BUNSAN_CONFIG_EXPORT(
     yandex::contest::invoker::
         detail::execution::async_process_group_detail::Stream,
     yandex::contest::invoker::
-        detail::execution::async_process_group_detail::FDAlias, "FDAlias")
+        detail::execution::async_process_group_detail::FdAlias, "FdAlias")
 
 BUNSAN_CONFIG_EXPORT(
     yandex::contest::invoker::
@@ -205,4 +205,4 @@ BUNSAN_CONFIG_EXPORT(
     yandex::contest::invoker::
         detail::execution::async_process_group_detail::NonPipeStream,
     yandex::contest::invoker::
-        detail::execution::async_process_group_detail::FDAlias, "FDAlias")
+        detail::execution::async_process_group_detail::FdAlias, "FdAlias")

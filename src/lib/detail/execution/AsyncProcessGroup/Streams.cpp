@@ -25,8 +25,8 @@ namespace yandex{namespace contest{namespace invoker{
             break;
         }
         const boost::filesystem::path path = boost::filesystem::absolute(file.path, currentPath_);
-        allocatedFDs_->push_back(system::unistd::open(path, flags, 0666));
-        return allocatedFDs_->back().get();
+        allocatedFds_->push_back(system::unistd::open(path, flags, 0666));
+        return allocatedFds_->back().get();
     }
 
     int Streams::operator()(const AsyncProcessGroup::Pipe::End &pipeEnd) const
@@ -46,20 +46,20 @@ namespace yandex{namespace contest{namespace invoker{
         return -1;
     }
 
-    int Streams::operator()(const AsyncProcessGroup::FDAlias &fdAlias) const
+    int Streams::operator()(const AsyncProcessGroup::FdAlias &fdAlias) const
     {
         const auto iter = descriptors_->find(fdAlias.fd);
         BOOST_ASSERT(iter != descriptors_->end());
-        allocatedFDs_->push_back(system::unistd::dup(iter->second));
-        return allocatedFDs_->back().get();
+        allocatedFds_->push_back(system::unistd::dup(iter->second));
+        return allocatedFds_->back().get();
     }
 
     bool Streams::isAlias (const AsyncProcessGroup::Stream &stream) const
     {
-        return boost::get<const AsyncProcessGroup::FDAlias>(&stream);
+        return boost::get<const AsyncProcessGroup::FdAlias>(&stream);
     }
 
-    int Streams::getFD(const AsyncProcessGroup::Stream &stream) const
+    int Streams::getFd(const AsyncProcessGroup::Stream &stream) const
     {
         return boost::apply_visitor(*this, stream);
     }

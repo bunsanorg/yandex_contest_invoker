@@ -25,14 +25,14 @@ namespace yandex{namespace contest{namespace invoker{
 {
     const int SIG_START_FAILED = SIGUSR2;
 
-    struct FDAliasError: virtual Error
+    struct FdAliasError: virtual Error
     {
         typedef boost::error_info<struct fdTag, int> fd;
     };
 
-    struct UnresolvedFDAliasError: virtual FDAliasError {};
+    struct UnresolvedFdAliasError: virtual FdAliasError {};
 
-    struct InvalidTargetFDAliasError: virtual FDAliasError {};
+    struct InvalidTargetFdAliasError: virtual FdAliasError {};
 
     ProcessStarter::ProcessStarter(system::cgroup::ControlGroup &controlGroup,
                                    const AsyncProcessGroup::Process &process,
@@ -45,29 +45,29 @@ namespace yandex{namespace contest{namespace invoker{
     {
         setUpControlGroup();
         // TODO check that 0, 1, 2 are allocated
-        std::unordered_set<int> childUsesFDs;
-        const Streams streams(pipes, allocatedFDs_, process.currentPath, descriptors_);
+        std::unordered_set<int> childUsesFds;
+        const Streams streams(pipes, allocatedFds_, process.currentPath, descriptors_);
         auto addStream =
-            [this, &process, &streams, &childUsesFDs](const std::pair<int, Stream> &fdStream,
+            [this, &process, &streams, &childUsesFds](const std::pair<int, Stream> &fdStream,
                                                       const bool isAlias)
             {
                 if (isAlias)
                 {
-                    const AsyncProcessGroup::FDAlias *const fdAlias =
-                        boost::get<const AsyncProcessGroup::FDAlias>(&fdStream.second);
+                    const AsyncProcessGroup::FdAlias *const fdAlias =
+                        boost::get<const AsyncProcessGroup::FdAlias>(&fdStream.second);
                     BOOST_ASSERT(fdAlias);
                     auto iter = process.descriptors.find(fdAlias->fd);
                     if (iter == process.descriptors.end())
-                        BOOST_THROW_EXCEPTION(UnresolvedFDAliasError() <<
-                                              FDAliasError::fd(fdAlias->fd));
+                        BOOST_THROW_EXCEPTION(UnresolvedFdAliasError() <<
+                                              FdAliasError::fd(fdAlias->fd));
                     if (streams.isAlias(iter->second))
-                        BOOST_THROW_EXCEPTION(InvalidTargetFDAliasError() <<
-                                              FDAliasError::fd(fdAlias->fd));
+                        BOOST_THROW_EXCEPTION(InvalidTargetFdAliasError() <<
+                                              FdAliasError::fd(fdAlias->fd));
                 }
-                const int fd = streams.getFD(fdStream.second);
+                const int fd = streams.getFd(fdStream.second);
                 descriptors_[fdStream.first] = fd;
-                BOOST_ASSERT(childUsesFDs.find(fd) == childUsesFDs.end());
-                childUsesFDs.insert(fd);
+                BOOST_ASSERT(childUsesFds.find(fd) == childUsesFds.end());
+                childUsesFds.insert(fd);
             };
         for (const auto &fdStream: process.descriptors)
         {
@@ -83,17 +83,17 @@ namespace yandex{namespace contest{namespace invoker{
         // to interfere with parent
         // so inherited fds should be closed
         for (int fd = 0; fd <= 2; ++fd)
-            childCloseFDs_.insert(fd);
+            childCloseFds_.insert(fd);
         // close all not used fds
         // note: all files are used, so we will check only pipes
         for (const system::unistd::Pipe &pipe: pipes)
         {
             BOOST_ASSERT(pipe.readEndIsOpened());
-            if (childUsesFDs.find(pipe.readEnd()) == childUsesFDs.end())
-                childCloseFDs_.insert(pipe.readEnd());
+            if (childUsesFds.find(pipe.readEnd()) == childUsesFds.end())
+                childCloseFds_.insert(pipe.readEnd());
             BOOST_ASSERT(pipe.writeEndIsOpened());
-            if (childUsesFDs.find(pipe.writeEnd()) == childUsesFDs.end())
-                childCloseFDs_.insert(pipe.writeEnd());
+            if (childUsesFds.find(pipe.writeEnd()) == childUsesFds.end())
+                childCloseFds_.insert(pipe.writeEnd());
         }
     }
 
@@ -124,7 +124,7 @@ namespace yandex{namespace contest{namespace invoker{
                 const LogPointer log(new contest::detail::NullLog);
                 Log::registerInstance(log);
             }
-            childSetUpFDs();
+            childSetUpFds();
             // TODO verify has permissions to execute
             childSetUpResourceLimits();
             // note: we change current path before privileges drop
@@ -151,9 +151,9 @@ namespace yandex{namespace contest{namespace invoker{
         }
     }
 
-    void ProcessStarter::childCloseFDs()
+    void ProcessStarter::childCloseFds()
     {
-        for (const int fd: childCloseFDs_)
+        for (const int fd: childCloseFds_)
             system::unistd::close(fd);
     }
 
@@ -161,92 +161,92 @@ namespace yandex{namespace contest{namespace invoker{
     {
     public:
         DescriptorMonitor():
-            maxFD_(system::unistd::getdtablesize()),
-            requiredFDs_(maxFD_),
-            usedFDs_(maxFD_),
-            freeFDs_(maxFD_),
-            fdMap_(maxFD_)
+            maxFd_(system::unistd::getdtablesize()),
+            requiredFds_(maxFd_),
+            usedFds_(maxFd_),
+            freeFds_(maxFd_),
+            fdMap_(maxFd_)
         {
-            freeFDs_.flip(); // freeFDs = "111...11";
+            freeFds_.flip(); // freeFds = "111...11";
         }
 
         void setRequired(const int fd)
         {
-            requiredFDs_.set(fd);
-            freeFDs_.reset(fd);
+            requiredFds_.set(fd);
+            freeFds_.reset(fd);
         }
 
         void setUsed(const int fd)
         {
-            usedFDs_.set(fd);
-            freeFDs_.reset(fd);
+            usedFds_.set(fd);
+            freeFds_.reset(fd);
         }
 
-        void closeFD(const int fd)
+        void closeFd(const int fd)
         {
-            BOOST_ASSERT(usedFDs_.test(fd));
+            BOOST_ASSERT(usedFds_.test(fd));
             system::unistd::close(fd);
-            usedFDs_.reset(fd);
-            freeFDs_.set(!requiredFDs_.test(fd));
+            usedFds_.reset(fd);
+            freeFds_.set(!requiredFds_.test(fd));
         }
 
-        void copyFD(const int oldfd, const int newfd)
+        void copyFd(const int oldfd, const int newfd)
         {
-            BOOST_ASSERT(freeFDs_.test(newfd) || requiredFDs_.test(newfd));
+            BOOST_ASSERT(freeFds_.test(newfd) || requiredFds_.test(newfd));
             system::unistd::dup2(oldfd, newfd);
-            freeFDs_.reset(newfd);
-            usedFDs_.set(newfd);
+            freeFds_.reset(newfd);
+            usedFds_.set(newfd);
         }
 
-        void moveFD(const int oldfd, const int newfd)
+        void moveFd(const int oldfd, const int newfd)
         {
-            copyFD(oldfd, newfd);
-            closeFD(oldfd);
+            copyFd(oldfd, newfd);
+            closeFd(oldfd);
         }
 
-        void freeRequiredFDs()
+        void freeRequiredFds()
         {
-            boost::dynamic_bitset<> mustBeFreedFDs = usedFDs_ & requiredFDs_;
-            for (std::size_t i = mustBeFreedFDs.find_first(), freeFD = freeFDs_.find_first();
+            boost::dynamic_bitset<> mustBeFreedFds = usedFds_ & requiredFds_;
+            for (std::size_t i = mustBeFreedFds.find_first(), freeFd = freeFds_.find_first();
                 i != boost::dynamic_bitset<>::npos;
-                i = mustBeFreedFDs.find_next(i), freeFD = freeFDs_.find_next(freeFD))
+                i = mustBeFreedFds.find_next(i), freeFd = freeFds_.find_next(freeFd))
             {
-                BOOST_ASSERT(freeFD != boost::dynamic_bitset<>::npos);
-                moveFD(i, freeFD);
-                mustBeFreedFDs.reset(i);
-                fdMap_[i] = freeFD;
-                BOOST_ASSERT(!requiredFDs_.test(freeFD));
+                BOOST_ASSERT(freeFd != boost::dynamic_bitset<>::npos);
+                moveFd(i, freeFd);
+                mustBeFreedFds.reset(i);
+                fdMap_[i] = freeFd;
+                BOOST_ASSERT(!requiredFds_.test(freeFd));
             }
-            BOOST_ASSERT(mustBeFreedFDs.none());
-            BOOST_ASSERT(!usedFDs_.intersects(requiredFDs_));
+            BOOST_ASSERT(mustBeFreedFds.none());
+            BOOST_ASSERT(!usedFds_.intersects(requiredFds_));
         }
 
-        int getMappedFD(const int fd)
+        int getMappedFd(const int fd)
         {
             BOOST_ASSERT(0 < fd && static_cast<unsigned>(fd) < fdMap_.size());
             return fdMap_[fd] ? fdMap_[fd] : fd;
         }
 
-        void moveMappedFD(const int oldfd, const int newfd)
+        void moveMappedFd(const int oldfd, const int newfd)
         {
-            moveFD(getMappedFD(oldfd), newfd);
+            moveFd(getMappedFd(oldfd), newfd);
         }
 
         ~DescriptorMonitor()
         {
-            BOOST_ASSERT(usedFDs_ == requiredFDs_);
+            BOOST_ASSERT(usedFds_ == requiredFds_);
         }
 
     private:
-        const unsigned maxFD_;
-        boost::dynamic_bitset<> requiredFDs_, usedFDs_, freeFDs_;
+        const unsigned maxFd_;
+        boost::dynamic_bitset<> requiredFds_, usedFds_, freeFds_;
         std::vector<int> fdMap_;
     };
 
-    void ProcessStarter::childSetUpFDs()
+    void ProcessStarter::childSetUpFds()
     {
         // close unused descriptors
-        childCloseFDs();
+        childCloseFds();
         /*
          * Here we need to move allocated resources
          * to descriptors that are not required
@@ -258,9 +258,9 @@ namespace yandex{namespace contest{namespace invoker{
             fdMonitor.setRequired(fdStream.first);
             fdMonitor.setUsed(fdStream.second);
         }
-        fdMonitor.freeRequiredFDs();
+        fdMonitor.freeRequiredFds();
         for (const auto &fdStream: descriptors_)
-            fdMonitor.moveMappedFD(fdStream.second, fdStream.first);
+            fdMonitor.moveMappedFd(fdStream.second, fdStream.first);
     }
 
     void ProcessStarter::setUpControlGroup()

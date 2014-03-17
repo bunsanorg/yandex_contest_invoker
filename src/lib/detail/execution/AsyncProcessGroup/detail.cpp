@@ -25,5 +25,5 @@ namespace yandex{namespace contest{namespace invoker{
         return end(End::WRITE);
     }
 
-    FDAlias::FDAlias(const int fd_): fd(fd_) {}
+    FdAlias::FdAlias(const int fd_): fd(fd_) {}
 }}}}}}

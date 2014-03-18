@@ -1,5 +1,6 @@
 #pragma once
 
+#include <yandex/contest/invoker/ContainerError.hpp>
 #include <yandex/contest/invoker/detail/CommonProcessTypedefs.hpp>
 #include <yandex/contest/invoker/detail/execution/AsyncProcessGroup.hpp>
 #include <yandex/contest/invoker/Forward.hpp>
@@ -14,6 +15,16 @@
 
 namespace yandex{namespace contest{namespace invoker
 {
+    struct ProcessError: virtual ContainerError {};
+
+    struct ProcessDescriptorError: virtual ProcessError
+    {
+        typedef boost::error_info<struct descriptorTag, int> descriptor;
+    };
+
+    struct ProcessDescriptorOutOfRangeError:
+        virtual ProcessDescriptorError {};
+
     namespace process
     {
         class DefaultSettings;
@@ -124,7 +135,8 @@ namespace yandex{namespace contest{namespace invoker
         /*!
          * \brief Get assigned stream.
          *
-         * \throws std::out_of_range if no assigned stream exists.
+         * \throws ProcessDescriptorOutOfRangeError
+         * if no assigned stream exists.
          */
         Stream stream(const int descriptor) const;
 

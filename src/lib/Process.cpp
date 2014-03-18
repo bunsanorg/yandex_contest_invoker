@@ -136,7 +136,19 @@ namespace yandex{namespace contest{namespace invoker
 
     Stream Process::stream(const int descriptor) const
     {
-        return processGroup_->processTask(id_).descriptors.at(descriptor);
+        const auto iter =
+            processGroup_->processTask(id_).descriptors.find(descriptor);
+
+        if (iter == processGroup_->processTask(id_).descriptors.end())
+        {
+            BOOST_THROW_EXCEPTION(
+                ProcessDescriptorOutOfRangeError() <<
+                ProcessDescriptorOutOfRangeError::descriptor(descriptor));
+        }
+        else
+        {
+            return iter->second;
+        }
     }
 
     void Process::closeStream(const int descriptor)

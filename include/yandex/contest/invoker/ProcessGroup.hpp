@@ -33,6 +33,21 @@ namespace yandex{namespace contest{namespace invoker
     struct ProcessGroupHasNotTerminatedError:
         virtual ProcessGroupIllegalStateError {};
 
+    struct ProcessGroupNotifierError:
+        virtual ProcessGroupError
+    {
+        typedef boost::error_info<
+            struct notifierIdTag,
+            std::size_t
+        > notifierId;
+    };
+
+    struct ProcessGroupNotifierOutOfRangeError:
+        virtual ProcessGroupNotifierError {};
+
+    struct ProcessGroupNotifierIllegalSinkError:
+        virtual ProcessGroupNotifierError {};
+
     namespace process_group
     {
         class DefaultSettings;
@@ -142,6 +157,17 @@ namespace yandex{namespace contest{namespace invoker
 
         const ResourceLimits &resourceLimits() const;
         void setResourceLimits(const ResourceLimits &resourceLimits);
+
+        /*!
+         * \brief Process with other pipe end will receive
+         * notifications that can be accessed by Notifier.
+         *
+         * \throws ProcessGroupNotifierIllegalSinkError
+         * if pipeEnd.end != WRITE
+         */
+        Pipe::End notifier(const std::size_t notifierId) const;
+        void setNotifier(const std::size_t notifierId, const Pipe::End &pipeEnd);
+        std::size_t addNotifier(const Pipe::End &pipeEnd);
 
         /*!
          * \brief Default settings for process.

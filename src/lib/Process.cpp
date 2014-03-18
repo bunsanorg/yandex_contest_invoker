@@ -107,6 +107,16 @@ namespace yandex{namespace contest{namespace invoker
         processGroup_->processTask(id_).ownerId = ownerId;
     }
 
+    const std::string &Process::name() const
+    {
+        return processGroup_->processTask(id_).name;
+    }
+
+    void Process::setName(const std::string &name)
+    {
+        processGroup_->processTask(id_).name = name;
+    }
+
     void Process::setStream(const int descriptor, const Stream &stream)
     {
         processGroup_->processTask(id_).descriptors[descriptor] = stream;

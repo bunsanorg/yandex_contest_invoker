@@ -21,6 +21,7 @@ bunsan_add_shared_library(${PROJECT_NAME}
     src/lib/Process.cpp
     src/lib/ContainerConfig.cpp
     src/lib/ControlProcessConfig.cpp
+    src/lib/Notifier.cpp
     src/lib/process_group/DefaultSettings.cpp
     src/lib/process/Result.cpp
     src/lib/process/DefaultSettings.cpp

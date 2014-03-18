@@ -113,6 +113,14 @@ namespace yandex{namespace contest{namespace invoker
         void setOwnerId(const system::unistd::access::Id &ownerId);
 
         /*!
+         * \brief Name is used in Notifier's events
+         *
+         * \see notifier::ProcessId
+         */
+        const std::string &name() const;
+        void setName(const std::string &name);
+
+        /*!
          * \return Process::Result previously set
          * by ProcessGroup::poll() or ProcessGroup::wait().
          *

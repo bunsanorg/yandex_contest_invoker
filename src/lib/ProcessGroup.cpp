@@ -201,6 +201,39 @@ namespace yandex{namespace contest{namespace invoker
         task_.resourceLimits = resourceLimits;
     }
 
+    Pipe::End ProcessGroup::notifier(const std::size_t notifierId) const
+    {
+        if (notifierId >= task_.notifiers.size())
+        {
+            BOOST_THROW_EXCEPTION(
+                ProcessGroupNotifierOutOfRangeError() <<
+                ProcessGroupNotifierOutOfRangeError::notifierId(notifierId));
+        }
+        return task_.notifiers[notifierId];
+    }
+
+    void ProcessGroup::setNotifier(
+        const std::size_t notifierId,
+        const Pipe::End &pipeEnd)
+    {
+        if (pipeEnd.end != Pipe::End::WRITE)
+            BOOST_THROW_EXCEPTION(ProcessGroupNotifierIllegalSinkError());
+        if (notifierId >= task_.notifiers.size())
+        {
+            BOOST_THROW_EXCEPTION(
+                ProcessGroupNotifierOutOfRangeError() <<
+                ProcessGroupNotifierOutOfRangeError::notifierId(notifierId));
+        }
+        task_.notifiers[notifierId] = pipeEnd;
+    }
+
+    std::size_t ProcessGroup::addNotifier(const Pipe::End &pipeEnd)
+    {
+        const std::size_t notifierId = task_.notifiers.size();
+        task_.notifiers.push_back(pipeEnd);
+        return notifierId;
+    }
+
     const process::DefaultSettings &ProcessGroup::processDefaultSettings() const
     {
         return processDefaultSettings_;

@@ -106,6 +106,8 @@ namespace yandex{namespace contest{namespace invoker{
     typedef boost::variant<Pipe::End, File, FdAlias> Stream;
     typedef boost::variant<File, FdAlias> NonPipeStream;
 
+    typedef std::unordered_map<int, Stream> DescriptorMap;
+
     struct Process
     {
         friend class boost::serialization::access;
@@ -113,6 +115,7 @@ namespace yandex{namespace contest{namespace invoker{
         template <typename Archive>
         void serialize(Archive &ar, const unsigned int)
         {
+            ar & BOOST_SERIALIZATION_NVP(name);
             ar & BOOST_SERIALIZATION_NVP(descriptors);
             ar & BOOST_SERIALIZATION_NVP(resourceLimits);
             ar & BOOST_SERIALIZATION_NVP(executable);
@@ -124,8 +127,7 @@ namespace yandex{namespace contest{namespace invoker{
             ar & BOOST_SERIALIZATION_NVP(terminateGroupOnCrash);
         }
 
-        typedef std::unordered_map<int, Stream> DescriptorMap;
-
+        std::string name;
         DescriptorMap descriptors;
         process::ResourceLimits resourceLimits;
         boost::filesystem::path executable;
@@ -146,6 +148,7 @@ namespace yandex{namespace contest{namespace invoker{
         {
             ar & BOOST_SERIALIZATION_NVP(processes);
             ar & BOOST_SERIALIZATION_NVP(pipesNumber);
+            ar & BOOST_SERIALIZATION_NVP(notifiers);
             ar & BOOST_SERIALIZATION_NVP(resourceLimits);
         }
 
@@ -154,6 +157,8 @@ namespace yandex{namespace contest{namespace invoker{
         // we have nothing to store here
         // we need to know only number of pipes to be allocated
         std::size_t pipesNumber = 0;
+
+        std::vector<Pipe::End> notifiers;
 
         process_group::ResourceLimits resourceLimits;
     };

@@ -12,7 +12,9 @@ namespace yandex{namespace contest{namespace invoker
 {
     YANDEX_CONTEST_INTRUSIVE_PTR_DEFINE(Process)
 
-    ProcessPointer Process::create(const ProcessGroupPointer &processGroup, const std::size_t id)
+    ProcessPointer Process::create(
+        const ProcessGroupPointer &processGroup,
+        const std::size_t id)
     {
         ProcessPointer ret(new Process(processGroup, id));
         processGroup->processDefaultSettings().setUpProcess(ret);
@@ -36,9 +38,11 @@ namespace yandex{namespace contest{namespace invoker
         return processGroup_->processTask(id_).groupWaitsForTermination;
     }
 
-    void Process::setGroupWaitsForTermination(const bool groupWaitsForTermination)
+    void Process::setGroupWaitsForTermination(
+        const bool groupWaitsForTermination)
     {
-        processGroup_->processTask(id_).groupWaitsForTermination = groupWaitsForTermination;
+        processGroup_->processTask(id_).groupWaitsForTermination =
+            groupWaitsForTermination;
     }
 
     bool Process::terminateGroupOnCrash() const
@@ -48,7 +52,8 @@ namespace yandex{namespace contest{namespace invoker
 
     void Process::setTerminateGroupOnCrash(const bool terminateGroupOnCrash)
     {
-        processGroup_->processTask(id_).terminateGroupOnCrash = terminateGroupOnCrash;
+        processGroup_->processTask(id_).terminateGroupOnCrash =
+            terminateGroupOnCrash;
     }
 
     const ProcessArguments &Process::arguments() const
@@ -86,7 +91,8 @@ namespace yandex{namespace contest{namespace invoker
         return processGroup_->processTask(id_).resourceLimits;
     }
 
-    void Process::setResourceLimits(const Process::ResourceLimits &resourceLimits)
+    void Process::setResourceLimits(
+        const Process::ResourceLimits &resourceLimits)
     {
         processGroup_->processTask(id_).resourceLimits = resourceLimits;
     }
@@ -118,9 +124,14 @@ namespace yandex{namespace contest{namespace invoker
         };
     }
 
-    void Process::setNonPipeStream(const int descriptor, const NonPipeStream &stream)
+    void Process::setNonPipeStream(
+        const int descriptor,
+        const NonPipeStream &stream)
     {
-        setStream(descriptor, boost::apply_visitor(NonPipeStreamToStreamVisitor(), stream));
+        setStream(
+            descriptor,
+            boost::apply_visitor(NonPipeStreamToStreamVisitor(), stream)
+        );
     }
 
     Stream Process::stream(const int descriptor) const
@@ -135,7 +146,8 @@ namespace yandex{namespace contest{namespace invoker
 
     bool Process::hasStream(const int descriptor) const
     {
-        const auto iter = processGroup_->processTask(id_).descriptors.find(descriptor);
+        const auto iter =
+            processGroup_->processTask(id_).descriptors.find(descriptor);
         return iter != processGroup_->processTask(id_).descriptors.end();
     }
 

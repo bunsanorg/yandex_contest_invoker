@@ -35,7 +35,8 @@ namespace yandex{namespace contest{namespace invoker
     {
     }
 
-    ProcessPointer ProcessGroup::createProcess(const boost::filesystem::path &executable)
+    ProcessPointer ProcessGroup::createProcess(
+        const boost::filesystem::path &executable)
     {
         if (processGroup_)
             BOOST_THROW_EXCEPTION(ProcessGroupHasAlreadyStartedError());
@@ -76,7 +77,8 @@ namespace yandex{namespace contest{namespace invoker
         }
         container_.reset();
         result_ = detail::execution::AsyncProcessGroup::Result();
-        result_->processGroupResult.completionStatus = ProcessGroup::Result::CompletionStatus::STOPPED;
+        result_->processGroupResult.completionStatus =
+            ProcessGroup::Result::CompletionStatus::STOPPED;
         result_->processResults.resize(task_.processes.size());
         for (Process::Result &pr: result_->processResults)
             pr.completionStatus = Process::Result::CompletionStatus::STOPPED;
@@ -103,21 +105,24 @@ namespace yandex{namespace contest{namespace invoker
                 if (poll())
                 {
                     // process has started and terminated while we were sleeping
-                    BOOST_THROW_EXCEPTION(ProcessGroupHasAlreadyTerminatedError());
+                    BOOST_THROW_EXCEPTION(
+                        ProcessGroupHasAlreadyTerminatedError());
                 }
                 // FIXME hardcode
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
             }
             const system::lxc::Lxc::State state = container_->state();
             if (state != system::lxc::Lxc::State::RUNNING)
-                BOOST_THROW_EXCEPTION(ContainerIllegalStateError() <<
-                                      system::lxc::IllegalStateError::state(state));
+                BOOST_THROW_EXCEPTION(
+                    ContainerIllegalStateError() <<
+                    system::lxc::IllegalStateError::state(state));
             container_->freeze();
         }
         catch (system::lxc::UtilityError &e)
         {
             if (poll())
-                BOOST_THROW_EXCEPTION(ProcessGroupHasAlreadyTerminatedError());
+                BOOST_THROW_EXCEPTION(
+                    ProcessGroupHasAlreadyTerminatedError());
             else
                 throw;
         }
@@ -132,8 +137,9 @@ namespace yandex{namespace contest{namespace invoker
             BOOST_THROW_EXCEPTION(ProcessGroupHasAlreadyTerminatedError());
         const system::lxc::Lxc::State state = container_->state();
         if (state != system::lxc::Lxc::State::FROZEN)
-            BOOST_THROW_EXCEPTION(ContainerIllegalStateError() <<
-                                  system::lxc::IllegalStateError::state(state));
+            BOOST_THROW_EXCEPTION(
+                ContainerIllegalStateError() <<
+                system::lxc::IllegalStateError::state(state));
         container_->unfreeze();
     }
 
@@ -162,8 +168,9 @@ namespace yandex{namespace contest{namespace invoker
         {
             const system::lxc::Lxc::State state = container_->state();
             if (state == system::lxc::Lxc::State::FROZEN)
-                BOOST_THROW_EXCEPTION(ContainerIllegalStateError() <<
-                                      system::lxc::IllegalStateError::state(state));
+                BOOST_THROW_EXCEPTION(
+                    ContainerIllegalStateError() <<
+                    system::lxc::IllegalStateError::state(state));
             result_ = processGroup_.wait();
             container_.reset();
         }
@@ -188,7 +195,8 @@ namespace yandex{namespace contest{namespace invoker
         return task_.resourceLimits;
     }
 
-    void ProcessGroup::setResourceLimits(const ProcessGroup::ResourceLimits &resourceLimits)
+    void ProcessGroup::setResourceLimits(
+        const ProcessGroup::ResourceLimits &resourceLimits)
     {
         task_.resourceLimits = resourceLimits;
     }

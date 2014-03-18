@@ -46,10 +46,16 @@ namespace yandex{namespace contest{namespace invoker{
         setUpControlGroup();
         // TODO check that 0, 1, 2 are allocated
         std::unordered_set<int> childUsesFds;
-        const Streams streams(pipes, allocatedFds_, process.currentPath, descriptors_);
+        const Streams streams(
+            pipes,
+            allocatedFds_,
+            process.currentPath,
+            descriptors_
+        );
         auto addStream =
-            [this, &process, &streams, &childUsesFds](const std::pair<int, Stream> &fdStream,
-                                                      const bool isAlias)
+            [this, &process, &streams, &childUsesFds](
+                const std::pair<int, Stream> &fdStream,
+                const bool isAlias)
             {
                 if (isAlias)
                 {
@@ -207,7 +213,8 @@ namespace yandex{namespace contest{namespace invoker{
         void freeRequiredFds()
         {
             boost::dynamic_bitset<> mustBeFreedFds = usedFds_ & requiredFds_;
-            for (std::size_t i = mustBeFreedFds.find_first(), freeFd = freeFds_.find_first();
+            for (std::size_t i = mustBeFreedFds.find_first(),
+                             freeFd = freeFds_.find_first();
                 i != boost::dynamic_bitset<>::npos;
                 i = mustBeFreedFds.find_next(i), freeFd = freeFds_.find_next(freeFd))
             {

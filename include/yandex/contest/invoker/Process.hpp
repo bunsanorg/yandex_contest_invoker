@@ -39,7 +39,9 @@ namespace yandex{namespace contest{namespace invoker
          * \brief Create new Process, associated with processGroup.
          * TODO: lifetime
          */
-        static ProcessPointer create(const ProcessGroupPointer &processGroup, const Id id);
+        static ProcessPointer create(
+            const ProcessGroupPointer &processGroup,
+            const Id id);
 
         const boost::filesystem::path &executable() const;
 
@@ -54,7 +56,8 @@ namespace yandex{namespace contest{namespace invoker
          * \see groupWaitsForTermination()
          * \note Default value is true.
          */
-        void setGroupWaitsForTermination(const bool groupWaitsForTermination=true);
+        void setGroupWaitsForTermination(
+            const bool groupWaitsForTermination=true);
 
         /*!
          * ProcessGroup will terminate
@@ -67,7 +70,8 @@ namespace yandex{namespace contest{namespace invoker
          * \see terminateGroupOnCrash()
          * \note Default value is true.
          */
-        void setTerminateGroupOnCrash(const bool terminateGroupOnCrash=true);
+        void setTerminateGroupOnCrash(
+            const bool terminateGroupOnCrash=true);
 
         const ProcessArguments &arguments() const;
         void setArguments(const ProcessArguments &arguments);
@@ -76,9 +80,13 @@ namespace yandex{namespace contest{namespace invoker
         template <typename Arg0, typename Arg1, typename ... Args>
         void setArguments(Arg0 &&arg0, Arg1 &&arg1, Args &&...args)
         {
-            setArguments(system::execution::collect(std::forward<Arg0>(arg0),
-                                                    std::forward<Arg1>(arg1),
-                                                    std::forward<Args>(args)...));
+            setArguments(
+                system::execution::collect(
+                    std::forward<Arg0>(arg0),
+                    std::forward<Arg1>(arg1),
+                    std::forward<Args>(args)...
+                )
+            );
         }
 
         const boost::filesystem::path &currentPath() const;
@@ -94,7 +102,8 @@ namespace yandex{namespace contest{namespace invoker
         void setOwnerId(const system::unistd::access::Id &ownerId);
 
         /*!
-         * \return Process::Result previously set by ProcessGroup::poll() or ProcessGroup::wait().
+         * \return Process::Result previously set
+         * by ProcessGroup::poll() or ProcessGroup::wait().
          *
          * \throws ContainerIllegalStateError if process result was not set.
          */
@@ -108,7 +117,9 @@ namespace yandex{namespace contest{namespace invoker
         /*!
          * \brief Assign descriptor to non-pipe stream.
          */
-        void setNonPipeStream(const int descriptor, const NonPipeStream &stream);
+        void setNonPipeStream(
+            const int descriptor,
+            const NonPipeStream &stream);
 
         /*!
          * \brief Get assigned stream.
@@ -143,7 +154,9 @@ namespace yandex{namespace contest{namespace invoker
          * \warning Constructor is private because
          * class uses own reference-counting mechanism.
          */
-        explicit Process(const ProcessGroupPointer &processGroup, const Id id);
+        explicit Process(
+            const ProcessGroupPointer &processGroup,
+            const Id id);
 
     private:
         ProcessGroupPointer processGroup_;

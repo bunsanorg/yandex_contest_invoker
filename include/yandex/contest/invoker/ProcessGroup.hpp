@@ -18,15 +18,20 @@ namespace yandex{namespace contest{namespace invoker
     struct ProcessGroupError: virtual ContainerError {};
 
     struct ProcessGroupIllegalStateError:
-        virtual ProcessGroupError, virtual ContainerIllegalStateError {};
+        virtual ProcessGroupError,
+        virtual ContainerIllegalStateError {};
 
-    struct ProcessGroupHasAlreadyStartedError: virtual ProcessGroupIllegalStateError {};
+    struct ProcessGroupHasAlreadyStartedError:
+        virtual ProcessGroupIllegalStateError {};
 
-    struct ProcessGroupHasNotStartedError: virtual ProcessGroupIllegalStateError {};
+    struct ProcessGroupHasNotStartedError:
+        virtual ProcessGroupIllegalStateError {};
 
-    struct ProcessGroupHasAlreadyTerminatedError: virtual ProcessGroupIllegalStateError {};
+    struct ProcessGroupHasAlreadyTerminatedError:
+        virtual ProcessGroupIllegalStateError {};
 
-    struct ProcessGroupHasNotTerminatedError: virtual ProcessGroupIllegalStateError {};
+    struct ProcessGroupHasNotTerminatedError:
+        virtual ProcessGroupIllegalStateError {};
 
     namespace process_group
     {
@@ -51,14 +56,16 @@ namespace yandex{namespace contest{namespace invoker
          * It is not possible to start multiple process groups,
          * associated with the same container.
          *
-         * \throws ProcessGroupIllegalStateError if any other process group is running.
+         * \throws ProcessGroupIllegalStateError
+         * if any other process group is running.
          */
         void start();
 
         /*!
          * \brief Stop all processes, started by process group.
          *
-         * This function will kill all associated processes and controlling process.
+         * This function kills all associated processes
+         * and controlling process.
          * All CompletionStatus fields will be set STOPPED.
          */
         void stop();
@@ -72,9 +79,11 @@ namespace yandex{namespace contest{namespace invoker
         const Result &synchronizedCall();
 
         /*!
-         * \brief Freeze all running processes, associated with process group.
+         * \brief Freeze all running processes,
+         * associated with process group.
          *
-         * Processes will be blocked until they are explicitly thawed by the unfreeze().
+         * Processes will be blocked until
+         * they are explicitly thawed by the unfreeze().
          *
          * \see unfreeze()
          */
@@ -106,7 +115,8 @@ namespace yandex{namespace contest{namespace invoker
         /*!
          * \return ProcessGroupResult previously set by poll() or wait().
          *
-         * \throws ProcessGroupIllegalStateError if process group result was not set.
+         * \throws ProcessGroupIllegalStateError
+         * if process group result was not set.
          *
          * \deprecated We can use wait() instead.
          */
@@ -115,7 +125,8 @@ namespace yandex{namespace contest{namespace invoker
         /*!
          * \brief Create new process, associated with ProcessGroup.
          *
-         * \throws ProcessGroupIllegalStateError if process group has already started.
+         * \throws ProcessGroupIllegalStateError
+         * if process group has already started.
          *
          * \see start()
          */
@@ -124,7 +135,8 @@ namespace yandex{namespace contest{namespace invoker
         /*!
          * \brief Create new pipe, associated with ProcessGroup.
          *
-         * \throws ProcessGroupIllegalStateError if process group has already started.
+         * \throws ProcessGroupIllegalStateError
+         * if process group has already started.
          */
         Pipe createPipe();
 
@@ -145,7 +157,8 @@ namespace yandex{namespace contest{namespace invoker
          *
          * \see processDefaultSettings()
          */
-        void setProcessDefaultSettings(const process::DefaultSettings &processDefaultSettings);
+        void setProcessDefaultSettings(
+            const process::DefaultSettings &processDefaultSettings);
 
     private:
         /*!

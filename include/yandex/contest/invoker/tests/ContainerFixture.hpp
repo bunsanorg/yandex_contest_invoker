@@ -18,7 +18,9 @@ struct ContainerFixture
     {
     }
 
-    ya::ProcessPointer p(const std::size_t i, const boost::filesystem::path &executable)
+    ya::ProcessPointer p(
+        const std::size_t i,
+        const boost::filesystem::path &executable)
     {
         p_.resize(std::max(i + 1, p_.size()));
         p_[i].process = pg->createProcess(executable);
@@ -26,9 +28,14 @@ struct ContainerFixture
     }
 
     template <typename ... Args>
-    ya::ProcessPointer p(const std::size_t i, const boost::filesystem::path &executable, Args &&...args)
+    ya::ProcessPointer p(
+        const std::size_t i,
+        const boost::filesystem::path &executable, Args &&...args)
     {
-        p(i, executable)->setArguments({executable.string(), std::forward<Args>(args)...});
+        p(i, executable)->setArguments({
+            executable.string(),
+            std::forward<Args>(args)...
+        });
         BOOST_REQUIRE_EQUAL(p(i)->arguments().size(), sizeof...(args) + 1);
         return p(i);
     }
@@ -41,7 +48,9 @@ struct ContainerFixture
     }
 
     template <typename ... Args>
-    ya::ProcessPointer pn(const std::size_t i, const std::string &name, Args &&...args)
+    ya::ProcessPointer pn(
+        const std::size_t i,
+        const std::string &name, Args &&...args)
     {
         p(i, std::forward<Args>(args)...);
         p_[i].name = name;
@@ -64,7 +73,9 @@ struct ContainerFixture
             BOOST_TEST_MESSAGE("TermSig: " << pp->result().termSig.get());
     }
 
-    void verifyP(const std::size_t i, const PR::CompletionStatus prcs=PR::CompletionStatus::OK)
+    void verifyP(
+        const std::size_t i,
+        const PR::CompletionStatus prcs=PR::CompletionStatus::OK)
     {
         BOOST_ASSERT(i < p_.size());
         const ya::ProcessPointer pp = p_[i].process;
@@ -79,7 +90,9 @@ struct ContainerFixture
         }
     }
 
-    void verify(const PGR::CompletionStatus pgrcs, const PR::CompletionStatus prcs)
+    void verify(
+        const PGR::CompletionStatus pgrcs,
+        const PR::CompletionStatus prcs)
     {
         verifyPG(pgrcs);
         for (std::size_t i = 0; i < p_.size(); ++i)
@@ -89,7 +102,9 @@ struct ContainerFixture
 #define VERIFY(STATUS) \
     void verify##STATUS() \
     { \
-        verify(PGR::CompletionStatus::STATUS, PR::CompletionStatus::STATUS); \
+        verify( \
+            PGR::CompletionStatus::STATUS, \
+            PR::CompletionStatus::STATUS); \
     }
 
     VERIFY(OK)
@@ -104,7 +119,8 @@ public:
     ya::ProcessGroupPointer pg;
 
     const char *const sleepTimeStr = "0.2";
-    const std::chrono::milliseconds sleepTime = std::chrono::milliseconds(200);
+    const std::chrono::milliseconds sleepTime =
+        std::chrono::milliseconds(200);
 
 private:
     struct Process

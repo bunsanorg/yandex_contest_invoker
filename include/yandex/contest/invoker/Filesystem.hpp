@@ -12,8 +12,15 @@ namespace yandex{namespace contest{namespace invoker
 {
     struct FilesystemError: virtual Error
     {
-        typedef boost::error_info<struct localPathTag, boost::filesystem::path> localPath;
-        typedef boost::error_info<struct remotePathTag, boost::filesystem::path> remotePath;
+        typedef boost::error_info<
+            struct localPathTag,
+            boost::filesystem::path
+        > localPath;
+
+        typedef boost::error_info<
+            struct remotePathTag,
+            boost::filesystem::path
+        > remotePath;
     };
 
     struct FileExistsError: virtual FilesystemError {};
@@ -34,7 +41,8 @@ namespace yandex{namespace contest{namespace invoker
         const boost::filesystem::path &containerRoot() const;
 
         /// Transform path in container to host path.
-        boost::filesystem::path keepInRoot(const boost::filesystem::path &path) const;
+        boost::filesystem::path keepInRoot(
+            const boost::filesystem::path &path) const;
 
         /*!
          * \brief Push local file into container.
@@ -52,12 +60,14 @@ namespace yandex{namespace contest{namespace invoker
                       const system::unistd::access::Id &ownerId,
                       const mode_t mode);
 
-        system::unistd::FileStatus fileStatus(const boost::filesystem::path &remote);
+        system::unistd::FileStatus fileStatus(
+            const boost::filesystem::path &remote);
 
         void setOwnerId(const boost::filesystem::path &remote,
                         const system::unistd::access::Id &ownerId);
 
-        void setMode(const boost::filesystem::path &remote, const mode_t mode);
+        void setMode(const boost::filesystem::path &remote,
+                     const mode_t mode);
 
         /*!
          * \brief Pull remote directory tree.

@@ -21,7 +21,8 @@ namespace yandex{namespace contest{namespace invoker
         static ContainerPointer create(const ContainerConfig &config);
 
         /*!
-         * \brief Create new container using specified config with patched lxcConfig.
+         * \brief Create new container using
+         * specified config with patched lxcConfig.
          *
          * \see create()
          */
@@ -29,7 +30,8 @@ namespace yandex{namespace contest{namespace invoker
                                        const system::lxc::Config &lxcConfig);
 
         /*!
-         * \brief Create new container using default config with patched lxcConfig.
+         * \brief Create new container using
+         * default config with patched lxcConfig.
          *
          * \see ContainerConfig::ContainerConfig()
          */

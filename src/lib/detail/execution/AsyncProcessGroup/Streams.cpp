@@ -24,7 +24,8 @@ namespace yandex{namespace contest{namespace invoker{
             flags |= O_RDWR;
             break;
         }
-        const boost::filesystem::path path = boost::filesystem::absolute(file.path, currentPath_);
+        const boost::filesystem::path path =
+            boost::filesystem::absolute(file.path, currentPath_);
         allocatedFds_->push_back(system::unistd::open(path, flags, 0666));
         return allocatedFds_->back().get();
     }
@@ -54,7 +55,7 @@ namespace yandex{namespace contest{namespace invoker{
         return allocatedFds_->back().get();
     }
 
-    bool Streams::isAlias (const AsyncProcessGroup::Stream &stream) const
+    bool Streams::isAlias(const AsyncProcessGroup::Stream &stream) const
     {
         return boost::get<const AsyncProcessGroup::FdAlias>(&stream);
     }

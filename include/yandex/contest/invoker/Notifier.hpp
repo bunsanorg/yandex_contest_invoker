@@ -1,13 +1,11 @@
 #pragma once
 
-#include <yandex/contest/invoker/notifier/SpawnEvent.hpp>
-#include <yandex/contest/invoker/notifier/TerminationEvent.hpp>
+#include <yandex/contest/invoker/notifier/Event.hpp>
 
 #include <boost/asio/io_service.hpp>
 #include <boost/noncopyable.hpp>
+#include <boost/shared_ptr.hpp>
 #include <boost/signals2/signal.hpp>
-
-#include <memory>
 
 namespace yandex{namespace contest{namespace invoker
 {
@@ -25,10 +23,14 @@ namespace yandex{namespace contest{namespace invoker
             typedef typename Signal::extended_slot_type ExtendedSlot;
         };
 
+        typedef EventTypes<notifier::Event> Event;
         typedef EventTypes<notifier::SpawnEvent> Spawn;
         typedef EventTypes<notifier::TerminationEvent> Termination;
 
     public:
+        Connection onEvent(const Event::Slot &slot);
+        Connection onEventExtended(const Event::ExtendedSlot &slot);
+
         Connection onSpawn(const Spawn::Slot &slot);
         Connection onSpawnExtended(const Spawn::ExtendedSlot &slot);
 
@@ -44,6 +46,6 @@ namespace yandex{namespace contest{namespace invoker
 
     private:
         class Impl;
-        std::shared_ptr<Impl> pimpl;
+        boost::shared_ptr<Impl> pimpl;
     };
 }}}

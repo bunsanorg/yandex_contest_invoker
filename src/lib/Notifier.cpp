@@ -2,11 +2,13 @@
 
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
+#include <boost/enable_shared_from_this.hpp>
+#include <boost/variant/static_visitor.hpp>
 
 namespace yandex{namespace contest{namespace invoker
 {
 #define YANDEX_CONTEST_NOTIFIER_SIGNAL_IMPL(LNAME, UNAME) \
-    void LNAME(const UNAME::Event &event) \
+    void operator()(const UNAME::Event &event) \
     { \
         ioService_.post(boost::bind( \
             &Impl::dispatch##UNAME, \
@@ -35,13 +37,21 @@ namespace yandex{namespace contest{namespace invoker
     using namespace boost::asio;
 
     class Notifier::Impl:
-        public std::enable_shared_from_this<Impl>,
+        public boost::enable_shared_from_this<Impl>,
+        public boost::static_visitor<void>,
         private boost::noncopyable
     {
     public:
         Impl(io_service &ioService, const int notifierFd):
             ioService_(ioService),
-            notifierFd_(ioService_, notifierFd) {}
+            notifierFd_(ioService_, notifierFd)
+        {
+            event_.connect(Event::Slot(
+                &Impl::dispatch,
+                this,
+                _1
+            ).track(shared_from_this()));
+        }
 
         void async_start()
         {
@@ -53,7 +63,12 @@ namespace yandex{namespace contest{namespace invoker
 #warning "Not implemented"
         }
 
-    private:
+        void dispatch(const Event::Event &event)
+        {
+            boost::apply_visitor(*this, event);
+        }
+
+        YANDEX_CONTEST_NOTIFIER_SIGNAL_IMPL(event, Event)
         YANDEX_CONTEST_NOTIFIER_SIGNAL_IMPL(spawn, Spawn)
         YANDEX_CONTEST_NOTIFIER_SIGNAL_IMPL(termination, Termination)
 
@@ -79,6 +94,7 @@ namespace yandex{namespace contest{namespace invoker
         pimpl->stop();
     }
 
+    YANDEX_CONTEST_NOTIFIER_SIGNAL(event, Event)
     YANDEX_CONTEST_NOTIFIER_SIGNAL(spawn, Spawn)
     YANDEX_CONTEST_NOTIFIER_SIGNAL(termination, Termination)
 }}}

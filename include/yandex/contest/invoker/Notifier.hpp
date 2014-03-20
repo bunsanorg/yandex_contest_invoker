@@ -1,6 +1,7 @@
 #pragma once
 
 #include <yandex/contest/invoker/notifier/Event.hpp>
+#include <yandex/contest/invoker/notifier/ErrorEvent.hpp>
 
 #include <boost/asio/io_service.hpp>
 #include <boost/noncopyable.hpp>
@@ -9,6 +10,11 @@
 
 namespace yandex{namespace contest{namespace invoker
 {
+    /*!
+     * \note Any event except Error is sent
+     * via onEvent() and on{Event}().
+     * Error is local event sent on local error.
+     */
     class Notifier: private boost::noncopyable
     {
     public:
@@ -24,12 +30,16 @@ namespace yandex{namespace contest{namespace invoker
         };
 
         typedef EventTypes<notifier::Event> Event;
+        typedef EventTypes<notifier::ErrorEvent> Error;
         typedef EventTypes<notifier::SpawnEvent> Spawn;
         typedef EventTypes<notifier::TerminationEvent> Termination;
 
     public:
         Connection onEvent(const Event::Slot &slot);
         Connection onEventExtended(const Event::ExtendedSlot &slot);
+
+        Connection onError(const Error::Slot &slot);
+        Connection onErrorExtended(const Error::ExtendedSlot &slot);
 
         Connection onSpawn(const Spawn::Slot &slot);
         Connection onSpawnExtended(const Spawn::ExtendedSlot &slot);
@@ -42,7 +52,7 @@ namespace yandex{namespace contest{namespace invoker
         ~Notifier();
 
         void async_start();
-        void stop();
+        void close();
 
     private:
         class Impl;

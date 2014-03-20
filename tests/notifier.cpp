@@ -2,6 +2,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include <yandex/contest/invoker/notifier/BlockStream.hpp>
+#include <yandex/contest/invoker/notifier/ObjectStream.hpp>
 
 #include <boost/asio.hpp>
 
@@ -72,6 +73,66 @@ BOOST_AUTO_TEST_CASE(BlockStream)
                                 {
                                     BOOST_REQUIRE(!ec);
                                     bs2.async_read(bs2Data,
+                                        [&](const boost::system::error_code &ec)
+                                        {
+                                            BOOST_REQUIRE_EQUAL(
+                                                ec,
+                                                boost::asio::error::eof
+                                            );
+                                        });
+                                });
+                        });
+                });
+        });
+    ioService.run();
+}
+
+BOOST_AUTO_TEST_CASE(ObjectStream)
+{
+    int os1Data, os2Data;
+    yan::ObjectStream<Socket> os1(socket1), os2(socket2);
+    os1.async_write(10,
+        [&](const boost::system::error_code &ec)
+        {
+            BOOST_REQUIRE(!ec);
+            os1.async_read(os1Data,
+                [&](const boost::system::error_code &ec)
+                {
+                    BOOST_REQUIRE(!ec);
+                    BOOST_CHECK_EQUAL(os1Data, 100);
+                    os1.async_write(20,
+                        [&](const boost::system::error_code &ec)
+                        {
+                            BOOST_REQUIRE(!ec);
+                            os1.async_read(os1Data,
+                                [&](const boost::system::error_code &ec)
+                                {
+                                    BOOST_REQUIRE(!ec);
+                                    BOOST_CHECK_EQUAL(os1Data, 200);
+                                    os1.close();
+                                });
+                        });
+                });
+        });
+    os2.async_read(os2Data,
+        [&](const boost::system::error_code &ec)
+        {
+            BOOST_REQUIRE(!ec);
+            BOOST_CHECK_EQUAL(os2Data, 10);
+            os2.async_write(100,
+                [&](const boost::system::error_code &ec)
+                {
+                    BOOST_REQUIRE(!ec);
+                    os2.async_read(os2Data,
+                        [&](const boost::system::error_code &ec)
+                        {
+                            BOOST_REQUIRE(!ec);
+                            BOOST_CHECK_EQUAL(os2Data, 20);
+                            os2.async_write(200,
+                                [&](const boost::system::error_code &ec)
+                                {
+                                    BOOST_REQUIRE(!ec);
+                                    os2.async_read(os2Data,
                                         [&](const boost::system::error_code &ec)
                                         {
                                             BOOST_REQUIRE_EQUAL(

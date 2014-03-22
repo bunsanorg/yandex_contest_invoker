@@ -2,8 +2,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include <yandex/contest/invoker/Notifier.hpp>
-#include <yandex/contest/invoker/notifier/BlockStream.hpp>
-#include <yandex/contest/invoker/notifier/ObjectStream.hpp>
+#include <yandex/contest/invoker/notifier/ObjectConnection.hpp>
 
 #include <yandex/contest/system/unistd/Pipe.hpp>
 
@@ -16,144 +15,6 @@ namespace unistd = ya::system::unistd;
 
 BOOST_AUTO_TEST_SUITE(notifier)
 
-struct SerializationFactory
-{
-    SerializationFactory():
-        socket1(ioService),
-        socket2(ioService)
-    {
-        boost::asio::local::connect_pair(socket1, socket2);
-    }
-
-    typedef boost::asio::local::stream_protocol::socket Socket;
-    boost::asio::io_service ioService;
-    Socket socket1, socket2;
-};
-
-BOOST_FIXTURE_TEST_SUITE(serialization, SerializationFactory)
-
-BOOST_AUTO_TEST_CASE(BlockStream)
-{
-    std::string bs1Data, bs2Data;
-    yan::BlockStream<Socket> bs1(socket1), bs2(socket2);
-    bs1.async_write("first request",
-        [&](const boost::system::error_code &ec)
-        {
-            BOOST_REQUIRE(!ec);
-            bs1.async_read(bs1Data,
-                [&](const boost::system::error_code &ec)
-                {
-                    BOOST_REQUIRE(!ec);
-                    BOOST_CHECK_EQUAL(bs1Data, "first response");
-                    bs1.async_write("second request",
-                        [&](const boost::system::error_code &ec)
-                        {
-                            BOOST_REQUIRE(!ec);
-                            bs1.async_read(bs1Data,
-                                [&](const boost::system::error_code &ec)
-                                {
-                                    BOOST_REQUIRE(!ec);
-                                    BOOST_CHECK_EQUAL(bs1Data, "second response");
-                                    bs1.close();
-                                });
-                        });
-                });
-        });
-    bs2.async_read(bs2Data,
-        [&](const boost::system::error_code &ec)
-        {
-            BOOST_REQUIRE(!ec);
-            BOOST_CHECK_EQUAL(bs2Data, "first request");
-            bs2.async_write("first response",
-                [&](const boost::system::error_code &ec)
-                {
-                    BOOST_REQUIRE(!ec);
-                    bs2.async_read(bs2Data,
-                        [&](const boost::system::error_code &ec)
-                        {
-                            BOOST_REQUIRE(!ec);
-                            BOOST_CHECK_EQUAL(bs2Data, "second request");
-                            bs2.async_write("second response",
-                                [&](const boost::system::error_code &ec)
-                                {
-                                    BOOST_REQUIRE(!ec);
-                                    bs2.async_read(bs2Data,
-                                        [&](const boost::system::error_code &ec)
-                                        {
-                                            BOOST_REQUIRE_EQUAL(
-                                                ec,
-                                                boost::asio::error::eof
-                                            );
-                                        });
-                                });
-                        });
-                });
-        });
-    ioService.run();
-}
-
-BOOST_AUTO_TEST_CASE(ObjectStream)
-{
-    int os1Data, os2Data;
-    yan::ObjectStream<Socket> os1(socket1), os2(socket2);
-    os1.async_write(10,
-        [&](const boost::system::error_code &ec)
-        {
-            BOOST_REQUIRE(!ec);
-            os1.async_read(os1Data,
-                [&](const boost::system::error_code &ec)
-                {
-                    BOOST_REQUIRE(!ec);
-                    BOOST_CHECK_EQUAL(os1Data, 100);
-                    os1.async_write(20,
-                        [&](const boost::system::error_code &ec)
-                        {
-                            BOOST_REQUIRE(!ec);
-                            os1.async_read(os1Data,
-                                [&](const boost::system::error_code &ec)
-                                {
-                                    BOOST_REQUIRE(!ec);
-                                    BOOST_CHECK_EQUAL(os1Data, 200);
-                                    os1.close();
-                                });
-                        });
-                });
-        });
-    os2.async_read(os2Data,
-        [&](const boost::system::error_code &ec)
-        {
-            BOOST_REQUIRE(!ec);
-            BOOST_CHECK_EQUAL(os2Data, 10);
-            os2.async_write(100,
-                [&](const boost::system::error_code &ec)
-                {
-                    BOOST_REQUIRE(!ec);
-                    os2.async_read(os2Data,
-                        [&](const boost::system::error_code &ec)
-                        {
-                            BOOST_REQUIRE(!ec);
-                            BOOST_CHECK_EQUAL(os2Data, 20);
-                            os2.async_write(200,
-                                [&](const boost::system::error_code &ec)
-                                {
-                                    BOOST_REQUIRE(!ec);
-                                    os2.async_read(os2Data,
-                                        [&](const boost::system::error_code &ec)
-                                        {
-                                            BOOST_REQUIRE_EQUAL(
-                                                ec,
-                                                boost::asio::error::eof
-                                            );
-                                        });
-                                });
-                        });
-                });
-        });
-    ioService.run();
-}
-
-BOOST_AUTO_TEST_SUITE_END() // serialization
-
 struct NotifierFactory
 {
     NotifierFactory():
@@ -164,7 +25,7 @@ struct NotifierFactory
     boost::asio::io_service ioService;
     unistd::Pipe pipe;
     boost::asio::posix::stream_descriptor writeEnd;
-    yan::ObjectStream<boost::asio::posix::stream_descriptor> os;
+    yan::ObjectConnection<boost::asio::posix::stream_descriptor> oc;
     yac::Notifier notifier;
 };
 
@@ -233,15 +94,15 @@ BOOST_FIXTURE_TEST_CASE(Notifier, NotifierFactory)
 
     const Notifier::Event::Event spawnEvent_(spawnEvent);
     const Notifier::Event::Event terminationEvent_(terminationEvent);
-    os.async_write(spawnEvent_,
+    oc.async_write(spawnEvent_,
         [&](const boost::system::error_code &ec)
         {
             BOOST_REQUIRE(!ec);
-            os.async_write(terminationEvent_,
+            oc.async_write(terminationEvent_,
                 [&](const boost::system::error_code &ec)
                 {
                     BOOST_REQUIRE(!ec);
-                    os.close();
+                    oc.close();
                 });
         });
     ioService.run();

@@ -1,6 +1,6 @@
 #include <yandex/contest/invoker/Notifier.hpp>
 
-#include <yandex/contest/invoker/notifier/ObjectStream.hpp>
+#include <yandex/contest/invoker/notifier/ObjectConnection.hpp>
 
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
@@ -47,7 +47,7 @@ namespace yandex{namespace contest{namespace invoker
         Impl(io_service &ioService, const int notifierFd):
             ioService_(ioService),
             notifierFd_(ioService_, notifierFd),
-            notifierStream_(notifierFd_) {}
+            notifierConnection_(notifierFd_) {}
 
         void async_start()
         {
@@ -56,7 +56,7 @@ namespace yandex{namespace contest{namespace invoker
 
         void close()
         {
-            notifierStream_.close();
+            notifierConnection_.close();
         }
 
         void dispatch(const Event::Event &event)
@@ -72,7 +72,7 @@ namespace yandex{namespace contest{namespace invoker
     private:
         void read()
         {
-            notifierStream_.async_read(
+            notifierConnection_.async_read(
                 inboundEvent_,
                 boost::bind(
                     &Impl::handle_read,
@@ -102,7 +102,9 @@ namespace yandex{namespace contest{namespace invoker
 
         io_service &ioService_;
         posix::stream_descriptor notifierFd_;
-        notifier::ObjectStream<posix::stream_descriptor> notifierStream_;
+        notifier::ObjectConnection<
+            posix::stream_descriptor
+        > notifierConnection_;
 
         Event::Event inboundEvent_;
     };

@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 2.8)
 
 include(BunsanCommon)
 
-bunsan_use_boost(system filesystem serialization program_options)
+bunsan_use_boost(system filesystem serialization thread program_options)
 
 bunsan_use_bunsan(common)
 bunsan_use(

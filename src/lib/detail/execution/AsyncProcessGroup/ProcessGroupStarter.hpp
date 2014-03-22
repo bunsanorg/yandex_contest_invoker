@@ -8,10 +8,10 @@
 #include <yandex/contest/system/unistd/Pipe.hpp>
 
 #include <boost/noncopyable.hpp>
+#include <boost/thread.hpp>
 
 #include <chrono>
 #include <functional>
-#include <thread>
 
 namespace yandex{namespace contest{namespace invoker{
     namespace detail{namespace execution{namespace async_process_group_detail
@@ -65,7 +65,7 @@ namespace yandex{namespace contest{namespace invoker{
         static const Duration waitInterval;
 
     private:
-        std::thread memoryUsageLoader_;
+        boost::thread_group workers_;
         system::cgroup::ControlGroup thisCgroup_;
         std::vector<ProcessInfo> id2processInfo_;
         std::unordered_map<Pid, Id> pid2id_;

@@ -6,6 +6,7 @@
 #include <yandex/contest/SystemError.hpp>
 
 #include <boost/assert.hpp>
+#include <boost/bind.hpp>
 #include <boost/format.hpp>
 
 #include <functional>
@@ -28,7 +29,11 @@ namespace yandex{namespace contest{namespace invoker{
             std::chrono::milliseconds(100));
 
     ProcessGroupStarter::ProcessGroupStarter(const AsyncProcessGroup::Task &task):
-        thisCgroup_(system::cgroup::ControlGroup::getControlGroup(system::unistd::getpid())),
+        thisCgroup_(
+            system::cgroup::ControlGroup::getControlGroup(
+                system::unistd::getpid()
+            )
+        ),
         id2processInfo_(task.processes.size()),
         monitor_(task.processes)
     {
@@ -73,10 +78,10 @@ namespace yandex{namespace contest{namespace invoker{
     {
         STREAM_DEBUG << "Starting execution loop...";
 
-        memoryUsageLoader_ = std::thread(
+        workers_.create_thread(boost::bind(
             &ProcessGroupStarter::memoryUsageLoader,
             this
-        );
+        ));
 
         STREAM_TRACE << "Waiting loop...";
         while (monitor_.processGroupIsRunning())
@@ -89,7 +94,9 @@ namespace yandex{namespace contest{namespace invoker{
                     monitor_.terminatedBySystem(id);
                 }
             }
-            waitForAnyChild(std::bind(waitFor, std::placeholders::_1, waitInterval));
+            waitForAnyChild(std::bind(
+                waitFor, std::placeholders::_1, waitInterval
+            ));
             if (Clock::now() >= realTimeLimitPoint_)
                 monitor_.realTimeLimitExceeded();
         }
@@ -111,9 +118,9 @@ namespace yandex{namespace contest{namespace invoker{
         }
         // end of function
 
-        STREAM_TRACE << "Joining memory usage loader...";
-        // everything is terminated, wait for worker thread
-        memoryUsageLoader_.join();
+        STREAM_TRACE << "Joining workers...";
+        // everything is terminated, wait for worker threads
+        workers_.join_all();
 
         STREAM_TRACE << "Closing control groups...";
         // let's check everything is OK
@@ -244,7 +251,8 @@ namespace yandex{namespace contest{namespace invoker{
 
     Pid ProcessGroupStarter::waitFor(int &statLoc, const Duration &duration)
     {
-        STREAM_TRACE << "Waiting for a child [timeout=" << duration.count() << "]...";
+        STREAM_TRACE << "Waiting for a child [timeout=" <<
+                        duration.count() << "]...";
         return waitUntil(statLoc, Clock::now() + duration);
     }
 
@@ -296,7 +304,7 @@ namespace yandex{namespace contest{namespace invoker{
                 }
             }
             // FIXME hardcode
-            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
         }
         while (found);
     }

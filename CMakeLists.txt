@@ -33,6 +33,7 @@ bunsan_add_shared_library(${PROJECT_NAME}
     src/lib/filesystem/Fifo.cpp
     src/lib/filesystem/CreateFile.cpp
     src/lib/filesystem/Operations.cpp
+    src/lib/notifier/QueuedWriter.cpp
     src/lib/detail/execution/AsyncProcessGroup.cpp
     src/lib/detail/execution/AsyncProcessGroup/detail.cpp
     src/lib/detail/execution/AsyncProcessGroup/execute.cpp

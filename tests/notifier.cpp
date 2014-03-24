@@ -3,10 +3,15 @@
 
 #include <yandex/contest/invoker/Notifier.hpp>
 #include <yandex/contest/invoker/notifier/ObjectConnection.hpp>
+#include <yandex/contest/invoker/notifier/QueuedEventWriter.hpp>
 
 #include <yandex/contest/system/unistd/Pipe.hpp>
 
 #include <boost/asio.hpp>
+#include <boost/thread.hpp>
+#include <boost/thread/mutex.hpp>
+
+#include <unordered_map>
 
 namespace ya = yandex::contest;
 namespace yac = ya::invoker;
@@ -22,10 +27,12 @@ struct NotifierFactory
         oc(writeEnd),
         notifier(ioService, pipe.releaseReadEnd().release()) {}
 
+    typedef boost::asio::posix::stream_descriptor Connection;
+
     boost::asio::io_service ioService;
     unistd::Pipe pipe;
-    boost::asio::posix::stream_descriptor writeEnd;
-    yan::ObjectConnection<boost::asio::posix::stream_descriptor> oc;
+    Connection writeEnd;
+    yan::ObjectConnection<Connection> oc;
     yac::Notifier notifier;
 };
 
@@ -110,6 +117,143 @@ BOOST_FIXTURE_TEST_CASE(Notifier, NotifierFactory)
     BOOST_CHECK(spawn);
     BOOST_CHECK(termination);
     BOOST_CHECK_EQUAL(eventNumber, 2);
+}
+
+BOOST_FIXTURE_TEST_CASE(QueuedWriter, NotifierFactory)
+{
+    boost::mutex boostTestLock;
+#define BOOST_TEST_LOCK \
+    boost::lock_guard<boost::mutex> boostTestLockGuard(boostTestLock)
+
+    yan::QueuedEventWriter<Connection> writer(
+        oc,
+        [&](const boost::system::error_code &ec)
+        {
+            BOOST_TEST_LOCK;
+            BOOST_TEST_MESSAGE(ec);
+            return true;
+        }
+    );
+
+    std::unordered_map<std::size_t, int> running;
+    boost::mutex runningLock;
+    std::size_t runningEvents = 0;
+    const auto checkRunning =
+        [&](const std::size_t id)
+        {
+            const auto iter = running.find(id);
+            if (iter != running.end() && iter->second == 0)
+                running.erase(iter);
+            ++runningEvents;
+        };
+    const auto addRunning =
+        [&](const std::size_t id)
+        {
+            boost::lock_guard<boost::mutex> lk(runningLock);
+            {
+                //BOOST_TEST_LOCK;
+                //BOOST_TEST_MESSAGE("Add " << id);
+            }
+            ++running[id];
+            checkRunning(id);
+        };
+    const auto delRunning =
+        [&](const std::size_t id)
+        {
+            boost::lock_guard<boost::mutex> lk(runningLock);
+            --running[id];
+            checkRunning(id);
+        };
+
+    notifier.onSpawn(
+        [&](const yac::Notifier::Spawn::Event &event)
+        {
+            addRunning(event.processId.id);
+        });
+    notifier.onTermination(
+        [&](const yac::Notifier::Termination::Event &event)
+        {
+            delRunning(event.processId.id);
+        });
+    notifier.onError(
+        [&](const yac::Notifier::Error::Event &event)
+        {
+            BOOST_TEST_LOCK;
+            BOOST_CHECK_EQUAL(event.errorCode, boost::asio::error::eof);
+        });
+    notifier.async_start();
+
+    boost::thread_group threads;
+    for (std::size_t i = 0; i < 10; ++i)
+        threads.create_thread(boost::bind(
+            &boost::asio::io_service::run,
+            &ioService
+        ));
+
+    constexpr std::size_t WORKERS = 10;
+    constexpr std::size_t STEPS = 10;
+    boost::barrier close(2 * WORKERS + 1);
+
+    for (std::size_t i = 0; i < WORKERS; ++i)
+        threads.create_thread(
+            [&, i]()
+            {
+                for (std::size_t j = 0; j < STEPS; ++j)
+                {
+                    yac::Notifier::Spawn::Event event;
+                    event.processId.id = i * STEPS + j;
+                    writer.write(event);
+                }
+                {
+                    BOOST_TEST_LOCK;
+                    BOOST_TEST_MESSAGE("Spawn worker " <<
+                                       i << " has finished.");
+                }
+                close.count_down_and_wait();
+            });
+
+    for (std::size_t i = 0; i < WORKERS; ++i)
+        threads.create_thread(
+            [&, i]()
+            {
+                for (std::size_t j = 0; j < STEPS; ++j)
+                {
+                    yac::Notifier::Termination::Event event;
+                    event.processId.id = i * STEPS + j;
+                    writer.write(event);
+                }
+                {
+                    BOOST_TEST_LOCK;
+                    BOOST_TEST_MESSAGE("Termination worker " <<
+                                       i << " has finished.");
+                }
+                close.count_down_and_wait();
+            });
+
+    {
+        BOOST_TEST_LOCK;
+        BOOST_TEST_MESSAGE("Waiting for workers' barrier...");
+    }
+    close.count_down_and_wait();
+    {
+        BOOST_TEST_LOCK;
+        BOOST_TEST_MESSAGE("Closing writer...");
+    }
+    writer.close();
+
+    {
+        BOOST_TEST_LOCK;
+        BOOST_TEST_MESSAGE("Waiting for threads...");
+    }
+    threads.join_all();
+    BOOST_CHECK(running.empty());
+    BOOST_CHECK_EQUAL(runningEvents, 2 * STEPS * WORKERS);
+}
+
+BOOST_FIXTURE_TEST_CASE(QueuedWriterLog, NotifierFactory)
+{
+    // check that this constructor compiles
+    yan::QueuedEventWriter<Connection> writer(oc);
 }
 
 BOOST_AUTO_TEST_SUITE_END() // notifier

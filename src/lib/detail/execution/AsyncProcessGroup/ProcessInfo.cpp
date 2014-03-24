@@ -11,6 +11,36 @@
 namespace yandex{namespace contest{namespace invoker{
     namespace detail{namespace execution{namespace async_process_group_detail
 {
+    const ProcessMeta &ProcessInfo::meta() const
+    {
+        return meta_;
+    }
+
+    void ProcessInfo::setMeta(const ProcessMeta &meta)
+    {
+        meta_ = meta;
+    }
+
+    std::size_t ProcessInfo::id() const
+    {
+        return meta_.id;
+    }
+
+    void ProcessInfo::setId(const std::size_t id)
+    {
+        meta_.id = id;
+    }
+
+    const std::string &ProcessInfo::name() const
+    {
+        return meta_.name;
+    }
+
+    void ProcessInfo::setName(const std::string &name)
+    {
+        meta_.name = name;
+    }
+
     Pid ProcessInfo::pid() const
     {
         return pid_;

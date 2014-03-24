@@ -49,6 +49,7 @@ namespace yandex{namespace contest{namespace invoker{
                     thisCgroup_.createChild(cid, 0700);
             ProcessStarter starter(cg, task.processes[id], pipes_);
             const Pid pid = starter();
+            id2processInfo_[id].setMeta(task.processes[id].meta);
             id2processInfo_[id].setPid(pid);
             STREAM_TRACE << "Process id mapping was established: " <<
                             "{id=" << id << "} = {pid=" << pid << "}.";
@@ -58,6 +59,7 @@ namespace yandex{namespace contest{namespace invoker{
         }
         pipes_.clear();
         BOOST_ASSERT(monitor_.running().size() == task.processes.size());
+
         // SIGALRM setup
         struct sigaction act;
         act.sa_handler = nop;
@@ -65,6 +67,7 @@ namespace yandex{namespace contest{namespace invoker{
         sigemptyset(&act.sa_mask);
         if (sigaction(SIGALRM, &act, nullptr) < 0)
             BOOST_THROW_EXCEPTION(SystemError("sigaction"));
+
         // real time limit
         realTimeLimitPoint_ =
             std::chrono::steady_clock::now() + task.resourceLimits.realTimeLimit;

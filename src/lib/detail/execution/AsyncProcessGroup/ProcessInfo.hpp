@@ -1,5 +1,7 @@
 #pragma once
 
+#include <yandex/contest/invoker/detail/CommonProcessTypedefs.hpp>
+
 #include <yandex/contest/system/cgroup/ControlGroup.hpp>
 
 #include <atomic>
@@ -31,6 +33,15 @@ namespace yandex{namespace contest{namespace invoker{
     class ProcessInfo
     {
     public:
+        const ProcessMeta &meta() const;
+        void setMeta(const ProcessMeta &meta);
+
+        std::size_t id() const;
+        void setId(const std::size_t id);
+
+        const std::string &name() const;
+        void setName(const std::string &name);
+
         Pid pid() const;
         void setPid(const Pid &pid);
 
@@ -48,6 +59,7 @@ namespace yandex{namespace contest{namespace invoker{
         bool setMaxMemoryUsageBytesIfZero(const std::uint64_t &memoryUsageBytes);
 
     private:
+        ProcessMeta meta_;
         Pid pid_{0};
         system::cgroup::ControlGroup controlGroup_;
         std::atomic<bool> terminated_{false};

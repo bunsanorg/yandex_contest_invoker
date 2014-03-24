@@ -108,6 +108,21 @@ namespace yandex{namespace contest{namespace invoker{
 
     typedef std::unordered_map<int, Stream> DescriptorMap;
 
+    struct ProcessMeta
+    {
+        friend class boost::serialization::access;
+
+        template <typename Archive>
+        void serialize(Archive &ar, const unsigned int)
+        {
+            ar & BOOST_SERIALIZATION_NVP(id);
+            ar & BOOST_SERIALIZATION_NVP(name);
+        }
+
+        std::size_t id = 0;
+        std::string name;
+    };
+
     struct Process
     {
         friend class boost::serialization::access;
@@ -115,7 +130,7 @@ namespace yandex{namespace contest{namespace invoker{
         template <typename Archive>
         void serialize(Archive &ar, const unsigned int)
         {
-            ar & BOOST_SERIALIZATION_NVP(name);
+            ar & BOOST_SERIALIZATION_NVP(meta);
             ar & BOOST_SERIALIZATION_NVP(descriptors);
             ar & BOOST_SERIALIZATION_NVP(resourceLimits);
             ar & BOOST_SERIALIZATION_NVP(executable);
@@ -127,7 +142,7 @@ namespace yandex{namespace contest{namespace invoker{
             ar & BOOST_SERIALIZATION_NVP(terminateGroupOnCrash);
         }
 
-        std::string name;
+        ProcessMeta meta;
         DescriptorMap descriptors;
         process::ResourceLimits resourceLimits;
         boost::filesystem::path executable;

@@ -47,10 +47,16 @@ struct AsyncProcessGroupFixture
     void run()
     {
         BOOST_TEST_CHECKPOINT(BOOST_CURRENT_FUNCTION);
+
+        for (std::size_t i = 0; i < task.processes.size(); ++i)
+            task.processes[i].meta.id = i;
+
         ya::AsyncProcess::Options cfg;
         cfg.executable = "yandex_contest_invoker_ctl";
+
         PG pg(cfg, task);
         result = pg.wait();
+
         BOOST_CHECK_EQUAL(pr().size(), task.processes.size());
     }
 

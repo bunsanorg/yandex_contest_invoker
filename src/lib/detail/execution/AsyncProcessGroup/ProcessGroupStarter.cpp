@@ -41,6 +41,7 @@ namespace yandex{namespace contest{namespace invoker{
         std::vector<system::unistd::Pipe> pipes_(task.pipesNumber);
         for (std::size_t id = 0; id < task.processes.size(); ++id)
         {
+            BOOST_ASSERT(task.processes[id].meta.id == id);
             const std::string cid = str(boost::format("id_%1%") % id);
             // we don't children to have access to cgroups
             system::cgroup::ControlGroup &cg =

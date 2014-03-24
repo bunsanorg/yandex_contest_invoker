@@ -12,6 +12,7 @@
 
 namespace yandex{namespace contest{namespace invoker
 {
+    typedef detail::execution::AsyncProcessGroup::ProcessMeta ProcessMeta;
     typedef detail::execution::AsyncProcessGroup::Process ProcessTask;
     typedef detail::execution::AsyncProcessGroup::Stream Stream;
     typedef detail::execution::AsyncProcessGroup::NonPipeStream NonPipeStream;

@@ -41,7 +41,8 @@ namespace yandex{namespace contest{namespace invoker
         if (processGroup_)
             BOOST_THROW_EXCEPTION(ProcessGroupHasAlreadyStartedError());
         const std::size_t id = task_.processes.size();
-        task_.processes.resize(id+1);
+        task_.processes.resize(id + 1);
+        processTask(id).meta.id = id;
         processTask(id).executable = executable;
         return Process::create(ProcessGroupPointer(this), id);
     }

@@ -41,12 +41,12 @@ BOOST_FIXTURE_TEST_CASE(Notifier, NotifierFactory)
     using yac::Notifier;
 
     Notifier::Spawn::Event spawnEvent;
-    spawnEvent.processId.id = 1;
-    spawnEvent.processId.name = "id for spawn";
+    spawnEvent.meta.id = 1;
+    spawnEvent.meta.name = "id for spawn";
 
     Notifier::Termination::Event terminationEvent;
-    terminationEvent.processId.id = 2;
-    terminationEvent.processId.name = "id for termination";
+    terminationEvent.meta.id = 2;
+    terminationEvent.meta.name = "id for termination";
     terminationEvent.result.completionStatus =
         yac::process::Result::CompletionStatus::TIME_LIMIT_EXCEEDED;
     terminationEvent.result.exitStatus = boost::none;
@@ -74,15 +74,15 @@ BOOST_FIXTURE_TEST_CASE(Notifier, NotifierFactory)
         [&](const Notifier::Spawn::Event &event)
         {
             spawn = true;
-            BOOST_CHECK_EQUAL(event.processId.id, 1);
-            BOOST_CHECK_EQUAL(event.processId.name, "id for spawn");
+            BOOST_CHECK_EQUAL(event.meta.id, 1);
+            BOOST_CHECK_EQUAL(event.meta.name, "id for spawn");
         });
     notifier.onTermination(
         [&](const Notifier::Termination::Event &event)
         {
             termination = true;
-            BOOST_CHECK_EQUAL(event.processId.id, 2);
-            BOOST_CHECK_EQUAL(event.processId.name, "id for termination");
+            BOOST_CHECK_EQUAL(event.meta.id, 2);
+            BOOST_CHECK_EQUAL(event.meta.name, "id for termination");
             BOOST_CHECK_EQUAL(
                 event.result.completionStatus,
                 yac::process::Result::CompletionStatus::TIME_LIMIT_EXCEEDED);
@@ -168,12 +168,12 @@ BOOST_FIXTURE_TEST_CASE(QueuedWriter, NotifierFactory)
     notifier.onSpawn(
         [&](const yac::Notifier::Spawn::Event &event)
         {
-            addRunning(event.processId.id);
+            addRunning(event.meta.id);
         });
     notifier.onTermination(
         [&](const yac::Notifier::Termination::Event &event)
         {
-            delRunning(event.processId.id);
+            delRunning(event.meta.id);
         });
     notifier.onError(
         [&](const yac::Notifier::Error::Event &event)
@@ -201,7 +201,7 @@ BOOST_FIXTURE_TEST_CASE(QueuedWriter, NotifierFactory)
                 for (std::size_t j = 0; j < STEPS; ++j)
                 {
                     yac::Notifier::Spawn::Event event;
-                    event.processId.id = i * STEPS + j;
+                    event.meta.id = i * STEPS + j;
                     writer.write(event);
                 }
                 {
@@ -219,7 +219,7 @@ BOOST_FIXTURE_TEST_CASE(QueuedWriter, NotifierFactory)
                 for (std::size_t j = 0; j < STEPS; ++j)
                 {
                     yac::Notifier::Termination::Event event;
-                    event.processId.id = i * STEPS + j;
+                    event.meta.id = i * STEPS + j;
                     writer.write(event);
                 }
                 {

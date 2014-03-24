@@ -1,6 +1,6 @@
 #pragma once
 
-#include <yandex/contest/invoker/notifier/ProcessId.hpp>
+#include <yandex/contest/invoker/detail/CommonProcessTypedefs.hpp>
 #include <yandex/contest/invoker/process/Result.hpp>
 
 #include <boost/serialization/access.hpp>
@@ -15,11 +15,11 @@ namespace yandex{namespace contest{namespace invoker{namespace notifier
         template <typename Archive>
         void serialize(Archive &ar, const unsigned int)
         {
-            ar & BOOST_SERIALIZATION_NVP(processId);
+            ar & BOOST_SERIALIZATION_NVP(meta);
             ar & BOOST_SERIALIZATION_NVP(result);
         }
 
-        ProcessId processId;
+        ProcessMeta meta;
         process::Result result;
     };
 }}}}

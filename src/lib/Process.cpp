@@ -109,12 +109,12 @@ namespace yandex{namespace contest{namespace invoker
 
     const std::string &Process::name() const
     {
-        return processGroup_->processTask(id_).name;
+        return processGroup_->processTask(id_).meta.name;
     }
 
     void Process::setName(const std::string &name)
     {
-        processGroup_->processTask(id_).name = name;
+        processGroup_->processTask(id_).meta.name = name;
     }
 
     void Process::setStream(const int descriptor, const Stream &stream)

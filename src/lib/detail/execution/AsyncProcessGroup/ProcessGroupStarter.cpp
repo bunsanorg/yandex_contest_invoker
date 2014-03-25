@@ -55,7 +55,7 @@ namespace yandex{namespace contest{namespace invoker{
                             "{id=" << id << "} = {pid=" << pid << "}.";
             BOOST_ASSERT(pid2id_.find(pid) == pid2id_.end());
             pid2id_[pid] = id;
-            monitor_.started(id, task.processes[id]);
+            monitor_.started(id2processInfo_[id], task.processes[id]);
         }
         pipes_.clear();
         BOOST_ASSERT(monitor_.running().size() == task.processes.size());
@@ -92,10 +92,10 @@ namespace yandex{namespace contest{namespace invoker{
         {
             for (const Id id: monitor_.running())
             {
-                if (monitor_.runOutOfResourceLimits(id, id2processInfo_[id]))
+                if (monitor_.runOutOfResourceLimits(id2processInfo_[id]))
                 {
                     terminate(id);
-                    monitor_.terminatedBySystem(id);
+                    monitor_.terminatedBySystem(id2processInfo_[id]);
                 }
             }
             waitForAnyChild(std::bind(
@@ -111,7 +111,7 @@ namespace yandex{namespace contest{namespace invoker{
         {
             STREAM_TRACE << "Terminating " << id << ".";
             terminate(id);
-            monitor_.terminatedBySystem(id);
+            monitor_.terminatedBySystem(id2processInfo_[id]);
         }
 
         // collect results
@@ -159,7 +159,7 @@ namespace yandex{namespace contest{namespace invoker{
                              "We received process we haven't started.");
             const Id id = pid2id_.at(pid);
             terminate(id);
-            monitor_.terminated(id, statLoc, id2processInfo_[id]);
+            monitor_.terminated(id2processInfo_[id], statLoc);
         }
     }
 

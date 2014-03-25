@@ -29,21 +29,23 @@ namespace yandex{namespace contest{namespace invoker{
             result_.processResults.resize(processes.size());
         }
 
-        /// Notify monitor that process with specified id has started.
-        void started(const Id id, const AsyncProcessGroup::Process &process);
+        /// Notify monitor that process has started.
+        void started(
+            ProcessInfo &processInfo,
+            const AsyncProcessGroup::Process &process);
 
-        /// Notify monitor that process with specified id has terminated.
-        void terminated(const Id id, const int statLoc, ProcessInfo &processInfo);
+        /// Notify monitor that process has terminated.
+        void terminated(ProcessInfo &processInfo, const int statLoc);
 
-        void terminatedBySystem(const Id id);
+        void terminatedBySystem(ProcessInfo &processInfo);
 
         /// Notify monitor that real time limit was exceeded.
         void realTimeLimitExceeded();
 
-        bool runOutOfResourceLimits(const Id id, ProcessInfo &processInfo);
+        bool runOutOfResourceLimits(ProcessInfo &processInfo);
 
         process::Result::CompletionStatus collectResourceInfo(
-            const Id id, ProcessInfo &processInfo);
+            ProcessInfo &processInfo);
 
         bool processGroupIsRunning() const
         {

@@ -12,8 +12,11 @@ namespace yandex{namespace contest{namespace invoker{
     namespace detail{namespace execution{namespace async_process_group_detail
 {
     void ExecutionMonitor::started(
-        const Id id, const AsyncProcessGroup::Process &process)
+        ProcessInfo &processInfo,
+        const AsyncProcessGroup::Process &process)
     {
+        const std::size_t id = processInfo.id();
+
         STREAM_TRACE << "Started id = " << id << ".";
         BOOST_ASSERT_MSG(running_.find(id) == running_.end(),
                          "This process has already started.");
@@ -25,8 +28,10 @@ namespace yandex{namespace contest{namespace invoker{
     }
 
     void ExecutionMonitor::terminated(
-        const Id id, const int statLoc, ProcessInfo &processInfo)
+        ProcessInfo &processInfo, const int statLoc)
     {
+        const std::size_t id = processInfo.id();
+
         STREAM_TRACE << "Terminated id = " << id << ".";
         BOOST_ASSERT(running_.size() + terminated_.size() ==
                      result_.processResults.size());
@@ -83,7 +88,7 @@ namespace yandex{namespace contest{namespace invoker{
         case process::Result::CompletionStatus::TERMINATED_BY_SYSTEM:
         case process::Result::CompletionStatus::ABNORMAL_EXIT:
         case process::Result::CompletionStatus::OK:
-            collectResourceInfo(id, processInfo);
+            collectResourceInfo(processInfo);
             break;
         default:
             ; // do nothing
@@ -102,8 +107,10 @@ namespace yandex{namespace contest{namespace invoker{
         }
     }
 
-    void ExecutionMonitor::terminatedBySystem(const Id id)
+    void ExecutionMonitor::terminatedBySystem(ProcessInfo &processInfo)
     {
+        const std::size_t id = processInfo.id();
+
         STREAM_TRACE << "Terminated by system id = " << id << ".";
         result_.processResults[id].completionStatus =
             process::Result::CompletionStatus::TERMINATED_BY_SYSTEM;
@@ -116,17 +123,20 @@ namespace yandex{namespace contest{namespace invoker{
             process_group::Result::CompletionStatus::REAL_TIME_LIMIT_EXCEEDED;
     }
 
-    bool ExecutionMonitor::runOutOfResourceLimits(
-        const Id id, ProcessInfo &processInfo)
+    bool ExecutionMonitor::runOutOfResourceLimits(ProcessInfo &processInfo)
     {
+        const std::size_t id = processInfo.id();
+
         STREAM_TRACE << "Check if id = " << id << " run out of resource limits.";
-        return collectResourceInfo(id, processInfo) !=
+        return collectResourceInfo(processInfo) !=
                process::Result::CompletionStatus::OK;
     }
 
     process::Result::CompletionStatus ExecutionMonitor::collectResourceInfo(
-        const Id id, ProcessInfo &processInfo)
+        ProcessInfo &processInfo)
     {
+        const std::size_t id = processInfo.id();
+
         STREAM_TRACE << "Collecting resource info id = " << id << ".";
         process::Result &result = result_.processResults[id];
         process::Result::CompletionStatus &status = result.completionStatus;

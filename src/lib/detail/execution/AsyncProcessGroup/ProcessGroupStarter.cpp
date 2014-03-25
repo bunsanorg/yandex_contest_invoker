@@ -52,7 +52,7 @@ namespace yandex{namespace contest{namespace invoker{
             id2processInfo_[id].setMeta(task.processes[id].meta);
             id2processInfo_[id].setPid(pid);
             STREAM_TRACE << "Process id mapping was established: " <<
-                            "{id=" << id << "} = {pid=" << pid << "}.";
+                            "{ id = " << id << " } = { pid= " << pid << " }.";
             BOOST_ASSERT(pid2id_.find(pid) == pid2id_.end());
             pid2id_[pid] = id;
             monitor_.started(id2processInfo_[id], task.processes[id]);

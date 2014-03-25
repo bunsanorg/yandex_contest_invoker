@@ -58,6 +58,8 @@ namespace yandex{namespace contest{namespace invoker{
         void updateMaxMemoryUsageBytes(const std::uint64_t &memoryUsageBytes);
         bool setMaxMemoryUsageBytesIfZero(const std::uint64_t &memoryUsageBytes);
 
+        friend std::ostream &operator<<(std::ostream &out, const ProcessInfo &info);
+
     private:
         ProcessMeta meta_;
         Pid pid_{0};
@@ -65,4 +67,6 @@ namespace yandex{namespace contest{namespace invoker{
         std::atomic<bool> terminated_{false};
         std::atomic<std::uint64_t> maxMemoryUsageBytes_{0};
     };
+
+    std::ostream &operator<<(std::ostream &out, const ProcessInfo &info);
 }}}}}}

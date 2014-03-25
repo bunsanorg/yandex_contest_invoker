@@ -51,8 +51,6 @@ namespace yandex{namespace contest{namespace invoker{
             const Pid pid = starter();
             id2processInfo_[id].setMeta(task.processes[id].meta);
             id2processInfo_[id].setPid(pid);
-            STREAM_TRACE << "Process id mapping was established: " <<
-                            "{ id = " << id << " } = { pid= " << pid << " }.";
             BOOST_ASSERT(pid2id_.find(pid) == pid2id_.end());
             pid2id_[pid] = id;
             monitor_.started(id2processInfo_[id], task.processes[id]);
@@ -109,7 +107,7 @@ namespace yandex{namespace contest{namespace invoker{
         STREAM_DEBUG << "Terminating processes...";
         for (const Id id: monitor_.running())
         {
-            STREAM_TRACE << "Terminating " << id << ".";
+            STREAM_TRACE << "Terminating " << id2processInfo_[id] << ".";
             terminate(id);
             monitor_.terminatedBySystem(id2processInfo_[id]);
         }
@@ -140,8 +138,7 @@ namespace yandex{namespace contest{namespace invoker{
     void ProcessGroupStarter::terminate(const Id id)
     {
         BOOST_ASSERT(id < id2processInfo_.size());
-        STREAM_TRACE << "Attempt to terminate " << id <<
-                        " (pid = " << id2processInfo_[id].pid() << ").";
+        STREAM_TRACE << "Attempt to terminate " << id2processInfo_[id] << ".";
         id2processInfo_[id].terminate();
     }
 

@@ -17,7 +17,7 @@ namespace yandex{namespace contest{namespace invoker{
     {
         const std::size_t id = processInfo.id();
 
-        STREAM_TRACE << "Started id = " << id << ".";
+        STREAM_TRACE << "Started " << processInfo << ".";
         BOOST_ASSERT_MSG(running_.find(id) == running_.end(),
                          "This process has already started.");
         running_.insert(id);
@@ -32,7 +32,7 @@ namespace yandex{namespace contest{namespace invoker{
     {
         const std::size_t id = processInfo.id();
 
-        STREAM_TRACE << "Terminated id = " << id << ".";
+        STREAM_TRACE << "Terminated " << processInfo << ".";
         BOOST_ASSERT(running_.size() + terminated_.size() ==
                      result_.processResults.size());
         BOOST_ASSERT_MSG(running_.find(id) != running_.end(),
@@ -111,7 +111,7 @@ namespace yandex{namespace contest{namespace invoker{
     {
         const std::size_t id = processInfo.id();
 
-        STREAM_TRACE << "Terminated by system id = " << id << ".";
+        STREAM_TRACE << "Terminated by system " << processInfo << ".";
         result_.processResults[id].completionStatus =
             process::Result::CompletionStatus::TERMINATED_BY_SYSTEM;
     }
@@ -125,9 +125,8 @@ namespace yandex{namespace contest{namespace invoker{
 
     bool ExecutionMonitor::runOutOfResourceLimits(ProcessInfo &processInfo)
     {
-        const std::size_t id = processInfo.id();
-
-        STREAM_TRACE << "Check if id = " << id << " run out of resource limits.";
+        STREAM_TRACE << "Check if " << processInfo << " " <<
+                        "run out of resource limits.";
         return collectResourceInfo(processInfo) !=
                process::Result::CompletionStatus::OK;
     }
@@ -137,7 +136,7 @@ namespace yandex{namespace contest{namespace invoker{
     {
         const std::size_t id = processInfo.id();
 
-        STREAM_TRACE << "Collecting resource info id = " << id << ".";
+        STREAM_TRACE << "Collecting resource info for " << processInfo << ".";
         process::Result &result = result_.processResults[id];
         process::Result::CompletionStatus &status = result.completionStatus;
         BOOST_ASSERT(status != process::Result::CompletionStatus::START_FAILED);
@@ -156,24 +155,24 @@ namespace yandex{namespace contest{namespace invoker{
             std::chrono::duration_cast<std::chrono::nanoseconds>(cpuAcct.usage());
         if (resourceUsage.timeUsage > resourceLimits.timeLimit)
         {
-            STREAM_TRACE << "Id = " << id << " run out of time limit.";
+            STREAM_TRACE << processInfo << " run out of time limit.";
             return status = process::Result::CompletionStatus::TIME_LIMIT_EXCEEDED;
         }
         if (resourceUsage.userTimeUsage > resourceLimits.userTimeLimit)
         {
-            STREAM_TRACE << "Id = " << id << " run out of user time limit.";
+            STREAM_TRACE << processInfo << " run out of user time limit.";
             return status =
                 process::Result::CompletionStatus::USER_TIME_LIMIT_EXCEEDED;
         }
         if (resourceUsage.systemTimeUsage > resourceLimits.systemTimeLimit)
         {
-            STREAM_TRACE << "Id = " << id << " run out of system time limit.";
+            STREAM_TRACE << processInfo << " run out of system time limit.";
             return status =
                 process::Result::CompletionStatus::SYSTEM_TIME_LIMIT_EXCEEDED;
         }
         if (resourceUsage.memoryUsageBytes > resourceLimits.memoryLimitBytes)
         {
-            STREAM_TRACE << "Id = " << id << " run out of memory limit.";
+            STREAM_TRACE << processInfo << " run out of memory limit.";
             return status =
                 process::Result::CompletionStatus::MEMORY_LIMIT_EXCEEDED;
         }

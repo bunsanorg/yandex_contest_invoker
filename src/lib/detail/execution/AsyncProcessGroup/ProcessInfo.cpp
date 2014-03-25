@@ -117,4 +117,9 @@ namespace yandex{namespace contest{namespace invoker{
         return maxMemoryUsageBytes_.compare_exchange_strong(
             expected, memoryUsageBytes);
     }
+
+    std::ostream &operator<<(std::ostream &out, const ProcessInfo &info)
+    {
+        return out << info.meta_;
+    }
 }}}}}}

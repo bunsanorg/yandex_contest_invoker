@@ -12,6 +12,7 @@
 #include <bunsan/stream_enum.hpp>
 
 #include <boost/filesystem/path.hpp>
+#include <boost/io/detail/quoted_manip.hpp>
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/map.hpp>
 #include <boost/serialization/nvp.hpp>
@@ -122,6 +123,17 @@ namespace yandex{namespace contest{namespace invoker{
         std::size_t id = 0;
         std::string name;
     };
+
+    inline std::ostream &operator<<(std::ostream &out, const ProcessMeta &meta)
+    {
+        out << "{ " << "id = " << meta.id;
+        if (!meta.name.empty())
+        {
+            out << ", ";
+            out << "name = " << boost::io::quoted(meta.name);
+        }
+        return out << " }";
+    }
 
     struct Process
     {

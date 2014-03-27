@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Notifier.hpp"
 #include "ProcessInfo.hpp"
 
 #include <yandex/contest/invoker/detail/execution/AsyncProcessGroup.hpp>
@@ -39,6 +40,9 @@ namespace yandex{namespace contest{namespace invoker{
 
         void terminatedBySystem(ProcessInfo &processInfo);
 
+        /// All processes has terminated.
+        void allTerminated();
+
         /// Notify monitor that real time limit was exceeded.
         void realTimeLimitExceeded();
 
@@ -60,7 +64,26 @@ namespace yandex{namespace contest{namespace invoker{
 
         const std::unordered_set<Id> &running() const { return running_; }
 
+        boost::signals2::connection onSpawn(
+            const Notifier::SpawnSignal::slot_type &slot)
+        {
+            return signals_.spawn.connect(slot);
+        }
+
+        boost::signals2::connection onTermination(
+            const Notifier::TerminationSignal::slot_type &slot)
+        {
+            return signals_.termination.connect(slot);
+        }
+
+        boost::signals2::connection onClose(
+            const Notifier::CloseSignal::slot_type &slot)
+        {
+            return signals_.close.connect(slot);
+        }
+
     private:
+        Notifier::Signals signals_;
         std::vector<process::ResourceLimits> resourceLimits_;
         AsyncProcessGroup::Result result_;
         std::unordered_set<Id> running_, terminated_,

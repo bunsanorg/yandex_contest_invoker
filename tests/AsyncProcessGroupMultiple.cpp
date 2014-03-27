@@ -4,6 +4,7 @@
 #include "AsyncProcessGroupMultipleFixture.hpp"
 
 #include <bunsan/testing/environment.hpp>
+#include <bunsan/testing/filesystem/read_data.hpp>
 #include <bunsan/testing/filesystem/tempdir.hpp>
 
 #include <boost/lexical_cast.hpp>
@@ -159,6 +160,34 @@ BOOST_AUTO_TEST_CASE(chain_send_back_verify)
 }
 
 BOOST_AUTO_TEST_SUITE_END() // pipes
+
+BOOST_AUTO_TEST_SUITE(notifier)
+
+BOOST_AUTO_TEST_CASE(single)
+{
+    TMP tmp;
+
+    p(0).executable = dir::tests::resources::binary() / "listener";
+    p(0).arguments = {"listener"};
+    p(0).meta.name = "listener";
+    p(0).descriptors[0] = pipe(0).readEnd();
+    addNotifier(pipe(0).writeEnd());
+    p(0).descriptors[2] = PG::File(tmp.path(), PG::AccessMode::WRITE_ONLY);
+
+    p(1).executable = "sleep";
+    p(1).arguments = {"sleep", sleepTimeStr};
+    p(1).terminateGroupOnCrash = false;
+    p(1).meta.name = "worker";
+
+    run();
+    verifyPGR();
+    verifyPR(0);
+    verifyPR(1);
+
+    BOOST_TEST_MESSAGE(filesystem::read_data(tmp.path()));
+}
+
+BOOST_AUTO_TEST_SUITE_END() // notifier
 
 struct BenchmarkFixture: AsyncProcessGroupMultipleFixture
 {

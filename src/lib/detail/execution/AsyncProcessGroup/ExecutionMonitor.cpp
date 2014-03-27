@@ -25,6 +25,8 @@ namespace yandex{namespace contest{namespace invoker{
             groupWaitsForTermination_.insert(id);
         if (process.terminateGroupOnCrash)
             terminateGroupOnCrash_.insert(id);
+
+        signals_.spawn(processInfo.meta());
     }
 
     void ExecutionMonitor::terminated(
@@ -94,6 +96,8 @@ namespace yandex{namespace contest{namespace invoker{
             ; // do nothing
         }
 
+        signals_.termination(processInfo.meta(), processResult);
+
         // group checks
         if (result_.processGroupResult.completionStatus ==
             process_group::Result::CompletionStatus::OK)
@@ -114,6 +118,12 @@ namespace yandex{namespace contest{namespace invoker{
         STREAM_TRACE << "Terminated by system " << processInfo << ".";
         result_.processResults[id].completionStatus =
             process::Result::CompletionStatus::TERMINATED_BY_SYSTEM;
+    }
+
+    void ExecutionMonitor::allTerminated()
+    {
+        STREAM_TRACE << "All processes has terminated.";
+        signals_.close();
     }
 
     void ExecutionMonitor::realTimeLimitExceeded()

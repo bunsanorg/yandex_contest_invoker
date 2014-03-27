@@ -94,12 +94,16 @@ namespace yandex{namespace contest{namespace invoker{
         // note: all files are used, so we will check only pipes
         for (const system::unistd::Pipe &pipe: pipes)
         {
-            BOOST_ASSERT(pipe.readEndIsOpened());
-            if (childUsesFds.find(pipe.readEnd()) == childUsesFds.end())
+            if (pipe.readEndIsOpened() &&
+                childUsesFds.find(pipe.readEnd()) == childUsesFds.end())
+            {
                 childCloseFds_.insert(pipe.readEnd());
-            BOOST_ASSERT(pipe.writeEndIsOpened());
-            if (childUsesFds.find(pipe.writeEnd()) == childUsesFds.end())
+            }
+            if (pipe.writeEndIsOpened() &&
+                childUsesFds.find(pipe.writeEnd()) == childUsesFds.end())
+            {
                 childCloseFds_.insert(pipe.writeEnd());
+            }
         }
     }
 

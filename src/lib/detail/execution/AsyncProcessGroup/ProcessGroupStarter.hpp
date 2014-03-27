@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ExecutionMonitor.hpp"
+#include "Notifier.hpp"
 #include "ProcessInfo.hpp"
 #include "ProcessStarter.hpp"
 
@@ -8,10 +9,13 @@
 #include <yandex/contest/system/unistd/Pipe.hpp>
 
 #include <boost/noncopyable.hpp>
+#include <boost/shared_ptr.hpp>
 #include <boost/thread.hpp>
 
 #include <chrono>
 #include <functional>
+#include <memory>
+#include <vector>
 
 namespace yandex{namespace contest{namespace invoker{
     namespace detail{namespace execution{namespace async_process_group_detail
@@ -65,10 +69,17 @@ namespace yandex{namespace contest{namespace invoker{
         static const Duration waitInterval;
 
     private:
+        boost::asio::io_service ioService_;
+        boost::asio::io_service::work work_;
+
         boost::thread_group workers_;
+
         system::cgroup::ControlGroup thisCgroup_;
         std::vector<ProcessInfo> id2processInfo_;
         std::unordered_map<Pid, Id> pid2id_;
+
+        std::vector<boost::shared_ptr<Notifier>> notifiers_;
+
         ExecutionMonitor monitor_;
         process_group::ResourceLimits resourceLimits_;
         TimePoint realTimeLimitPoint_;

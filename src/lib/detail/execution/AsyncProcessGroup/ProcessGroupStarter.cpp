@@ -8,6 +8,7 @@
 #include <boost/assert.hpp>
 #include <boost/bind.hpp>
 #include <boost/format.hpp>
+#include <boost/make_shared.hpp>
 
 #include <functional>
 
@@ -29,16 +30,72 @@ namespace yandex{namespace contest{namespace invoker{
             std::chrono::milliseconds(100));
 
     ProcessGroupStarter::ProcessGroupStarter(const AsyncProcessGroup::Task &task):
+        work_(ioService_),
         thisCgroup_(
             system::cgroup::ControlGroup::getControlGroup(
                 system::unistd::getpid()
             )
         ),
         id2processInfo_(task.processes.size()),
+        notifiers_(task.notifiers.size()),
         monitor_(task.processes)
     {
-        // TODO restrict memory usage of process group (excluding control process)
+        workers_.create_thread(boost::bind(
+            &boost::asio::io_service::run,
+            &ioService_
+        ));
+
         std::vector<system::unistd::Pipe> pipes_(task.pipesNumber);
+
+        // notifiers setup
+        for (std::size_t notifierId = 0;
+             notifierId < task.notifiers.size();
+             ++notifierId)
+        {
+            const Pipe::End &pipeEnd = task.notifiers[notifierId];
+            BOOST_ASSERT(pipeEnd.end == Pipe::End::WRITE);
+            BOOST_ASSERT(pipeEnd.pipeId < pipes_.size());
+            STREAM_TRACE << "Allocating notifier " << notifierId << "...";
+            auto notifier = notifiers_[notifierId] =
+                boost::make_shared<Notifier>(
+                    ioService_,
+                    pipes_[pipeEnd.pipeId].releaseWriteEnd().release()
+                );
+            STREAM_TRACE << "Notifier " << notifierId << " " <<
+                            "was successfully allocated, configuring...";
+            monitor_.onSpawn(
+                Notifier::SpawnSignal::slot_type(
+                    boost::bind(
+                        &Notifier::spawn,
+                        notifier.get(),
+                        _1
+                    )
+                ).track(notifier)
+            );
+            monitor_.onTermination(
+                Notifier::TerminationSignal::slot_type(
+                    boost::bind(
+                        &Notifier::termination,
+                        notifier.get(),
+                        _1,
+                        _2
+                    )
+                ).track(notifier)
+            );
+            monitor_.onClose(
+                Notifier::CloseSignal::slot_type(
+                    boost::bind(
+                        &Notifier::close,
+                        notifier.get()
+                    )
+                ).track(notifier)
+            );
+            STREAM_TRACE << "Notifier " << notifierId << " " <<
+                            "was successfully configured.";
+        }
+
+        // processes setup
+        // TODO restrict memory usage of process group (excluding control process)
         for (std::size_t id = 0; id < task.processes.size(); ++id)
         {
             BOOST_ASSERT(task.processes[id].meta.id == id);
@@ -55,20 +112,32 @@ namespace yandex{namespace contest{namespace invoker{
             pid2id_[pid] = id;
             monitor_.started(id2processInfo_[id], task.processes[id]);
         }
+
         pipes_.clear();
         BOOST_ASSERT(monitor_.running().size() == task.processes.size());
 
-        // SIGALRM setup
-        struct sigaction act;
-        act.sa_handler = nop;
-        act.sa_flags = 0;
-        sigemptyset(&act.sa_mask);
-        if (sigaction(SIGALRM, &act, nullptr) < 0)
-            BOOST_THROW_EXCEPTION(SystemError("sigaction"));
+        // signals setup
+        {
+            struct sigaction act;
+
+            // SIGALRM
+            act.sa_handler = nop;
+            act.sa_flags = 0;
+            sigemptyset(&act.sa_mask);
+            if (sigaction(SIGALRM, &act, nullptr) < 0)
+                BOOST_THROW_EXCEPTION(SystemError("sigaction"));
+
+            // SIGPIPE
+            act.sa_handler = SIG_IGN;
+            act.sa_flags = 0;
+            if (sigaction(SIGPIPE, &act, nullptr) < 0)
+                BOOST_THROW_EXCEPTION(SystemError("sigaction"));
+        }
 
         // real time limit
         realTimeLimitPoint_ =
-            std::chrono::steady_clock::now() + task.resourceLimits.realTimeLimit;
+            std::chrono::steady_clock::now() +
+            task.resourceLimits.realTimeLimit;
     }
 
     ProcessGroupStarter::~ProcessGroupStarter()
@@ -120,6 +189,10 @@ namespace yandex{namespace contest{namespace invoker{
         }
         // end of function
 
+        monitor_.allTerminated();
+
+        // FIXME need to execute this block regardless of exceptions
+        ioService_.stop();
         STREAM_TRACE << "Joining workers...";
         // everything is terminated, wait for worker threads
         workers_.join_all();

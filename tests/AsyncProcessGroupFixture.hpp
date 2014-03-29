@@ -1,5 +1,6 @@
 #pragma once
 
+#include <yandex/contest/invoker/ContainerConfig.hpp>
 #include <yandex/contest/invoker/detail/execution/AsyncProcessGroup.hpp>
 
 #include <yandex/contest/system/unistd/Operations.hpp>
@@ -25,22 +26,29 @@ struct AsyncProcessGroupFixture
     typedef yandex::contest::invoker::process::Result PR;
     typedef yandex::contest::Tempfile TMP;
 
-    explicit AsyncProcessGroupFixture(const std::size_t size)
+    explicit AsyncProcessGroupFixture(const std::size_t size):
+        containerConfig(
+            yandex::contest::invoker::ContainerConfig::fromEnvironment())
     {
         BOOST_REQUIRE_EQUAL(unistd::getuid(), 0);
         task.processes.resize(size, defaultProcess());
     }
 
-    static PG::Process defaultProcess()
+    PG::Process defaultProcess()
     {
+        const auto &processDefaultSettings =
+            containerConfig.
+            processGroupDefaultSettings.
+            processDefaultSettings;
+
         PG::Process pr;
-        pr.environment["PATH"] = "/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin";
-        pr.environment["HOME"] = "/tmp";
-        pr.environment["LANG"] = "C";
-        pr.environment["LC_ALL"] = "C";
+
+        pr.environment = processDefaultSettings.environment;
+
         pr.descriptors[0] = PG::File("/dev/null");
         pr.descriptors[1] = PG::File("/dev/null");
         pr.descriptors[2] = PG::File("/dev/null");
+
         return pr;
     }
 
@@ -52,7 +60,7 @@ struct AsyncProcessGroupFixture
             task.processes[i].meta.id = i;
 
         ya::AsyncProcess::Options cfg;
-        cfg.executable = "yandex_contest_invoker_ctl";
+        cfg.executable = containerConfig.controlProcessConfig.executable;
 
         PG pg(cfg, task);
         result = pg.wait();
@@ -129,6 +137,8 @@ struct AsyncProcessGroupFixture
     AsyncProcessGroupFixture(): AsyncProcessGroupFixture(0) {}
 
     ~AsyncProcessGroupFixture() {}
+
+    yandex::contest::invoker::ContainerConfig containerConfig;
 
     PG::Task task;
     PG::Result result;

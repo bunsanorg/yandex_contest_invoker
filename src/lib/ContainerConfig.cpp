@@ -2,8 +2,7 @@
 
 #include <yandex/contest/invoker/ConfigurationError.hpp>
 
-#include <bunsan/config/input_archive.hpp>
-#include <bunsan/config/output_archive.hpp>
+#include <bunsan/config/cast.hpp>
 
 #include <bunsan/filesystem/fstream.hpp>
 
@@ -20,7 +19,10 @@ namespace bunsan{namespace config{namespace traits
 namespace boost{namespace property_tree
 {
     template <>
-    struct translator_between<std::string, yandex::contest::system::unistd::MountEntry>
+    struct translator_between<
+        std::string,
+        yandex::contest::system::unistd::MountEntry
+    >
     {
         struct type
         {
@@ -51,8 +53,15 @@ namespace yandex{namespace contest{namespace invoker
 
         constexpr system::lxc::Config::Arch getArch()
         {
-            static_assert(getWordSize() == 32 || getWordSize() == 64, "Unknown word size.");
-            return getWordSize() == 32 ? system::lxc::Config::Arch::x86 : system::lxc::Config::Arch::x86_64;
+            static_assert(
+                getWordSize() == 32 ||
+                getWordSize() == 64,
+                "Unknown word size."
+            );
+            return
+                getWordSize() == 32 ?
+                system::lxc::Config::Arch::x86 :
+                system::lxc::Config::Arch::x86_64;
         }
 
         system::lxc::MountConfig getLxcMountConfig()
@@ -102,7 +111,15 @@ namespace yandex{namespace contest{namespace invoker
             process::DefaultSettings st;
             st.resourceLimits = getProcessResourceLimits();
             st.environment = {
-                {"PATH", "/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin"},
+                {
+                    "PATH",
+                    "/usr/local/bin:"
+                    "/usr/bin:"
+                    "/bin:"
+                    "/usr/local/sbin:"
+                    "/usr/sbin:"
+                    "/sbin"
+                },
                 {"LC_ALL", "C"},
                 {"LANG", "C"},
                 {"PWD", "/"}
@@ -212,18 +229,18 @@ namespace yandex{namespace contest{namespace invoker
         {
             boost::property_tree::read_json(in, cfg);
         }
-        catch (boost::property_tree::ptree_error &e)
+        catch (std::exception &)
         {
-            BOOST_THROW_EXCEPTION(ConfigurationError() << Error::message(e.what()));
+            BOOST_THROW_EXCEPTION(ConfigurationError() <<
+                                  bunsan::enable_nested_current());
         }
-        bunsan::config::input_archive<boost::property_tree::ptree>::load_from_ptree(config, cfg);
+        config = bunsan::config::load<ContainerConfig>(cfg);
         return in;
     }
 
     std::ostream &operator<<(std::ostream &out, const ContainerConfig &config)
     {
-        boost::property_tree::ptree cfg;
-        bunsan::config::output_archive<boost::property_tree::ptree>::save_to_ptree(config, cfg);
+        const auto cfg = bunsan::config::save<boost::property_tree::ptree>(config);
         boost::property_tree::write_json(out, cfg);
         return out;
     }

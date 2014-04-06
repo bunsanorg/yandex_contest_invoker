@@ -6,10 +6,10 @@ namespace yandex{namespace contest{namespace invoker{namespace notifier
 {
     namespace detail
     {
-        bool logQueuedWriterError(const boost::system::error_code &ec)
+        void logQueuedWriterError(const boost::system::error_code &ec)
         {
-            STREAM_ERROR << "Unable to write object: " << ec.message();
-            return false;
+            if (ec)
+                STREAM_ERROR << "Unable to write object: " << ec.message();
         }
     }
 }}}}

@@ -97,7 +97,7 @@ BOOST_FIXTURE_TEST_CASE(Notifier, NotifierFactory)
                 1024
             );
         });
-    notifier.async_start();
+    notifier.start();
 
     const Notifier::Event::Event spawnEvent_(spawnEvent);
     const Notifier::Event::Event terminationEvent_(terminationEvent);
@@ -181,7 +181,7 @@ BOOST_FIXTURE_TEST_CASE(QueuedWriter, NotifierFactory)
             BOOST_TEST_LOCK;
             BOOST_CHECK_EQUAL(event.errorCode, boost::asio::error::eof);
         });
-    notifier.async_start();
+    notifier.start();
 
     boost::thread_group threads;
     for (std::size_t i = 0; i < 10; ++i)

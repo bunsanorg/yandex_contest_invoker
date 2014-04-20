@@ -49,7 +49,7 @@ namespace yandex{namespace contest{namespace invoker
             notifierFd_(ioService_, notifierFd),
             notifierConnection_(notifierFd_) {}
 
-        void async_start()
+        void start()
         {
             read();
         }
@@ -123,9 +123,9 @@ namespace yandex{namespace contest{namespace invoker
 
     Notifier::~Notifier() { /*~Impl()*/ }
 
-    void Notifier::async_start()
+    void Notifier::start()
     {
-        pimpl->async_start();
+        pimpl->start();
     }
 
     void Notifier::close()

@@ -51,7 +51,7 @@ namespace yandex{namespace contest{namespace invoker
         Notifier(boost::asio::io_service &ioService, const int notifierFd);
         ~Notifier();
 
-        void async_start();
+        void start();
         void close();
 
     private:

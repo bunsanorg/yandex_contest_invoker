@@ -43,7 +43,7 @@ int main()
             std::abort();
         });
 
-    notifier.async_start();
+    notifier.start();
     ioService.run();
     BOOST_ASSERT(spawn_count == 2);
     BOOST_ASSERT(termination_count == 1);

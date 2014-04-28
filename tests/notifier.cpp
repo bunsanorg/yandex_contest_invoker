@@ -20,9 +20,9 @@ namespace unistd = ya::system::unistd;
 
 BOOST_AUTO_TEST_SUITE(notifier)
 
-struct NotifierFactory
+struct NotifierFixture
 {
-    NotifierFactory():
+    NotifierFixture():
         writeEnd(ioService, pipe.releaseWriteEnd().release()),
         oc(writeEnd),
         notifier(ioService, pipe.releaseReadEnd().release()) {}
@@ -36,7 +36,7 @@ struct NotifierFactory
     yac::Notifier notifier;
 };
 
-BOOST_FIXTURE_TEST_CASE(Notifier, NotifierFactory)
+BOOST_FIXTURE_TEST_CASE(Notifier, NotifierFixture)
 {
     using yac::Notifier;
 
@@ -119,7 +119,7 @@ BOOST_FIXTURE_TEST_CASE(Notifier, NotifierFactory)
     BOOST_CHECK_EQUAL(eventNumber, 2);
 }
 
-BOOST_FIXTURE_TEST_CASE(QueuedWriter, NotifierFactory)
+BOOST_FIXTURE_TEST_CASE(QueuedWriter, NotifierFixture)
 {
     boost::mutex boostTestLock;
 #define BOOST_TEST_LOCK \
@@ -250,7 +250,7 @@ BOOST_FIXTURE_TEST_CASE(QueuedWriter, NotifierFactory)
     BOOST_CHECK_EQUAL(runningEvents, 2 * STEPS * WORKERS);
 }
 
-BOOST_FIXTURE_TEST_CASE(QueuedWriterLog, NotifierFactory)
+BOOST_FIXTURE_TEST_CASE(QueuedWriterLog, NotifierFixture)
 {
     // check that this constructor compiles
     yan::QueuedEventWriter<Connection> writer(oc);

@@ -119,6 +119,41 @@ BOOST_FIXTURE_TEST_CASE(Notifier, NotifierFixture)
     BOOST_CHECK_EQUAL(eventNumber, 2);
 }
 
+BOOST_FIXTURE_TEST_CASE(NotifierClose, NotifierFixture)
+{
+    using yac::Notifier;
+
+    bool error = false;
+
+    notifier.onError(
+        [&](const Notifier::Error::Event &event)
+        {
+            error = true;
+            BOOST_CHECK_EQUAL(
+                event.errorCode,
+                boost::asio::error::operation_aborted
+            );
+        });
+
+    notifier.start();
+
+    Notifier::Spawn::Event spawnEvent;
+
+    oc.async_write(
+        spawnEvent,
+        [&](const boost::system::error_code &ec)
+        {
+            BOOST_REQUIRE(!ec);
+        });
+
+    ioService.post([&]{
+        notifier.close();
+    });
+
+    ioService.run();
+    BOOST_CHECK(error);
+}
+
 BOOST_FIXTURE_TEST_CASE(QueuedWriter, NotifierFixture)
 {
     boost::mutex boostTestLock;

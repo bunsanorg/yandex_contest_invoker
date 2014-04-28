@@ -46,6 +46,7 @@ namespace yandex{namespace contest{namespace invoker
     public:
         Impl(io_service &ioService, const int notifierFd):
             ioService_(ioService),
+            strand_(ioService),
             notifierFd_(ioService_, notifierFd),
             notifierConnection_(notifierFd_) {}
 
@@ -56,6 +57,9 @@ namespace yandex{namespace contest{namespace invoker
 
         void close()
         {
+            strand_.dispatch([this]{
+                closed_ = true;
+            });
             notifierConnection_.close();
         }
 
@@ -74,11 +78,11 @@ namespace yandex{namespace contest{namespace invoker
         {
             notifierConnection_.async_read(
                 inboundEvent_,
-                boost::bind(
+                strand_.wrap(boost::bind(
                     &Impl::handle_read,
                     this,
                     boost::asio::placeholders::error
-                )
+                ))
             );
         }
 
@@ -87,7 +91,10 @@ namespace yandex{namespace contest{namespace invoker
             if (ec)
             {
                 Error::Event error;
-                error.errorCode = ec;
+                if (closed_)
+                    error.errorCode = boost::asio::error::operation_aborted;
+                else
+                    error.errorCode = ec;
                 (*this)(error);
             }
             else
@@ -101,12 +108,15 @@ namespace yandex{namespace contest{namespace invoker
         friend class Notifier;
 
         io_service &ioService_;
+        io_service::strand strand_;
         posix::stream_descriptor notifierFd_;
         notifier::ObjectConnection<
             posix::stream_descriptor
         > notifierConnection_;
 
         Event::Event inboundEvent_;
+
+        bool closed_ = false;
     };
 
     Notifier::Notifier(io_service &ioService, const int notifierFd):

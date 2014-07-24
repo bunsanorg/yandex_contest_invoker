@@ -12,4 +12,8 @@ namespace yandex{namespace contest{namespace invoker{namespace filesystem
      */
     boost::filesystem::path keepInRoot(const boost::filesystem::path &path,
                                        const boost::filesystem::path &root);
+
+    /// This function makes strips root prefix from path or throws .
+    boost::filesystem::path containerPath(const boost::filesystem::path &path,
+                                          const boost::filesystem::path &root);
 }}}}

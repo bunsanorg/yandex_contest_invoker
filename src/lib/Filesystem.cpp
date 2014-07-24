@@ -36,6 +36,11 @@ namespace yandex{namespace contest{namespace invoker
         return filesystem::keepInRoot(path, containerRoot_);
     }
 
+    boost::filesystem::path Filesystem::containerPath(const boost::filesystem::path &path) const
+    {
+        return filesystem::containerPath(path, containerRoot_);
+    }
+
     void Filesystem::push(const boost::filesystem::path &local,
                           const boost::filesystem::path &remote,
                           const system::unistd::access::Id &ownerId,

@@ -35,6 +35,16 @@ BOOST_AUTO_TEST_CASE(keepInRoot)
     }
 }
 
+BOOST_AUTO_TEST_CASE(relativePath)
+{
+    BOOST_CHECK_EQUAL(ya::containerPath("/srv/lxc", "/srv/lxc"), "/");
+    BOOST_CHECK_EQUAL(ya::containerPath("/srv/lxc/some", "/srv/lxc"), "/some");
+    BOOST_CHECK_EQUAL(ya::containerPath("/srv/lxc/some", "/"), "/srv/lxc/some");
+    BOOST_CHECK_EQUAL(ya::containerPath("/", "/"), "/");
+    BOOST_CHECK_THROW(ya::containerPath("/srv/wrong", "/srv/lxc"), ya::NonContainerPathError);
+    BOOST_CHECK_THROW(ya::containerPath("/does/not/matter", "srv/lxc"), ya::InvalidContainerRootError);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
 struct CreateFileFixture

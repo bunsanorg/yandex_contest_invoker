@@ -43,6 +43,9 @@ bunsan_add_shared_library(${PROJECT_NAME}
     src/lib/detail/execution/AsyncProcessGroup/ExecutionMonitor.cpp
     src/lib/detail/execution/AsyncProcessGroup/Streams.cpp
     src/lib/detail/execution/AsyncProcessGroup/Notifier.cpp
+    src/lib/detail/execution/AsyncProcessGroup/EventWriter.cpp
+    src/lib/detail/execution/AsyncProcessGroup/EventWriter/NativeEventWriter.cpp
+    src/lib/detail/execution/AsyncProcessGroup/EventWriter/PlainTextEventWriter.cpp
 )
 bunsan_use(${PROJECT_NAME})
 

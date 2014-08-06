@@ -163,10 +163,21 @@ namespace yandex{namespace contest{namespace invoker
          * notifications that can be accessed by Notifier.
          *
          * \throws ProcessGroupNotifierIllegalSinkError
-         * if pipeEnd.end != WRITE
+         * if notificationStream.pipeEnd.end != WRITE
          */
-        Pipe::End notifier(const std::size_t notifierId) const;
-        void setNotifier(const std::size_t notifierId, const Pipe::End &pipeEnd);
+        NotificationStream notifier(const std::size_t notifierId) const;
+
+        void setNotifier(const std::size_t notifierId,
+                         const NotificationStream &notificationStream);
+        void setNotifier(const std::size_t notifierId,
+                         const Pipe::End &pipeEnd,
+                         const NotificationStream::Protocol protocol);
+        void setNotifier(const std::size_t notifierId,
+                         const Pipe::End &pipeEnd);
+
+        std::size_t addNotifier(const NotificationStream &notificationStream);
+        std::size_t addNotifier(const Pipe::End &pipeEnd,
+                                const NotificationStream::Protocol protocol);
         std::size_t addNotifier(const Pipe::End &pipeEnd);
 
         /*!

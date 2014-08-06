@@ -52,14 +52,16 @@ namespace yandex{namespace contest{namespace invoker{
              notifierId < task.notifiers.size();
              ++notifierId)
         {
-            const Pipe::End &pipeEnd = task.notifiers[notifierId];
+            const NotificationStream &notificationStream = task.notifiers[notifierId];
+            const Pipe::End &pipeEnd = notificationStream.pipeEnd;
             BOOST_ASSERT(pipeEnd.end == Pipe::End::WRITE);
             BOOST_ASSERT(pipeEnd.pipeId < pipes_.size());
             STREAM_TRACE << "Allocating notifier " << notifierId << "...";
             auto notifier = notifiers_[notifierId] =
                 boost::make_shared<Notifier>(
                     ioService_,
-                    pipes_[pipeEnd.pipeId].releaseWriteEnd().release()
+                    pipes_[pipeEnd.pipeId].releaseWriteEnd().release(),
+                    notificationStream.protocol
                 );
             STREAM_TRACE << "Notifier " << notifierId << " " <<
                             "was successfully allocated, configuring...";

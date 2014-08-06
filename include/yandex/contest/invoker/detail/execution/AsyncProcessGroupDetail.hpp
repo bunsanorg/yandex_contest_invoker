@@ -104,6 +104,25 @@ namespace yandex{namespace contest{namespace invoker{
         int fd;
     };
 
+    struct NotificationStream
+    {
+        BUNSAN_INCLASS_STREAM_ENUM_CLASS(Protocol,
+        (
+            NATIVE,
+            PLAIN_TEXT
+        ))
+
+        template <typename Archive>
+        void serialize(Archive &ar, const unsigned int)
+        {
+            ar & BOOST_SERIALIZATION_NVP(pipeEnd);
+            ar & BOOST_SERIALIZATION_NVP(protocol);
+        }
+
+        Pipe::End pipeEnd;
+        Protocol protocol;
+    };
+
     typedef boost::variant<Pipe::End, File, FdAlias> Stream;
     typedef boost::variant<File, FdAlias> NonPipeStream;
 
@@ -185,7 +204,7 @@ namespace yandex{namespace contest{namespace invoker{
         // we need to know only number of pipes to be allocated
         std::size_t pipesNumber = 0;
 
-        std::vector<Pipe::End> notifiers;
+        std::vector<NotificationStream> notifiers;
 
         process_group::ResourceLimits resourceLimits;
     };

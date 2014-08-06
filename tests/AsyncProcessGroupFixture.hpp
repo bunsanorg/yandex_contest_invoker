@@ -120,13 +120,19 @@ struct AsyncProcessGroupFixture
         return PG::Pipe(id);
     }
 
-    std::size_t addNotifier(const PG::Pipe::End &pipeEnd)
+    std::size_t addNotifier(const PG::Pipe::End &pipeEnd,
+                            const PG::NotificationStream::Protocol protocol)
     {
         BOOST_TEST_CHECKPOINT(BOOST_CURRENT_FUNCTION);
         BOOST_REQUIRE_EQUAL(pipeEnd.end, PG::Pipe::End::WRITE);
         const std::size_t id = task.notifiers.size();
-        task.notifiers.push_back(pipeEnd);
+        task.notifiers.push_back(PG::NotificationStream{pipeEnd, protocol});
         return id;
+    }
+
+    std::size_t addNotifier(const PG::Pipe::End &pipeEnd)
+    {
+        return addNotifier(pipeEnd, PG::NotificationStream::Protocol::NATIVE);
     }
 
     const std::vector<PR> &pr() const

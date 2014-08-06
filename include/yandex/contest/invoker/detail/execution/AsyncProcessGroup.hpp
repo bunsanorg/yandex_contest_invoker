@@ -28,6 +28,7 @@ namespace yandex{namespace contest{namespace invoker{
         typedef async_process_group_detail::File File;
         typedef async_process_group_detail::Pipe Pipe;
         typedef async_process_group_detail::FdAlias FdAlias;
+        typedef async_process_group_detail::NotificationStream NotificationStream;
         typedef async_process_group_detail::Process Process;
         typedef async_process_group_detail::ProcessMeta ProcessMeta;
         typedef async_process_group_detail::Stream Stream;

@@ -1,7 +1,8 @@
 #pragma once
 
+#include "EventWriter.hpp"
+
 #include <yandex/contest/invoker/detail/CommonProcessTypedefs.hpp>
-#include <yandex/contest/invoker/notifier/QueuedEventWriter.hpp>
 #include <yandex/contest/invoker/process/Result.hpp>
 
 #include <boost/signals2/signal.hpp>
@@ -30,7 +31,9 @@ namespace yandex{namespace contest{namespace invoker{
         };
 
     public:
-        Notifier(boost::asio::io_service &ioService, const int fd);
+        Notifier(boost::asio::io_service &ioService,
+                 const int fd,
+                 const NotificationStream::Protocol protocol);
 
         void spawn(const ProcessMeta &processMeta);
 
@@ -41,10 +44,9 @@ namespace yandex{namespace contest{namespace invoker{
         void close();
 
     private:
-        typedef boost::asio::posix::stream_descriptor Connection;
+        typedef EventWriter::Connection Connection;
 
         Connection fd_;
-        notifier::ObjectConnection<Connection> connection_;
-        notifier::QueuedEventWriter<Connection> writer_;
+        EventWriterPointer writer_;
     };
 }}}}}}

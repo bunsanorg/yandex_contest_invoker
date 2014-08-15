@@ -252,6 +252,18 @@ namespace yandex{namespace contest{namespace invoker
         return addNotifier(pipeEnd, NotificationStream::Protocol::NATIVE);
     }
 
+    Pipe::End ProcessGroup::addNotifier(const NotificationStream::Protocol protocol)
+    {
+        const Pipe pipe = createPipe();
+        addNotifier(pipe.writeEnd(), protocol);
+        return pipe.readEnd();
+    }
+
+    Pipe::End ProcessGroup::addNotifier()
+    {
+        return addNotifier(NotificationStream::Protocol::NATIVE);
+    }
+
     NotificationStream ProcessGroup::notifier(const std::size_t notifierId) const
     {
         if (notifierId >= task_.notifiers.size())

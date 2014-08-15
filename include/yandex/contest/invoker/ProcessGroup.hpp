@@ -179,6 +179,8 @@ namespace yandex{namespace contest{namespace invoker
         std::size_t addNotifier(const Pipe::End &pipeEnd,
                                 const NotificationStream::Protocol protocol);
         std::size_t addNotifier(const Pipe::End &pipeEnd);
+        Pipe::End addNotifier(const NotificationStream::Protocol protocol);
+        Pipe::End addNotifier();
 
         /*!
          * \brief Default settings for process.

@@ -86,6 +86,27 @@ namespace yandex{namespace contest{namespace invoker
         processGroup_->processTask(id_).environment = environment;
     }
 
+    std::string Process::environment(const std::string &key) const
+    {
+        const auto &env = processGroup_->processTask(id_).environment;
+        const auto iter = env.find(key);
+        if (iter == env.end())
+            BOOST_THROW_EXCEPTION(
+                ProcessUndefinedEnvironmentVariableError() <<
+                ProcessUndefinedEnvironmentVariableError::key(key));
+        return iter->second;
+    }
+
+    void Process::setEnvironment(const std::string &key, const std::string &value)
+    {
+        processGroup_->processTask(id_).environment[key] = value;
+    }
+
+    void Process::unsetEnvironment(const std::string &key)
+    {
+        processGroup_->processTask(id_).environment.erase(key);
+    }
+
     const Process::ResourceLimits &Process::resourceLimits() const
     {
         return processGroup_->processTask(id_).resourceLimits;

@@ -25,6 +25,13 @@ namespace yandex{namespace contest{namespace invoker
     struct ProcessDescriptorOutOfRangeError:
         virtual ProcessDescriptorError {};
 
+    struct ProcessEnvironmentError: virtual ProcessError
+    {
+        typedef boost::error_info<struct keyTag, std::string> key;
+    };
+    struct ProcessUndefinedEnvironmentVariableError:
+        virtual ProcessEnvironmentError {};
+
     namespace process
     {
         class DefaultSettings;
@@ -105,6 +112,10 @@ namespace yandex{namespace contest{namespace invoker
 
         const ProcessEnvironment &environment() const;
         void setEnvironment(const ProcessEnvironment &environment);
+
+        std::string environment(const std::string &key) const;
+        void setEnvironment(const std::string &key, const std::string &value);
+        void unsetEnvironment(const std::string &key);
 
         const ResourceLimits &resourceLimits() const;
         void setResourceLimits(const ResourceLimits &resourceLimits);

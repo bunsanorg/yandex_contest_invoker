@@ -8,6 +8,7 @@
 #include <yandex/contest/system/unistd/Pipe.hpp>
 
 #include <boost/asio.hpp>
+#include <boost/optional/optional_io.hpp>
 #include <boost/thread.hpp>
 #include <boost/thread/mutex.hpp>
 

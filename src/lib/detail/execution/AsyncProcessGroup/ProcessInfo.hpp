@@ -3,6 +3,7 @@
 #include <yandex/contest/invoker/detail/CommonProcessTypedefs.hpp>
 
 #include <yandex/contest/system/cgroup/ControlGroup.hpp>
+#include <yandex/contest/system/cgroup/Termination.hpp>
 
 #include <atomic>
 
@@ -69,6 +70,7 @@ namespace yandex{namespace contest{namespace invoker{
         ProcessMeta meta_;
         Pid pid_{0};
         system::cgroup::ControlGroupPointer controlGroup_;
+        system::cgroup::TerminationGuard terminationGuard_;
         std::atomic<bool> terminated_{false};
         std::atomic<std::uint64_t> maxMemoryUsageBytes_{0};
     };

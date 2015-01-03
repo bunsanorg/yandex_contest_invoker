@@ -71,11 +71,13 @@ namespace yandex{namespace contest{namespace invoker{
         const system::cgroup::ControlGroupPointer &controlGroup)
     {
         controlGroup_ = controlGroup;
+        terminationGuard_ = system::cgroup::TerminationGuard(controlGroup_);
     }
 
     void ProcessInfo::unsetControlGroup()
     {
         controlGroup_.reset();
+        terminationGuard_ = system::cgroup::TerminationGuard();
     }
 
     void ProcessInfo::terminate()

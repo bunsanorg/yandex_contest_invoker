@@ -1,5 +1,6 @@
 #include "ProcessGroupStarter.hpp"
 
+#include <yandex/contest/system/cgroup/MultipleControlGroup.hpp>
 #include <yandex/contest/system/unistd/Operations.hpp>
 
 #include <yandex/contest/detail/LogHelper.hpp>
@@ -31,11 +32,7 @@ namespace yandex{namespace contest{namespace invoker{
 
     ProcessGroupStarter::ProcessGroupStarter(const AsyncProcessGroup::Task &task):
         work_(ioService_),
-        thisCgroup_(
-            system::cgroup::ControlGroup::getControlGroup(
-                system::unistd::getpid()
-            )
-        ),
+        thisCgroup_(system::cgroup::MultipleControlGroup::forSelf()),
         id2processInfo_(task.processes.size()),
         notifiers_(task.notifiers.size()),
         monitor_(task.processes)
@@ -103,9 +100,9 @@ namespace yandex{namespace contest{namespace invoker{
             BOOST_ASSERT(task.processes[id].meta.id == id);
             const std::string cid = str(boost::format("id_%1%") % id);
             // we don't children to have access to cgroups
-            system::cgroup::ControlGroup &cg =
-                id2processInfo_[id].controlGroup() =
-                    thisCgroup_.createChild(cid, 0700);
+            system::cgroup::ControlGroupPointer cg =
+                thisCgroup_->createChild(cid, 0700);
+            id2processInfo_[id].setControlGroup(cg);
             ProcessStarter starter(cg, task.processes[id], pipes_);
             const Pid pid = starter();
             id2processInfo_[id].setMeta(task.processes[id].meta);
@@ -205,7 +202,12 @@ namespace yandex{namespace contest{namespace invoker{
         {
             BOOST_ASSERT_MSG(processInfo.terminated(),
                              "Every process should be terminated.");
-            processInfo.controlGroup().close();
+            if (!processInfo.controlGroup().tasks().empty())
+            {
+                STREAM_ERROR << processInfo.controlGroup() << " is not empty!";
+                processInfo.terminate();
+            }
+            processInfo.unsetControlGroup();
         }
         STREAM_TRACE << "Execution loop has completed.";
     }

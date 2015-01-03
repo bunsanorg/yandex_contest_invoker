@@ -3,8 +3,12 @@
 #include <yandex/contest/detail/LogHelper.hpp>
 #include <yandex/contest/SystemError.hpp>
 
+#include <yandex/contest/system/cgroup/CpuAccounting.hpp>
 #include <yandex/contest/system/cgroup/Memory.hpp>
 #include <yandex/contest/system/cgroup/MemorySwap.hpp>
+#include <yandex/contest/system/cgroup/Termination.hpp>
+
+#include <boost/assert.hpp>
 
 #include <signal.h>
 
@@ -53,12 +57,25 @@ namespace yandex{namespace contest{namespace invoker{
 
     const system::cgroup::ControlGroup &ProcessInfo::controlGroup() const
     {
-        return controlGroup_;
+        BOOST_ASSERT(controlGroup_);
+        return *controlGroup_;
     }
 
     system::cgroup::ControlGroup &ProcessInfo::controlGroup()
     {
-        return controlGroup_;
+        BOOST_ASSERT(controlGroup_);
+        return *controlGroup_;
+    }
+
+    void ProcessInfo::setControlGroup(
+        const system::cgroup::ControlGroupPointer &controlGroup)
+    {
+        controlGroup_ = controlGroup;
+    }
+
+    void ProcessInfo::unsetControlGroup()
+    {
+        controlGroup_.reset();
     }
 
     void ProcessInfo::terminate()
@@ -70,7 +87,7 @@ namespace yandex{namespace contest{namespace invoker{
             BOOST_THROW_EXCEPTION(SystemError("kill") <<
                                   Error::message("This should not happen."));
         // \todo Do we need to check for lost children and report?
-        controlGroup_.terminate();
+        system::cgroup::terminate(controlGroup_);
         terminated_.store(true);
 
         // collect memory usage info
@@ -84,6 +101,28 @@ namespace yandex{namespace contest{namespace invoker{
     bool ProcessInfo::terminated() const
     {
         return terminated_.load();
+    }
+
+    void ProcessInfo::fillResourceUsage(
+        process::ResourceUsage &resourceUsage) const
+    {
+        resourceUsage.memoryUsageBytes = maxMemoryUsageBytes();
+        fillTimeUsage(resourceUsage);
+    }
+
+    void ProcessInfo::fillTimeUsage(
+        process::ResourceUsage &resourceUsage) const
+    {
+        const system::cgroup::CpuAccounting cpuAcct(controlGroup_);
+        const auto cpuAcctStat = cpuAcct.stat();
+        resourceUsage.userTimeUsage =
+            std::chrono::duration_cast<std::chrono::milliseconds>(
+                cpuAcctStat.userUsage);
+        resourceUsage.systemTimeUsage =
+            std::chrono::duration_cast<std::chrono::milliseconds>(
+                cpuAcctStat.systemUsage);
+        resourceUsage.timeUsage =
+            std::chrono::duration_cast<std::chrono::nanoseconds>(cpuAcct.usage());
     }
 
     std::uint64_t ProcessInfo::maxMemoryUsageBytes() const

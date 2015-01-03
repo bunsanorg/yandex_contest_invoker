@@ -47,9 +47,14 @@ namespace yandex{namespace contest{namespace invoker{
 
         const system::cgroup::ControlGroup &controlGroup() const;
         system::cgroup::ControlGroup &controlGroup();
+        void setControlGroup(const system::cgroup::ControlGroupPointer &controlGroup);
+        void unsetControlGroup();
 
         void terminate();
         bool terminated() const;
+
+        void fillResourceUsage(process::ResourceUsage &resourceUsage) const;
+        void fillTimeUsage(process::ResourceUsage &resourceUsage) const;
 
         std::uint64_t maxMemoryUsageBytes() const;
         void updateMaxMemoryUsageFromMemoryStat();
@@ -63,7 +68,7 @@ namespace yandex{namespace contest{namespace invoker{
     private:
         ProcessMeta meta_;
         Pid pid_{0};
-        system::cgroup::ControlGroup controlGroup_;
+        system::cgroup::ControlGroupPointer controlGroup_;
         std::atomic<bool> terminated_{false};
         std::atomic<std::uint64_t> maxMemoryUsageBytes_{0};
     };

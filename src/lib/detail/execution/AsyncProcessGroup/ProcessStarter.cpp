@@ -34,14 +34,15 @@ namespace yandex{namespace contest{namespace invoker{
 
     struct InvalidTargetFdAliasError: virtual FdAliasError {};
 
-    ProcessStarter::ProcessStarter(system::cgroup::ControlGroup &controlGroup,
-                                   const AsyncProcessGroup::Process &process,
-                                   std::vector<system::unistd::Pipe> &pipes):
-        controlGroup_(controlGroup),
-        ownerId_(process.ownerId),
-        exec_(process.executable, process.arguments, process.environment),
-        currentPath_(process.currentPath),
-        resourceLimits_(process.resourceLimits)
+    ProcessStarter::ProcessStarter(
+        const system::cgroup::ControlGroupPointer &controlGroup,
+        const AsyncProcessGroup::Process &process,
+        std::vector<system::unistd::Pipe> &pipes):
+            controlGroup_(controlGroup),
+            ownerId_(process.ownerId),
+            exec_(process.executable, process.arguments, process.environment),
+            currentPath_(process.currentPath),
+            resourceLimits_(process.resourceLimits)
     {
         setUpControlGroup();
         // TODO check that 0, 1, 2 are allocated
@@ -143,7 +144,7 @@ namespace yandex{namespace contest{namespace invoker{
             // We should not take into account our cpu time.
             // But it is not possible to attach task without a hack
             // not being root. So, attach it just before dropId() call.
-            controlGroup_.attachTask(system::unistd::getpid());
+            controlGroup_->attachSelf();
             system::unistd::access::dropId(ownerId_);
             childSetUpResourceLimitsUser();
             // TODO usePath?
@@ -276,7 +277,7 @@ namespace yandex{namespace contest{namespace invoker{
 
     void ProcessStarter::setUpControlGroup()
     {
-        system::cgroup::ControlGroup parentCG = controlGroup_.parent();
+        system::cgroup::ControlGroupPointer parentCG = controlGroup_->parent();
 
         const system::cgroup::CpuSet parentCpuSet(parentCG), cpuSet(controlGroup_);
         cpuSet.setCpus(parentCpuSet.cpus());

@@ -74,7 +74,7 @@ namespace yandex{namespace contest{namespace invoker{
 
         boost::thread_group workers_;
 
-        system::cgroup::ControlGroup thisCgroup_;
+        system::cgroup::ControlGroupPointer thisCgroup_;
         std::vector<ProcessInfo> id2processInfo_;
         std::unordered_map<Pid, Id> pid2id_;
 

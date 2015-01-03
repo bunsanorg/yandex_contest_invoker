@@ -20,9 +20,10 @@ namespace yandex{namespace contest{namespace invoker{
     class ProcessStarter: private boost::noncopyable
     {
     public:
-        ProcessStarter(system::cgroup::ControlGroup &controlGroup,
-                       const AsyncProcessGroup::Process &process,
-                       std::vector<system::unistd::Pipe> &pipes);
+        ProcessStarter(
+            const system::cgroup::ControlGroupPointer &controlGroup,
+            const AsyncProcessGroup::Process &process,
+            std::vector<system::unistd::Pipe> &pipes);
 
         /// Start process and return it's pid.
         Pid operator()();
@@ -43,7 +44,7 @@ namespace yandex{namespace contest{namespace invoker{
         void childSetUpResourceLimitsUser();
 
     private:
-        system::cgroup::ControlGroup &controlGroup_;
+        system::cgroup::ControlGroupPointer controlGroup_;
         system::unistd::access::Id ownerId_;
         system::unistd::Exec exec_;
         std::unordered_map<int, int> descriptors_;

@@ -1,7 +1,5 @@
 #include "ExecutionMonitor.hpp"
 
-#include <yandex/contest/system/cgroup/CpuAccounting.hpp>
-
 #include <yandex/contest/detail/LogHelper.hpp>
 
 #include <boost/assert.hpp>
@@ -152,17 +150,7 @@ namespace yandex{namespace contest{namespace invoker{
         BOOST_ASSERT(status != process::Result::CompletionStatus::START_FAILED);
         process::ResourceUsage &resourceUsage = result.resourceUsage;
         const process::ResourceLimits &resourceLimits = resourceLimits_[id];
-        const system::cgroup::CpuAccounting cpuAcct(processInfo.controlGroup());
-        resourceUsage.memoryUsageBytes = processInfo.maxMemoryUsageBytes();
-        const auto cpuAcctStat = cpuAcct.stat();
-        resourceUsage.userTimeUsage =
-            std::chrono::duration_cast<std::chrono::milliseconds>(
-                cpuAcctStat.userUsage);
-        resourceUsage.systemTimeUsage =
-            std::chrono::duration_cast<std::chrono::milliseconds>(
-                cpuAcctStat.systemUsage);
-        resourceUsage.timeUsage =
-            std::chrono::duration_cast<std::chrono::nanoseconds>(cpuAcct.usage());
+        processInfo.fillResourceUsage(resourceUsage);
         if (resourceUsage.timeUsage > resourceLimits.timeLimit)
         {
             STREAM_TRACE << processInfo << " run out of time limit.";

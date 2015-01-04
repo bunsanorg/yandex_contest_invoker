@@ -7,6 +7,7 @@
 #include <yandex/contest/invoker/process/DefaultSettings.hpp>
 #include <yandex/contest/invoker/process_group/ResourceLimits.hpp>
 #include <yandex/contest/invoker/process_group/Result.hpp>
+#include <yandex/contest/invoker/process_group/State.hpp>
 
 #include <yandex/contest/IntrusivePointeeBase.hpp>
 
@@ -60,6 +61,7 @@ namespace yandex{namespace contest{namespace invoker
         typedef process_group::ResourceLimits ResourceLimits;
         typedef process_group::ResourceUsage ResourceUsage;
         typedef process_group::DefaultSettings DefaultSettings;
+        typedef process_group::State State;
 
     public:
         static ProcessGroupPointer create(const ContainerPointer &container);
@@ -136,6 +138,11 @@ namespace yandex{namespace contest{namespace invoker
          * \deprecated We can use wait() instead.
          */
         const Result &result();
+
+        /*!
+         * \return Current state of process group.
+         */
+        State state();
 
         /*!
          * \brief Create new process, associated with ProcessGroup.

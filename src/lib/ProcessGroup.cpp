@@ -191,6 +191,13 @@ namespace yandex{namespace contest{namespace invoker
         return result_->processGroupResult;
     }
 
+    ProcessGroup::State ProcessGroup::state()
+    {
+        // note: current implementation relies on
+        // consistent definition with system::lxc::Lxc::State
+        return static_cast<State>(container_->state());
+    }
+
     const ProcessGroup::ResourceLimits &ProcessGroup::resourceLimits() const
     {
         return task_.resourceLimits;

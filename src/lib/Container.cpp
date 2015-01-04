@@ -118,23 +118,8 @@ namespace yandex{namespace contest{namespace invoker
             }, controlProcessOptions_);
     }
 
-    void Container::freeze()
-    {
-        lxcPtr_->freeze();
-    }
-
-    void Container::unfreeze()
-    {
-        lxcPtr_->unfreeze();
-    }
-
     void Container::stop()
     {
         lxcPtr_->stop();
-    }
-
-    system::lxc::Lxc::State Container::state()
-    {
-        return lxcPtr_->state();
     }
 }}}

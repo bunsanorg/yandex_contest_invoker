@@ -33,43 +33,12 @@ BOOST_AUTO_TEST_CASE(slow)
     verifyPG(PGR::CompletionStatus::REAL_TIME_LIMIT_EXCEEDED);
 }
 
-BOOST_AUTO_TEST_CASE(freezing)
-{
-    p(0, "sleep", sleepTimeStr);
-    CALL_CHECKPOINT(pg->start());
-    // note: this is not stable.
-    // Increasing sleepTime can help
-    // if process dies in timeout.
-    CALL_CHECKPOINT(pg->freeze());
-    CALL_CHECKPOINT(pg->unfreeze());
-    verifyOK();
-}
-
 BOOST_AUTO_TEST_CASE(stop)
 {
     p(0, "sleep", sleepTimeStr);
     CALL_CHECKPOINT(pg->start());
     CALL_CHECKPOINT(pg->stop());
     verifySTOPPED();;
-}
-
-BOOST_AUTO_TEST_CASE(freeze_stop)
-{
-    p(0, "sleep", sleepTimeStr);
-    CALL_CHECKPOINT(pg->start());
-    CALL_CHECKPOINT(pg->freeze());
-    CALL_CHECKPOINT(pg->stop());
-    verifySTOPPED();
-}
-
-BOOST_AUTO_TEST_CASE(freeze_wait)
-{
-    p(0, "sleep", sleepTimeStr);
-    pg->start();
-    pg->freeze();
-    BOOST_CHECK_THROW(pg->wait(), ya::ContainerIllegalStateError);
-    pg->stop();
-    verifySTOPPED();
 }
 
 BOOST_AUTO_TEST_CASE(dev_null_permissions)

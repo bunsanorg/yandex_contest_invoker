@@ -97,17 +97,8 @@ namespace yandex{namespace contest{namespace invoker
         detail::execution::AsyncProcessGroup execute(
             const detail::execution::AsyncProcessGroup::Task &task);
 
-        /// \copydoc system::lxc::Lxc::freeze()
-        void freeze();
-
-        /// \copydoc system::lxc::Lxc::unfreeze()
-        void unfreeze();
-
         /// \copydoc system::lxc::Lxc::stop()
         void stop();
-
-        /// \copydoc system::lxc::Lxc::state()
-        system::lxc::Lxc::State state();
 
     private:
         /*!

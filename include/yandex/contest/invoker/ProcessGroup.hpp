@@ -96,24 +96,6 @@ namespace yandex{namespace contest{namespace invoker
         const Result &synchronizedCall();
 
         /*!
-         * \brief Freeze all running processes,
-         * associated with process group.
-         *
-         * Processes will be blocked until
-         * they are explicitly thawed by the unfreeze().
-         *
-         * \see unfreeze()
-         */
-        void freeze();
-
-        /*!
-         * \brief Thaw all processes, associated with process group.
-         *
-         * \see freeze()
-         */
-        void unfreeze();
-
-        /*!
          * \brief Check if process group has terminated.
          *
          * Set process group result if terminated.

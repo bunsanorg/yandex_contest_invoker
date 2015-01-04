@@ -91,59 +91,6 @@ namespace yandex{namespace contest{namespace invoker
         return wait();
     }
 
-    void ProcessGroup::freeze()
-    {
-        poll();
-        if (!processGroup_)
-            BOOST_THROW_EXCEPTION(ProcessGroupHasNotStartedError());
-        if (!container_)
-            BOOST_THROW_EXCEPTION(ProcessGroupHasAlreadyTerminatedError());
-        try
-        {
-            // process has not started yet
-            while (container_->state() == system::lxc::Lxc::State::STOPPED)
-            {
-                if (poll())
-                {
-                    // process has started and terminated while we were sleeping
-                    BOOST_THROW_EXCEPTION(
-                        ProcessGroupHasAlreadyTerminatedError());
-                }
-                // FIXME hardcode
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
-            }
-            const system::lxc::Lxc::State state = container_->state();
-            if (state != system::lxc::Lxc::State::RUNNING)
-                BOOST_THROW_EXCEPTION(
-                    ContainerIllegalStateError() <<
-                    system::lxc::IllegalStateError::state(state));
-            container_->freeze();
-        }
-        catch (system::lxc::UtilityError &e)
-        {
-            if (poll())
-                BOOST_THROW_EXCEPTION(
-                    ProcessGroupHasAlreadyTerminatedError());
-            else
-                throw;
-        }
-    }
-
-    void ProcessGroup::unfreeze()
-    {
-        poll();
-        if (!processGroup_)
-            BOOST_THROW_EXCEPTION(ProcessGroupHasNotStartedError());
-        if (!container_)
-            BOOST_THROW_EXCEPTION(ProcessGroupHasAlreadyTerminatedError());
-        const system::lxc::Lxc::State state = container_->state();
-        if (state != system::lxc::Lxc::State::FROZEN)
-            BOOST_THROW_EXCEPTION(
-                ContainerIllegalStateError() <<
-                system::lxc::IllegalStateError::state(state));
-        container_->unfreeze();
-    }
-
     boost::optional<ProcessGroup::Result> ProcessGroup::poll()
     {
         if (!processGroup_)
@@ -167,11 +114,6 @@ namespace yandex{namespace contest{namespace invoker
             BOOST_THROW_EXCEPTION(ProcessGroupHasNotStartedError());
         if (!result_)
         {
-            const system::lxc::Lxc::State state = container_->state();
-            if (state == system::lxc::Lxc::State::FROZEN)
-                BOOST_THROW_EXCEPTION(
-                    ContainerIllegalStateError() <<
-                    system::lxc::IllegalStateError::state(state));
             result_ = processGroup_.wait();
             container_.reset();
         }
@@ -189,13 +131,6 @@ namespace yandex{namespace contest{namespace invoker
                 BOOST_THROW_EXCEPTION(ProcessGroupHasNotTerminatedError());
         }
         return result_->processGroupResult;
-    }
-
-    ProcessGroup::State ProcessGroup::state()
-    {
-        // note: current implementation relies on
-        // consistent definition with system::lxc::Lxc::State
-        return static_cast<State>(container_->state());
     }
 
     const ProcessGroup::ResourceLimits &ProcessGroup::resourceLimits() const

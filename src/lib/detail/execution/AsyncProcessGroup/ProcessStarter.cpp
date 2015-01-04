@@ -290,7 +290,8 @@ namespace yandex{namespace contest{namespace invoker{
         memory.setMoveChargeAtImmigrate(false, false);
 
         // we need oom-killer
-        memory.setOomKillDisable(false);
+        if (memory.oomKillDisable())
+            memory.setOomKillDisable(false);
     }
 
     void ProcessStarter::childSetUpResourceLimits()

@@ -2,10 +2,13 @@
 
 #include <yandex/contest/invoker/ConfigurationError.hpp>
 
+#include <yandex/contest/system/cgroup/SystemInfo.hpp>
+
 #include <bunsan/config/cast.hpp>
 
 #include <bunsan/filesystem/fstream.hpp>
 
+#include <boost/filesystem/operations.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
 
@@ -67,14 +70,38 @@ namespace yandex{namespace contest{namespace invoker
         system::lxc::MountConfig getLxcMountConfig()
         {
             system::lxc::MountConfig st;
-            st.entries = {
-                system::unistd::MountEntry::bindRO("/etc", "/etc"),
-                system::unistd::MountEntry::bindRO("/bin", "/bin"),
-                system::unistd::MountEntry::bindRO("/sbin", "/sbin"),
-                system::unistd::MountEntry::bindRO("/lib", "/lib"),
-                system::unistd::MountEntry::bindRO("/usr", "/usr"),
-                system::unistd::MountEntry::proc()
-            };
+            st.entries = std::vector<system::unistd::MountEntry>();
+            const auto try_add = [&st](const boost::filesystem::path &path)
+                {
+                    if (boost::filesystem::is_directory(path))
+                    {
+                        st.entries->push_back(
+                            system::unistd::MountEntry::bindRO(path, path)
+                        );
+                    }
+                };
+            try_add("/bin");
+            try_add("/etc");
+            try_add("/lib");
+            try_add("/lib32");
+            try_add("/lib64");
+            try_add("/opt");
+            try_add("/sbin");
+            try_add("/usr");
+            st.entries->push_back(system::unistd::MountEntry::proc());
+            for (const system::cgroup::HierarchyInfo &hierarchy:
+                 *system::cgroup::SystemInfo::instance())
+            {
+                if (hierarchy.mountpoint)
+                {
+                    st.entries->push_back(
+                        system::unistd::MountEntry::bind(
+                            *hierarchy.mountpoint,
+                            *hierarchy.mountpoint
+                        )
+                    );
+                }
+            }
             return st;
         }
 
@@ -118,14 +145,15 @@ namespace yandex{namespace contest{namespace invoker
                     "/bin:"
                     "/usr/local/sbin:"
                     "/usr/sbin:"
-                    "/sbin"
+                    "/sbin",
                 },
                 {"LC_ALL", "C"},
                 {"LANG", "C"},
-                {"PWD", "/"}
+                {"PWD", "/"},
+                {"HOME", "/"},
             };
-            // FIXME should be nobody
-            st.ownerId = {0, 0};
+            st.currentPath = "/";
+            st.ownerId = {65535, 65535};
             // stdin, stdout, stderr
             for (int fd = 0; fd <= 2; ++fd)
                 st.descriptors[fd] = File("/dev/null", AccessMode::READ_WRITE);
@@ -177,10 +205,20 @@ namespace yandex{namespace contest{namespace invoker
             return filesystem::CreateFile(symlink);
         }
 
+        filesystem::CreateFile getDirectory(const boost::filesystem::path &path,
+                                            const mode_t mode)
+        {
+            filesystem::Directory directory;
+            directory.path = path;
+            directory.mode = mode;
+            return filesystem::CreateFile(directory);
+        }
+
         filesystem::Config getFilesystemConfig()
         {
             filesystem::Config st;
             st.createFiles = {
+                getDirectory("/dev", 0555),
                 getCharDevice("/dev/null", 0666, 1, 3),
                 getCharDevice("/dev/zero", 0666, 1, 5),
                 getCharDevice("/dev/random", 0666, 1, 8),
@@ -196,7 +234,7 @@ namespace yandex{namespace contest{namespace invoker
     }
 
     ContainerConfig::ContainerConfig():
-        containersDir("/tmp"),
+        containersDir("/var/tmp"),
         lxcConfig(getLxcConfig()),
         processGroupDefaultSettings(getProcessGroupDefaultSettings()),
         controlProcessConfig(getControlProcessConfig()),

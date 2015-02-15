@@ -51,7 +51,7 @@ namespace yandex{namespace contest{namespace invoker
 
     namespace process_group
     {
-        class DefaultSettings;
+        struct DefaultSettings;
     }
 
     class ProcessGroup: public IntrusivePointeeBase

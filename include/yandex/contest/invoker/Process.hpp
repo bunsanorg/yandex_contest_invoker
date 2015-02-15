@@ -34,7 +34,7 @@ namespace yandex{namespace contest{namespace invoker
 
     namespace process
     {
-        class DefaultSettings;
+        struct DefaultSettings;
     }
 
     /*!

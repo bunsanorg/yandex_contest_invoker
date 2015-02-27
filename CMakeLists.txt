@@ -2,17 +2,9 @@ project(yandex_contest_invoker)
 
 include(${CMAKE_SOURCE_DIR}/system-config.cmake OPTIONAL)
 
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.0)
 
-include(BunsanCommon)
-
-bunsan_use_boost(system filesystem serialization thread program_options)
-
-bunsan_use_bunsan(common)
-bunsan_use(
-    yandex_contest_common
-    yandex_contest_system
-)
+find_package(BunsanCMake CONFIG REQUIRED)
 
 bunsan_add_shared_library(${PROJECT_NAME}
     src/lib/Container.cpp
@@ -47,11 +39,20 @@ bunsan_add_shared_library(${PROJECT_NAME}
     src/lib/detail/execution/AsyncProcessGroup/EventWriter/NativeEventWriter.cpp
     src/lib/detail/execution/AsyncProcessGroup/EventWriter/PlainTextEventWriter.cpp
 )
-bunsan_use(${PROJECT_NAME})
+bunsan_use_bunsan_package(${PROJECT_NAME} yandex_contest_common yandex_contest_common)
+bunsan_use_bunsan_package(${PROJECT_NAME} yandex_contest_system yandex_contest_system)
+bunsan_use_boost(${PROJECT_NAME} thread)
 
-bunsan_add_cli_targets(cli_targets cli ctl)
+foreach(bin cli ctl)
+    bunsan_add_executable(${PROJECT_NAME}_${bin}
+        src/bin/${bin}.cpp
+    )
+    bunsan_use_target(${PROJECT_NAME}_${bin} ${PROJECT_NAME})
+    bunsan_install_targets(${PROJECT_NAME}_${bin})
+endforeach()
 
 bunsan_install_headers()
-bunsan_install_targets(${PROJECT_NAME} ${cli_targets})
+bunsan_install_targets(${PROJECT_NAME})
+bunsan_install_project()
 
 bunsan_include_tests()

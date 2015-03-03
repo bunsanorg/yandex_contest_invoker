@@ -1,8 +1,8 @@
-project(yandex_contest_invoker)
+cmake_minimum_required(VERSION 3.0)
 
 include(${CMAKE_SOURCE_DIR}/system-config.cmake OPTIONAL)
 
-cmake_minimum_required(VERSION 3.0)
+project(yandex_contest_invoker)
 
 find_package(BunsanCMake CONFIG REQUIRED)
 

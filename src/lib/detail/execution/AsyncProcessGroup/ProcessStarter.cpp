@@ -9,7 +9,6 @@
 #include <yandex/contest/system/unistd/Operations.hpp>
 
 #include <yandex/contest/detail/LogHelper.hpp>
-#include <yandex/contest/detail/NullLog.hpp>
 #include <yandex/contest/SystemError.hpp>
 
 #include <boost/assert.hpp>
@@ -132,8 +131,7 @@ namespace yandex{namespace contest{namespace invoker{
         {
             {
                 // FIXME workaround, should be transmitted to control process
-                const LogPointer log(new contest::detail::NullLog);
-                Log::registerInstance(log);
+                Log::disableLogging();
             }
             childSetUpFds();
             // TODO verify has permissions to execute

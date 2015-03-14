@@ -6,7 +6,7 @@ project(yandex_contest_invoker)
 
 find_package(BunsanCMake CONFIG REQUIRED)
 
-bunsan_add_shared_library(${PROJECT_NAME}
+bunsan_add_library(${PROJECT_NAME}
     src/lib/Container.cpp
     src/lib/Filesystem.cpp
     src/lib/ProcessGroup.cpp

@@ -150,12 +150,12 @@ namespace yandex{namespace contest{namespace invoker{
         }
         catch (std::exception &e)
         {
-            BUNSAN_LOG_ERROR_INTO(std::cerr) << "Unable to start due to: " << e.what();
+            BUNSAN_LOG_FATAL_INTO(std::cerr) << "Unable to start due to: " << e.what();
             ::raise(SIG_START_FAILED);
         }
         catch (...)
         {
-            BUNSAN_LOG_ERROR_INTO(std::cerr) << "Unable to start due to unknown error";
+            BUNSAN_LOG_FATAL_INTO(std::cerr) << "Unable to start due to unknown error";
             ::raise(SIG_START_FAILED);
         }
     }

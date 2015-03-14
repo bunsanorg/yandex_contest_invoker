@@ -8,7 +8,7 @@
 #include <yandex/contest/system/unistd/access/Operations.hpp>
 #include <yandex/contest/system/unistd/Operations.hpp>
 
-#include <yandex/contest/detail/LogHelper.hpp>
+#include <yandex/contest/StreamLog.hpp>
 #include <yandex/contest/SystemError.hpp>
 
 #include <boost/assert.hpp>

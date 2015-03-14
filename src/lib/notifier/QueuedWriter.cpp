@@ -1,6 +1,6 @@
 #include <yandex/contest/invoker/notifier/QueuedWriter.hpp>
 
-#include <yandex/contest/detail/LogHelper.hpp>
+#include <yandex/contest/StreamLog.hpp>
 
 namespace yandex{namespace contest{namespace invoker{namespace notifier
 {

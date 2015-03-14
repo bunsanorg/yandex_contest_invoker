@@ -7,7 +7,7 @@
 #include <yandex/contest/invoker/All.hpp>
 #include <yandex/contest/invoker/detail/VectorToString.hpp>
 
-#include <yandex/contest/detail/LogHelper.hpp>
+#include <yandex/contest/StreamLog.hpp>
 #include <yandex/contest/TypeInfo.hpp>
 
 #include <bunsan/application.hpp>

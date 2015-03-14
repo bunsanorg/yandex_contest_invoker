@@ -1,6 +1,6 @@
 #include "ExecutionMonitor.hpp"
 
-#include <yandex/contest/detail/LogHelper.hpp>
+#include <yandex/contest/StreamLog.hpp>
 
 #include <boost/assert.hpp>
 

@@ -1,12 +1,12 @@
 #include "ProcessInfo.hpp"
 
-#include <yandex/contest/detail/LogHelper.hpp>
-#include <yandex/contest/SystemError.hpp>
-
 #include <yandex/contest/system/cgroup/CpuAccounting.hpp>
 #include <yandex/contest/system/cgroup/Memory.hpp>
 #include <yandex/contest/system/cgroup/MemorySwap.hpp>
 #include <yandex/contest/system/cgroup/Termination.hpp>
+
+#include <yandex/contest/StreamLog.hpp>
+#include <yandex/contest/SystemError.hpp>
 
 #include <boost/assert.hpp>
 

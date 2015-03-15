@@ -2,6 +2,7 @@
 
 #include <yandex/contest/invoker/All.hpp>
 
+#include <bunsan/testing/environment.hpp>
 #include <bunsan/testing/exec_test.hpp>
 
 namespace ya = yandex::contest::invoker;
@@ -12,7 +13,7 @@ struct ContainerFixture
     typedef ya::Process::Result PR;
 
     ContainerFixture():
-        cfg_(ya::ContainerConfig::fromEnvironment()),
+        cfg_(getContainerConfig()),
         cnt(ya::Container::create(cfg_)),
         pg(cnt->createProcessGroup())
     {
@@ -110,6 +111,19 @@ struct ContainerFixture
     VERIFY(OK)
     VERIFY(STOPPED)
     VERIFY(ABNORMAL_EXIT)
+
+    static ya::ContainerConfig getContainerConfig()
+    {
+        ya::ContainerConfig config = ya::ContainerConfig::fromEnvironment();
+        config.controlProcessConfig.executable = bunsan::testing::dir::binary() / "yandex_contest_invoker_ctl";
+        { // fix mounts
+            config.lxcConfig.mount->entries->push_back(yandex::contest::system::unistd::MountEntry::bindRO(
+                bunsan::testing::dir::binary(),
+                bunsan::testing::dir::binary()
+            ));
+        }
+        return config;
+    }
 
 private:
     ya::ContainerConfig cfg_;

@@ -2,6 +2,7 @@
 
 #include <yandex/contest/invoker/ContainerConfig.hpp>
 #include <yandex/contest/invoker/detail/execution/AsyncProcessGroup.hpp>
+#include <yandex/contest/invoker/tests/ContainerConfig.hpp>
 
 #include <yandex/contest/system/unistd/Operations.hpp>
 
@@ -27,8 +28,7 @@ struct AsyncProcessGroupFixture
     typedef yandex::contest::Tempfile TMP;
 
     explicit AsyncProcessGroupFixture(const std::size_t size):
-        containerConfig(
-            yandex::contest::invoker::ContainerConfig::fromEnvironment())
+        containerConfig(yandex::contest::invoker::tests::getContainerConfig())
     {
         BOOST_REQUIRE_EQUAL(unistd::getuid(), 0);
         task.processes.resize(size, defaultProcess());

@@ -60,9 +60,8 @@ BOOST_FIXTURE_TEST_CASE(Notifier, NotifierFixture)
     bool termination = false;
     std::size_t eventNumber = 0;
     notifier.onEvent(
-        [&](const Notifier::Event::Event &event)
+        [&](const Notifier::Event::Event &/*event*/)
         {
-            BOOST_CHECK(!boost::get<Notifier::Error::Event *>(&event));
             ++eventNumber;
         });
     notifier.onError(

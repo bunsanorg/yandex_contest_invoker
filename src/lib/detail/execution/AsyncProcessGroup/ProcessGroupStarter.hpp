@@ -68,6 +68,8 @@ namespace yandex{namespace contest{namespace invoker{
     private:
         static const Duration waitInterval;
 
+        static system::cgroup::ControlGroupPointer getThisCgroup();
+
     private:
         boost::asio::io_service ioService_;
         boost::asio::io_service::work work_;

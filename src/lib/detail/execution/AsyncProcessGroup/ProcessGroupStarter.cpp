@@ -12,6 +12,7 @@
 #include <boost/make_shared.hpp>
 
 #include <functional>
+#include <set>
 
 #include <signal.h>
 #include <sys/time.h>
@@ -30,9 +31,27 @@ namespace yandex{namespace contest{namespace invoker{
         std::chrono::duration_cast<ProcessGroupStarter::Duration>(
             std::chrono::milliseconds(100));
 
+    system::cgroup::ControlGroupPointer ProcessGroupStarter::getThisCgroup()
+    {
+        const char *const subsystems[] = {
+            "cpuacct",
+            "cpuset",
+            "freezer",
+            "memory",
+        };
+        const auto sys = system::cgroup::SystemInfo::instance();
+        std::set<std::size_t> hierarchies;
+        for (const char *const subsystem: subsystems)
+            hierarchies.insert(sys->bySubsystem(subsystem).id);
+        return system::cgroup::MultipleControlGroup::forSelf(
+            hierarchies.begin(),
+            hierarchies.end()
+        );
+    }
+
     ProcessGroupStarter::ProcessGroupStarter(const AsyncProcessGroup::Task &task):
         work_(ioService_),
-        thisCgroup_(system::cgroup::MultipleControlGroup::forSelf()),
+        thisCgroup_(getThisCgroup()),
         id2processInfo_(task.processes.size()),
         notifiers_(task.notifiers.size()),
         monitor_(task.processes)

@@ -11,7 +11,7 @@
 #include <yandex/contest/StreamLog.hpp>
 #include <yandex/contest/SystemError.hpp>
 
-#include <bunsan/logging/fallback.hpp>
+#include <bunsan/log/fallback.hpp>
 
 #include <boost/assert.hpp>
 #include <boost/dynamic_bitset.hpp>

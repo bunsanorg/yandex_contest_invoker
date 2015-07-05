@@ -3,7 +3,7 @@
 #include <yandex/contest/invoker/All.hpp>
 #include <yandex/contest/invoker/tests/ContainerConfig.hpp>
 
-#include <bunsan/testing/exec_test.hpp>
+#include <bunsan/test/exec_test.hpp>
 
 namespace ya = yandex::contest::invoker;
 

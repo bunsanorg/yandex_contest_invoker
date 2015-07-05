@@ -3,9 +3,9 @@
 
 #include "AsyncProcessGroupSingleFixture.hpp"
 
-#include <bunsan/testing/environment.hpp>
-#include <bunsan/testing/filesystem/read_data.hpp>
-#include <bunsan/testing/filesystem/tempdir.hpp>
+#include <bunsan/test/environment.hpp>
+#include <bunsan/test/filesystem/read_data.hpp>
+#include <bunsan/test/filesystem/tempdir.hpp>
 
 #include <boost/filesystem/operations.hpp>
 #include <boost/lexical_cast.hpp>
@@ -13,7 +13,7 @@
 #include <cerrno>
 #include <csignal>
 
-using namespace bunsan::testing;
+using namespace bunsan::test;
 
 BOOST_FIXTURE_TEST_SUITE(single, AsyncProcessGroupSingleFixture)
 

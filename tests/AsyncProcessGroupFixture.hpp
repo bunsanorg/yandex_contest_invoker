@@ -8,7 +8,7 @@
 
 #include <yandex/contest/Tempfile.hpp>
 
-#include <bunsan/testing/exec_test.hpp>
+#include <bunsan/test/exec_test.hpp>
 
 #include <boost/test/test_tools.hpp>
 

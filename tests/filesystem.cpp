@@ -8,15 +8,15 @@
 
 #include <yandex/contest/system/unistd/Operations.hpp>
 
-#include <bunsan/testing/filesystem/read_data.hpp>
-#include <bunsan/testing/filesystem/tempdir.hpp>
-#include <bunsan/testing/filesystem/write_data.hpp>
+#include <bunsan/test/filesystem/read_data.hpp>
+#include <bunsan/test/filesystem/tempdir.hpp>
+#include <bunsan/test/filesystem/write_data.hpp>
 
 #include <boost/filesystem/operations.hpp>
 
 #include <iterator>
 
-using namespace bunsan::testing;
+using namespace bunsan::test;
 
 namespace ya = yandex::contest::invoker::filesystem;
 namespace unistd = yandex::contest::system::unistd;

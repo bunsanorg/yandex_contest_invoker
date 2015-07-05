@@ -12,11 +12,16 @@ struct ContainerFixture
     typedef ya::ProcessGroup::Result PGR;
     typedef ya::Process::Result PR;
 
-    ContainerFixture():
-        cfg_(ya::tests::getContainerConfig()),
-        cnt(ya::Container::create(cfg_)),
-        pg(cnt->createProcessGroup())
+    ContainerFixture(): cfg(ya::tests::getContainerConfig())
     {
+        resetContainer();
+    }
+
+    void resetContainer()
+    {
+        cnt = ya::Container::create(cfg);
+        pg = cnt->createProcessGroup();
+        p_.clear();
     }
 
     ya::ProcessPointer p(
@@ -112,10 +117,7 @@ struct ContainerFixture
     VERIFY(STOPPED)
     VERIFY(ABNORMAL_EXIT)
 
-private:
-    ya::ContainerConfig cfg_;
-
-public:
+    ya::ContainerConfig cfg;
     ya::ContainerPointer cnt;
     ya::ProcessGroupPointer pg;
 

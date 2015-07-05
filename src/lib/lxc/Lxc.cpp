@@ -225,7 +225,16 @@ namespace yandex{namespace contest{namespace invoker{namespace lxc
     void Lxc::prepare(unistd::MountEntry &entry)
     {
         const boost::filesystem::path dst = rootfs_ / entry.dir;
-        boost::filesystem::create_directories(dst);
+        if (entry.hasOpt("bind") && !boost::filesystem::is_directory(entry.fsname))
+        {
+            boost::filesystem::create_directories(dst.parent_path());
+            bunsan::filesystem::ofstream fout(dst);
+            fout.close();
+        }
+        else
+        {
+            boost::filesystem::create_directories(dst);
+        }
         entry.dir = dst.string();
     }
 

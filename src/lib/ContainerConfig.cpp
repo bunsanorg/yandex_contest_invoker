@@ -54,7 +54,7 @@ namespace yandex{namespace contest{namespace invoker
             return 8 * sizeof(void *);
         }
 
-        constexpr system::lxc::Config::Arch getArch()
+        constexpr lxc::Config::Arch getArch()
         {
             static_assert(
                 getWordSize() == 32 ||
@@ -63,13 +63,13 @@ namespace yandex{namespace contest{namespace invoker
             );
             return
                 getWordSize() == 32 ?
-                system::lxc::Config::Arch::x86 :
-                system::lxc::Config::Arch::x86_64;
+                lxc::Config::Arch::x86 :
+                lxc::Config::Arch::x86_64;
         }
 
-        system::lxc::MountConfig getLxcMountConfig()
+        lxc::MountConfig getLxcMountConfig()
         {
-            system::lxc::MountConfig st;
+            lxc::MountConfig st;
             st.entries = std::vector<system::unistd::MountEntry>();
             const auto try_add = [&st](const boost::filesystem::path &path)
                 {
@@ -105,9 +105,9 @@ namespace yandex{namespace contest{namespace invoker
             return st;
         }
 
-        system::lxc::Config getLxcConfig()
+        lxc::Config getLxcConfig()
         {
-            system::lxc::Config st;
+            lxc::Config st;
             st.arch = getArch();
             st.utsname = "container";
             // TODO network

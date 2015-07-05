@@ -5,10 +5,10 @@
 #include <yandex/contest/invoker/Filesystem.hpp>
 #include <yandex/contest/invoker/filesystem/Config.hpp>
 #include <yandex/contest/invoker/Forward.hpp>
+#include <yandex/contest/invoker/lxc/Lxc.hpp>
 #include <yandex/contest/invoker/process_group/DefaultSettings.hpp>
 
 #include <yandex/contest/IntrusivePointeeBase.hpp>
-#include <yandex/contest/system/lxc/Lxc.hpp>
 
 namespace yandex{namespace contest{namespace invoker
 {
@@ -27,7 +27,7 @@ namespace yandex{namespace contest{namespace invoker
          * \see create()
          */
         static ContainerPointer create(const ContainerConfig &config,
-                                       const system::lxc::Config &lxcConfig);
+                                       const lxc::Config &lxcConfig);
 
         /*!
          * \brief Create new container using
@@ -35,7 +35,7 @@ namespace yandex{namespace contest{namespace invoker
          *
          * \see ContainerConfig::ContainerConfig()
          */
-        static ContainerPointer create(const system::lxc::Config &lxcConfig);
+        static ContainerPointer create(const lxc::Config &lxcConfig);
 
         /*!
          * \brief Create new container using default config.
@@ -97,7 +97,7 @@ namespace yandex{namespace contest{namespace invoker
         detail::execution::AsyncProcessGroup execute(
             const detail::execution::AsyncProcessGroup::Task &task);
 
-        /// \copydoc system::lxc::Lxc::stop()
+        /// \copydoc lxc::Lxc::stop()
         void stop();
 
     private:
@@ -109,13 +109,13 @@ namespace yandex{namespace contest{namespace invoker
          *
          * \see create()
          */
-        Container(std::unique_ptr<system::lxc::Lxc> &&lxcPtr,
+        Container(std::unique_ptr<lxc::Lxc> &&lxcPtr,
                   const ContainerConfig &config);
 
     private:
         Filesystem filesystem_;
         const detail::execution::AsyncProcess::Options controlProcessOptions_;
         process_group::DefaultSettings processGroupDefaultSettings_;
-        std::unique_ptr<system::lxc::Lxc> lxcPtr_;
+        std::unique_ptr<lxc::Lxc> lxcPtr_;
     };
 }}}

@@ -38,12 +38,12 @@ namespace yandex{namespace contest{namespace invoker
             BOOST_THROW_EXCEPTION(Error() << Error::message("Unable to create unique container"));
         }
         // create Lxc
-        std::unique_ptr<system::lxc::Lxc> lxcPtr;
+        std::unique_ptr<lxc::Lxc> lxcPtr;
         try
         {
             STREAM_INFO << "New container directory was created: " << path << ".";
             STREAM_INFO << "Trying to create LXC at " << path << " .";
-            lxcPtr.reset(new system::lxc::Lxc(path.filename().string(), path, config.lxcConfig));
+            lxcPtr.reset(new lxc::Lxc(path.filename().string(), path, config.lxcConfig));
         }
         catch (...)
         {
@@ -61,14 +61,14 @@ namespace yandex{namespace contest{namespace invoker
     }
 
     ContainerPointer Container::create(const ContainerConfig &config,
-                                       const system::lxc::Config &lxcConfig)
+                                       const lxc::Config &lxcConfig)
     {
         ContainerConfig cfg = config;
         cfg.lxcConfig.patch(lxcConfig);
         return create(cfg);
     }
 
-    ContainerPointer Container::create(const system::lxc::Config &lxcConfig)
+    ContainerPointer Container::create(const lxc::Config &lxcConfig)
     {
         return create(ContainerConfig(), lxcConfig);
     }
@@ -78,7 +78,7 @@ namespace yandex{namespace contest{namespace invoker
         return create(ContainerConfig());
     }
 
-    Container::Container(std::unique_ptr<system::lxc::Lxc> &&lxcPtr, const ContainerConfig &config):
+    Container::Container(std::unique_ptr<lxc::Lxc> &&lxcPtr, const ContainerConfig &config):
         filesystem_(lxcPtr->rootfs(), config.filesystemConfig),
         controlProcessOptions_(config.controlProcessConfig),
         processGroupDefaultSettings_(config.processGroupDefaultSettings),

@@ -2,9 +2,8 @@
 
 #include <yandex/contest/invoker/ControlProcessConfig.hpp>
 #include <yandex/contest/invoker/filesystem/Config.hpp>
+#include <yandex/contest/invoker/lxc/Config.hpp>
 #include <yandex/contest/invoker/process_group/DefaultSettings.hpp>
-
-#include <yandex/contest/system/lxc/Config.hpp>
 
 #include <boost/filesystem/path.hpp>
 #include <boost/serialization/access.hpp>
@@ -37,7 +36,7 @@ namespace yandex{namespace contest{namespace invoker
         }
 
         boost::filesystem::path containersDir;
-        system::lxc::Config lxcConfig;
+        lxc::Config lxcConfig;
         process_group::DefaultSettings processGroupDefaultSettings;
         ControlProcessConfig controlProcessConfig;
         filesystem::Config filesystemConfig;

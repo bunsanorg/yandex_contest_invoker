@@ -2,9 +2,8 @@
 
 #include <yandex/contest/invoker/Container.hpp>
 #include <yandex/contest/invoker/ContainerError.hpp>
+#include <yandex/contest/invoker/lxc/Error.hpp>
 #include <yandex/contest/invoker/Process.hpp>
-
-#include <yandex/contest/system/lxc/Error.hpp>
 
 #include <yandex/contest/detail/IntrusivePointerHelper.hpp>
 

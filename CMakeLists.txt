@@ -29,7 +29,11 @@ bunsan_add_library(${PROJECT_NAME}
     src/lib/filesystem/Fifo.cpp
     src/lib/filesystem/CreateFile.cpp
     src/lib/filesystem/Operations.cpp
-    src/lib/notifier/QueuedWriter.cpp
+    src/lib/lxc/Config.cpp
+    src/lib/lxc/RootfsConfig.cpp
+    src/lib/lxc/Lxc.cpp
+    src/lib/lxc/LxcApi.cpp
+    src/lib/lxc/MountConfig.cpp
     src/lib/detail/execution/AsyncProcessGroup.cpp
     src/lib/detail/execution/AsyncProcessGroup/detail.cpp
     src/lib/detail/execution/AsyncProcessGroup/execute.cpp
@@ -42,6 +46,7 @@ bunsan_add_library(${PROJECT_NAME}
     src/lib/detail/execution/AsyncProcessGroup/EventWriter.cpp
     src/lib/detail/execution/AsyncProcessGroup/EventWriter/NativeEventWriter.cpp
     src/lib/detail/execution/AsyncProcessGroup/EventWriter/PlainTextEventWriter.cpp
+    src/lib/notifier/QueuedWriter.cpp
 )
 bunsan_use_bunsan_package(${PROJECT_NAME} yandex_contest_common yandex_contest_common)
 bunsan_use_bunsan_package(${PROJECT_NAME} yandex_contest_system yandex_contest_system)

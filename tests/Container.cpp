@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_CASE(stop)
     p(0, "sleep", sleepTimeStr);
     CALL_CHECKPOINT(pg->start());
     CALL_CHECKPOINT(pg->stop());
-    verifySTOPPED();;
+    verifySTOPPED();
 }
 
 BOOST_AUTO_TEST_CASE(dev_null_permissions)

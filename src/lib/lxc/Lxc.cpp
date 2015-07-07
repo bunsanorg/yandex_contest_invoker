@@ -11,6 +11,9 @@
 
 #include <boost/filesystem/operations.hpp>
 
+#include <chrono>
+#include <thread>
+
 namespace yandex{namespace contest{namespace invoker{namespace lxc
 {
     using system::execution::ProcessArguments;
@@ -24,7 +27,8 @@ namespace yandex{namespace contest{namespace invoker{namespace lxc
         rootfs_(dir_ / "rootfs"),
         rootfsMount_(dir_ / "rootfs.mount"),
         configPath_(dir_ / "config"),
-        container_(api::container_new(name_))
+        container_(api::container_new(name_)),
+        lastStart_(Clock::now())
     {
         STREAM_INFO << "Trying to create \"" << name_ << "\" LXC.";
         Config config_ = config;
@@ -105,6 +109,7 @@ namespace yandex{namespace contest{namespace invoker{namespace lxc
         const Executor &executor,
         const system::execution::AsyncProcess::Options &options)
     {
+        lastStart_ = Clock::now();
         // TODO thread-safety
         // TODO lxc-execute errors control
         STREAM_INFO << "Attempt to execute command "
@@ -138,22 +143,37 @@ namespace yandex{namespace contest{namespace invoker{namespace lxc
                         << "it should be unfrozen first.";
             unfreeze();
         }
-        const system::execution::Result result =
-            system::execution::getErrCallArgv("lxc-stop", "-n", name_, "--kill");
-        if (result)
+        const auto end = lastStart_.load() + std::chrono::milliseconds(200);
+        const auto step = std::chrono::milliseconds(25);
+        do
         {
-            STREAM_INFO << "\"" << name_ << "\" LXC "
-                        << "was successfully stopped.";
+            const system::execution::Result result =
+                system::execution::getErrCallArgv("lxc-stop", "-n", name_, "--kill");
+            if (result)
+            {
+                STREAM_INFO << "\"" << name_ << "\" LXC "
+                            << "was successfully stopped.";
+                return;
+            }
+            else if (result.exitStatus && *result.exitStatus == 2)
+            {
+                STREAM_DEBUG << "\"" << name_
+                             << "\" LXC is not running, nothing to be stopped. "
+                             << "Sleeping to allow not-started LXC to start...";
+                std::this_thread::sleep_for(step);
+            }
+            else
+            {
+                STREAM_ERROR << "Error while stopping \"" << name_
+                             << "\" LXC: \"" << result.err << "\", "
+                             << "exception is thrown.";
+                BOOST_THROW_EXCEPTION(
+                    toUtilityError(result) <<
+                    Error::message("Error while stopping LXC."));
+            }
         }
-        else
-        {
-            STREAM_ERROR << "Error while stopping \"" << name_
-                         << "\" LXC: \"" << result.err << "\", "
-                         << "exception is thrown.";
-            BOOST_THROW_EXCEPTION(
-                toUtilityError(result) <<
-                Error::message("Error while stopping LXC."));
-        }
+        while (Clock::now() < end);
+        STREAM_INFO << "\"" << name_ << "\" LXC is not running.";
     }
 
     Lxc::State Lxc::state()
@@ -167,14 +187,9 @@ namespace yandex{namespace contest{namespace invoker{namespace lxc
         STREAM_INFO << "Trying to remove \"" << name_ << "\" LXC.";
         try
         {
-            if (state() != State::STOPPED)
-            {
-                STREAM_INFO << "\"" << name_
-                            << "\" LXC is not stopped, trying to stop it.";
-                stop();
-            }
+            stop();
         }
-        catch (std::exception &e)
+        catch (std::exception &)
         {
             STREAM_ERROR << "Unable to stop \""
                          << name_ << "\" LXC (ignoring).";

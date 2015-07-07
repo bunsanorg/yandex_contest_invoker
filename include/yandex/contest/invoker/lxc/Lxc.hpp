@@ -13,6 +13,8 @@
 #include <boost/noncopyable.hpp>
 #include <boost/optional.hpp>
 
+#include <atomic>
+#include <chrono>
 #include <string>
 #include <utility>
 #include <vector>
@@ -65,6 +67,7 @@ namespace yandex{namespace contest{namespace invoker{namespace lxc
         const boost::filesystem::path &rootfs() const;
 
     private:
+        using Clock = std::chrono::steady_clock;
         using Executor = std::function<void (const system::execution::AsyncProcess::Options &options)>;
 
         void execute_(
@@ -87,5 +90,6 @@ namespace yandex{namespace contest{namespace invoker{namespace lxc
         const boost::filesystem::path rootfsMount_;
         const boost::filesystem::path configPath_;
         api::container_ptr container_;
+        std::atomic<Clock::time_point> lastStart_;
     };
 }}}}

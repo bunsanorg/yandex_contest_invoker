@@ -35,25 +35,17 @@ namespace yandex{namespace contest{namespace invoker{namespace lxc
         template <typename Ctor>
         auto execute(
             const Ctor &ctor,
-            const system::execution::AsyncProcess::Options &options) ->
-                decltype(ctor(options))
+            const system::execution::AsyncProcess::Options &options)
         {
-            typedef decltype(ctor(options)) result_type;
-            struct ExecutorLocal: Executor
-            {
-                explicit ExecutorLocal(const Ctor &ctor): ctor_(ctor) {}
-
-                void operator()(
-                    const system::execution::AsyncProcess::Options &options) override
+            decltype(ctor(options)) result;
+            execute_(
+                [&result, &ctor](const system::execution::AsyncProcess::Options &options)
                 {
-                    result = ctor_(options);
-                }
-
-                const Ctor &ctor_;
-                result_type result;
-            } executor(ctor);
-            execute_(executor, options);
-            return std::move(executor.result);
+                    result = ctor(options);
+                },
+                options
+            );
+            return result;
         }
 
         /// \todo Is not implemented.
@@ -73,16 +65,10 @@ namespace yandex{namespace contest{namespace invoker{namespace lxc
         const boost::filesystem::path &rootfs() const;
 
     private:
-        class Executor
-        {
-        public:
-            virtual void operator()(
-                const system::execution::AsyncProcess::Options &options)=0;
-        };
+        using Executor = std::function<void (const system::execution::AsyncProcess::Options &options)>;
 
-    private:
         void execute_(
-            Executor &executor,
+            const Executor &executor,
             const system::execution::AsyncProcess::Options &options);
 
         void prepare(Config &config);

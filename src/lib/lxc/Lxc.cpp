@@ -102,7 +102,7 @@ namespace yandex{namespace contest{namespace invoker{namespace lxc
     }
 
     void Lxc::execute_(
-        Executor &executor,
+        const Executor &executor,
         const system::execution::AsyncProcess::Options &options)
     {
         // TODO thread-safety

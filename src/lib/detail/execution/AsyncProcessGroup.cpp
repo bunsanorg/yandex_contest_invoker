@@ -14,8 +14,8 @@ namespace yandex{namespace contest{namespace invoker{
             AsyncProcess::Options options,
             const AsyncProcessGroup::Task &task)
         {
-            STREAM_TRACE << "Attempt to execute process group: " <<
-                            STREAM_OBJECT(task);
+            STREAM_TRACE << "Attempt to execute process group: "
+                         << STREAM_OBJECT(task);
             options.in = serialization::serialize(task);
             return options;
         }

@@ -133,8 +133,8 @@ namespace yandex{namespace contest{namespace invoker{
 
     bool ExecutionMonitor::runOutOfResourceLimits(ProcessInfo &processInfo)
     {
-        STREAM_TRACE << "Check if " << processInfo << " " <<
-                        "run out of resource limits.";
+        STREAM_TRACE << "Check if " << processInfo << " "
+                     << "run out of resource limits.";
         return collectResourceInfo(processInfo) !=
                process::Result::CompletionStatus::OK;
     }

@@ -34,8 +34,11 @@ namespace yandex{namespace contest{namespace invoker
         while (--counter && !(newDirectoryCreated = boost::filesystem::create_directory(path)));
         if (!newDirectoryCreated)
         {
-            STREAM_ERROR << "New container was not created due to name collisions, throwing an exception.";
-            BOOST_THROW_EXCEPTION(Error() << Error::message("Unable to create unique container"));
+            STREAM_ERROR << "New container was not created due to name collisions, "
+                         << "throwing an exception.";
+            BOOST_THROW_EXCEPTION(
+                Error() <<
+                Error::message("Unable to create unique container"));
         }
         // create Lxc
         std::unique_ptr<lxc::Lxc> lxcPtr;
@@ -51,8 +54,8 @@ namespace yandex{namespace contest{namespace invoker
             boost::system::error_code ec;
             boost::filesystem::remove_all(path, ec);
             if (ec)
-                STREAM_ERROR << "Unable to remove container's directory " << path <<
-                                "due to \"" << ec << "\" (ignoring).";
+                STREAM_ERROR << "Unable to remove container's directory " << path
+                             << "due to \"" << ec << "\" (ignoring).";
             throw;
         }
         BOOST_ASSERT(lxcPtr);
@@ -78,7 +81,8 @@ namespace yandex{namespace contest{namespace invoker
         return create(ContainerConfig());
     }
 
-    Container::Container(std::unique_ptr<lxc::Lxc> &&lxcPtr, const ContainerConfig &config):
+    Container::Container(std::unique_ptr<lxc::Lxc> &&lxcPtr,
+                         const ContainerConfig &config):
         filesystem_(lxcPtr->rootfs(), config.filesystemConfig),
         controlProcessOptions_(config.controlProcessConfig),
         processGroupDefaultSettings_(config.processGroupDefaultSettings),

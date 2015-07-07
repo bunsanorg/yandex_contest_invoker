@@ -79,8 +79,8 @@ namespace yandex{namespace contest{namespace invoker{
                     pipes_[pipeEnd.pipeId].releaseWriteEnd().release(),
                     notificationStream.protocol
                 );
-            STREAM_TRACE << "Notifier " << notifierId << " " <<
-                            "was successfully allocated, configuring...";
+            STREAM_TRACE << "Notifier " << notifierId << " "
+                         << "was successfully allocated, configuring...";
             monitor_.onSpawn(
                 Notifier::SpawnSignal::slot_type(
                     boost::bind(

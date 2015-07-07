@@ -143,10 +143,9 @@ namespace yandex{namespace contest{namespace invoker{namespace cli
 
         void execute()
         {
-            STREAM_INFO <<
-                "Trying to execute " << executable << " with " <<
-                detail::vectorToString(arguments) << " arguments where " <<
-                STREAM_OBJECT(processResourceLimits);
+            STREAM_INFO << "Trying to execute " << executable << " with "
+                        << detail::vectorToString(arguments) << " arguments "
+                        << "where " << STREAM_OBJECT(processResourceLimits);
 
             ContainerPointer container = Container::create(containerConfig);
             ProcessGroupPointer processGroup = container->createProcessGroup();

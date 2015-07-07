@@ -29,21 +29,21 @@ namespace yandex{namespace contest{namespace invoker{namespace lxc
         STREAM_INFO << "Trying to create \"" << name_ << "\" LXC.";
         Config config_ = config;
         prepare(config_);
-        STREAM_INFO << "Trying to create root directory " <<
-                       "for \"" << name_ << "\" LXC " <<
-                       "at " << rootfs_ << ".";
+        STREAM_INFO << "Trying to create root directory "
+                    << "for \"" << name_ << "\" LXC "
+                    << "at " << rootfs_ << ".";
         boost::filesystem::create_directory(rootfs_);
-        STREAM_INFO << "Root directory was successfully created " <<
-                       "for \"" << name_ << "\" LXC.";
-        STREAM_INFO << "Trying to create root.mount directory " <<
-                       "for \"" << name_ << "\" LXC " <<
-                       "at " << rootfsMount_ << ".";
+        STREAM_INFO << "Root directory was successfully created "
+                    << "for \"" << name_ << "\" LXC.";
+        STREAM_INFO << "Trying to create root.mount directory "
+                    << "for \"" << name_ << "\" LXC "
+                    << "at " << rootfsMount_ << ".";
         boost::filesystem::create_directory(rootfsMount_);
-        STREAM_INFO << "Root directory was successfully created " <<
-                       "for \"" << name_ << "\" LXC.";
+        STREAM_INFO << "Root directory was successfully created "
+                    << "for \"" << name_ << "\" LXC.";
         {
-            STREAM_INFO << "Trying to write lxc.conf(5) " <<
-                           "for \"" << name_ << "\" LXC.";
+            STREAM_INFO << "Trying to write lxc.conf(5) "
+                        << "for \"" << name_ << "\" LXC.";
             bunsan::filesystem::ofstream cfg(configPath_);
             BUNSAN_FILESYSTEM_FSTREAM_WRAP_BEGIN(cfg)
             {
@@ -51,8 +51,8 @@ namespace yandex{namespace contest{namespace invoker{namespace lxc
             }
             BUNSAN_FILESYSTEM_FSTREAM_WRAP_END(cfg)
             cfg.close();
-            STREAM_INFO << "lxc.conf(5) was successfully written " <<
-                           "for \"" << name << "\" LXC.";
+            STREAM_INFO << "lxc.conf(5) was successfully written "
+                        << "for \"" << name << "\" LXC.";
         }
         STREAM_DEBUG << "Loading LXC config for \"" << name_ << "\" at " << configPath_;
         if (!container_->load_config(container_.get(), configPath_.string().c_str()))
@@ -66,14 +66,14 @@ namespace yandex{namespace contest{namespace invoker{namespace lxc
             system::execution::getErrCallArgv("lxc-freeze", "-n", name_);
         if (result)
         {
-            STREAM_INFO << "\"" << name_ << "\" LXC " <<
-                           "was successfully frozen.";
+            STREAM_INFO << "\"" << name_ << "\" LXC "
+                        << "was successfully frozen.";
         }
         else
         {
-            STREAM_ERROR << "Error while freezing \"" << name_ <<
-                            "\" LXC: \"" << result.err << "\", " <<
-                            "exception is thrown.";
+            STREAM_ERROR << "Error while freezing \"" << name_
+                         << "\" LXC: \"" << result.err << "\", "
+                         << "exception is thrown.";
             BOOST_THROW_EXCEPTION(
                 toUtilityError(result) <<
                 Error::message("Error while freezing LXC."));
@@ -88,13 +88,13 @@ namespace yandex{namespace contest{namespace invoker{namespace lxc
         if (result)
         {
             STREAM_INFO << "\"" << name_ << "\" LXC "
-                           "was successfully unfrozen.";
+                        << "was successfully unfrozen.";
         }
         else
         {
-            STREAM_ERROR << "Error while unfreezing \"" << name_ <<
-                            "\" LXC: \"" << result.err << "\", " <<
-                            "exception is thrown.";
+            STREAM_ERROR << "Error while unfreezing \"" << name_
+                         << "\" LXC: \"" << result.err << "\", "
+                         << "exception is thrown.";
             BOOST_THROW_EXCEPTION(
                 toUtilityError(result) <<
                 Error::message("Error while unfreezing LXC."));
@@ -107,24 +107,24 @@ namespace yandex{namespace contest{namespace invoker{namespace lxc
     {
         // TODO thread-safety
         // TODO lxc-execute errors control
-        STREAM_INFO << "Attempt to execute command " <<
-                       "in \"" << name_ << "\" LXC.";
+        STREAM_INFO << "Attempt to execute command "
+                    << "in \"" << name_ << "\" LXC.";
         // we need to use it twice
         // and do not want it to change
         const State state_ = state();
         if (state_ != State::STOPPED)
         {
-            STREAM_ERROR << "Command execution is impossible " <<
-                            "in \"" << name_ << "\" LXC " <<
-                            "due to illegal state, exception is thrown.";
+            STREAM_ERROR << "Command execution is impossible "
+                         << "in \"" << name_ << "\" LXC "
+                         << "due to illegal state, exception is thrown.";
             BOOST_THROW_EXCEPTION(
                 IllegalStateError() <<
                 IllegalStateError::state(state_) <<
                 Error::message("It is impossible to spawn process in LXC."));
         }
         executor(transform(options));
-        STREAM_INFO << "Command execution is started " <<
-                       "in \"" << name_ << "\" LXC.";
+        STREAM_INFO << "Command execution is started "
+                    << "in \"" << name_ << "\" LXC.";
     }
 
     void Lxc::stop()
@@ -133,23 +133,23 @@ namespace yandex{namespace contest{namespace invoker{namespace lxc
         const State state_ = state();
         if (state_ == State::FROZEN)
         {
-            STREAM_INFO << "\"" << name_ <<
-                           "\" LXC is " << state_ << ", "
-                           "it should be unfrozen first.";
+            STREAM_INFO << "\"" << name_
+                        << "\" LXC is " << state_ << ", "
+                        << "it should be unfrozen first.";
             unfreeze();
         }
         const system::execution::Result result =
             system::execution::getErrCallArgv("lxc-stop", "-n", name_, "--kill");
         if (result)
         {
-            STREAM_INFO << "\"" << name_ << "\" LXC " <<
-                           "was successfully stopped.";
+            STREAM_INFO << "\"" << name_ << "\" LXC "
+                        << "was successfully stopped.";
         }
         else
         {
-            STREAM_ERROR << "Error while stopping \"" << name_ <<
-                            "\" LXC: \"" << result.err << "\", " <<
-                            "exception is thrown.";
+            STREAM_ERROR << "Error while stopping \"" << name_
+                         << "\" LXC: \"" << result.err << "\", "
+                         << "exception is thrown.";
             BOOST_THROW_EXCEPTION(
                 toUtilityError(result) <<
                 Error::message("Error while stopping LXC."));
@@ -169,26 +169,26 @@ namespace yandex{namespace contest{namespace invoker{namespace lxc
         {
             if (state() != State::STOPPED)
             {
-                STREAM_INFO << "\"" << name_ <<
-                               "\" LXC is not stopped, trying to stop it.";
+                STREAM_INFO << "\"" << name_
+                            << "\" LXC is not stopped, trying to stop it.";
                 stop();
             }
         }
         catch (std::exception &e)
         {
-            STREAM_ERROR << "Unable to stop \"" <<
-                            name_ << "\" LXC (ignoring).";
+            STREAM_ERROR << "Unable to stop \""
+                         << name_ << "\" LXC (ignoring).";
         }
         container_.reset(); // after stop && before remove
         boost::system::error_code ec;
         boost::filesystem::remove_all(dir_, ec);
         if (ec)
-            STREAM_ERROR << "Unable to remove directory " << dir_ << " " <<
-                            "with \"" << name_ << "\" LXC " <<
-                            "due to \"" << ec << "\" (ignoring).";
+            STREAM_ERROR << "Unable to remove directory " << dir_ << " "
+                         << "with \"" << name_ << "\" LXC "
+                         << "due to \"" << ec << "\" (ignoring).";
         else
-            STREAM_INFO << "\"" << name_ << "\" LXC " <<
-                           "was successfully removed.";
+            STREAM_INFO << "\"" << name_ << "\" LXC "
+                        << "was successfully removed.";
     }
 
     const boost::filesystem::path &Lxc::rootfs() const

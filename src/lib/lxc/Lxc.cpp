@@ -143,7 +143,7 @@ namespace yandex{namespace contest{namespace invoker{namespace lxc
         if (result)
         {
             STREAM_INFO << "\"" << name_ << "\" LXC " <<
-                           "was successfully unfrozen.";
+                           "was successfully stopped.";
         }
         else
         {

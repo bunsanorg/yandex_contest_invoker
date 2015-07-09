@@ -1,7 +1,7 @@
 #define BOOST_TEST_MODULE Container
 #include <boost/test/unit_test.hpp>
 
-#include <yandex/contest/invoker/tests/ContainerFixture.hpp>
+#include <yandex/contest/invoker/test/ContainerFixture.hpp>
 
 #include <bunsan/test/filesystem/read_data.hpp>
 #include <bunsan/test/filesystem/tempdir.hpp>

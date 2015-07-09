@@ -1,7 +1,7 @@
 #pragma once
 
 #include <yandex/contest/invoker/All.hpp>
-#include <yandex/contest/invoker/tests/ContainerConfig.hpp>
+#include <yandex/contest/invoker/test/ContainerConfig.hpp>
 
 #include <bunsan/test/exec_test.hpp>
 

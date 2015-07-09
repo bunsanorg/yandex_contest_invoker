@@ -2,7 +2,7 @@
 
 #include <yandex/contest/invoker/ContainerConfig.hpp>
 #include <yandex/contest/invoker/detail/execution/AsyncProcessGroup.hpp>
-#include <yandex/contest/invoker/tests/ContainerConfig.hpp>
+#include <yandex/contest/invoker/test/ContainerConfig.hpp>
 
 #include <yandex/contest/system/unistd/Operations.hpp>
 

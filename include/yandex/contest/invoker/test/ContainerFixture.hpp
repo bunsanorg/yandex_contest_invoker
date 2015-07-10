@@ -12,7 +12,7 @@ struct ContainerFixture
     typedef ya::ProcessGroup::Result PGR;
     typedef ya::Process::Result PR;
 
-    ContainerFixture(): cfg(ya::tests::getContainerConfig())
+    ContainerFixture(): cfg(ya::test::getContainerConfig())
     {
         resetContainer();
     }

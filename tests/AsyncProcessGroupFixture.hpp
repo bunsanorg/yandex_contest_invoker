@@ -28,7 +28,7 @@ struct AsyncProcessGroupFixture
     typedef yandex::contest::Tempfile TMP;
 
     explicit AsyncProcessGroupFixture(const std::size_t size):
-        containerConfig(yandex::contest::invoker::tests::getContainerConfig())
+        containerConfig(yandex::contest::invoker::test::getContainerConfig())
     {
         BOOST_REQUIRE_EQUAL(unistd::getuid(), 0);
         task.processes.resize(size, defaultProcess());

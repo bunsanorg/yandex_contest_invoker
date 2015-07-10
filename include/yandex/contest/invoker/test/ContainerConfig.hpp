@@ -4,7 +4,7 @@
 
 #include <bunsan/test/environment.hpp>
 
-namespace yandex{namespace contest{namespace invoker{namespace tests
+namespace yandex{namespace contest{namespace invoker{namespace test
 {
     static ContainerConfig getContainerConfig()
     {

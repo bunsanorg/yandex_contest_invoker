@@ -7,100 +7,104 @@
 #include <yandex/contest/system/execution/AsyncProcess.hpp>
 #include <yandex/contest/system/execution/ResultError.hpp>
 
-namespace yandex{namespace contest{namespace invoker{
-    namespace detail{namespace execution
-{
-    using namespace system::execution;
+namespace yandex {
+namespace contest {
+namespace invoker {
+namespace detail {
+namespace execution {
 
-    struct AsyncProcessGroupError: virtual Error {};
+using namespace system::execution;
 
-    struct AsyncProcessGroupControlProcessError:
-        ContainerUtilityError,
-        virtual AsyncProcessGroupError
-    {
-        using ContainerUtilityError::ContainerUtilityError;
-    };
+struct AsyncProcessGroupError : virtual Error {};
 
-    class AsyncProcessGroup
-    {
-    public:
-        typedef async_process_group_detail::AccessMode AccessMode;
-        typedef async_process_group_detail::File File;
-        typedef async_process_group_detail::Pipe Pipe;
-        typedef async_process_group_detail::FdAlias FdAlias;
-        typedef async_process_group_detail::NotificationStream NotificationStream;
-        typedef async_process_group_detail::Process Process;
-        typedef async_process_group_detail::ProcessMeta ProcessMeta;
-        typedef async_process_group_detail::Stream Stream;
-        typedef async_process_group_detail::NonPipeStream NonPipeStream;
-        typedef async_process_group_detail::Task Task;
-        typedef async_process_group_detail::Result Result;
+struct AsyncProcessGroupControlProcessError : ContainerUtilityError,
+                                              virtual AsyncProcessGroupError {
+  using ContainerUtilityError::ContainerUtilityError;
+};
 
-    public:
-        /// Invalid AsyncProcessGroup instance.
-        AsyncProcessGroup()=default;
+class AsyncProcessGroup {
+ public:
+  using AccessMode = async_process_group_detail::AccessMode;
+  using File = async_process_group_detail::File;
+  using Pipe = async_process_group_detail::Pipe;
+  using FdAlias = async_process_group_detail::FdAlias;
+  using NotificationStream = async_process_group_detail::NotificationStream;
+  using Process = async_process_group_detail::Process;
+  using ProcessMeta = async_process_group_detail::ProcessMeta;
+  using Stream = async_process_group_detail::Stream;
+  using NonPipeStream = async_process_group_detail::NonPipeStream;
+  using Task = async_process_group_detail::Task;
+  using Result = async_process_group_detail::Result;
 
-        /*!
-         * \brief Start new asynchronous group asynchronous.
-         *
-         * \param options Settings for control process,
-         * AsyncProcess::Options::in will be redefined.
-         * \param task Process group settings.
-         */
-        AsyncProcessGroup(const AsyncProcess::Options &options, const Task &task);
-        AsyncProcessGroup(const AsyncProcessGroup &)=delete;
-        AsyncProcessGroup(AsyncProcessGroup &&);
-        AsyncProcessGroup &operator=(const AsyncProcessGroup &)=delete;
-        AsyncProcessGroup &operator=(AsyncProcessGroup &&);
+ public:
+  /// Invalid AsyncProcessGroup instance.
+  AsyncProcessGroup() = default;
 
-        /// If AsyncProcessGroup instance is valid.
-        explicit operator bool() const noexcept;
+  /*!
+   * \brief Start new asynchronous group asynchronous.
+   *
+   * \param options Settings for control process,
+   * AsyncProcess::Options::in will be redefined.
+   * \param task Process group settings.
+   */
+  AsyncProcessGroup(const AsyncProcess::Options &options, const Task &task);
+  AsyncProcessGroup(const AsyncProcessGroup &) = delete;
+  AsyncProcessGroup(AsyncProcessGroup &&);
+  AsyncProcessGroup &operator=(const AsyncProcessGroup &) = delete;
+  AsyncProcessGroup &operator=(AsyncProcessGroup &&);
 
-        /// Calls stop().
-        ~AsyncProcessGroup();
+  /// If AsyncProcessGroup instance is valid.
+  explicit operator bool() const noexcept;
 
-        /*!
-         * \brief Wait for process group termination.
-         *
-         * Set execution result.
-         */
-        const Result &wait();
+  /// Calls stop().
+  ~AsyncProcessGroup();
 
-        /*!
-         * \brief Check if process group has terminated.
-         *
-         * Set execution result if terminated.
-         *
-         * \return Initialized execution result if process
-         * has terminated.
-         */
-        const boost::optional<Result> &poll();
+  /*!
+   * \brief Wait for process group termination.
+   *
+   * Set execution result.
+   */
+  const Result &wait();
 
-        /// If process group has not terminated try to kill and wait.
-        void stop();
+  /*!
+   * \brief Check if process group has terminated.
+   *
+   * Set execution result if terminated.
+   *
+   * \return Initialized execution result if process
+   * has terminated.
+   */
+  const boost::optional<Result> &poll();
 
-        void swap(AsyncProcessGroup &processGroup) noexcept;
+  /// If process group has not terminated try to kill and wait.
+  void stop();
 
-    public:
-        /*!
-         * \brief Control process implementation.
-         *
-         * \warning Should be called from separate process.
-         * Function assumes that application is single-threaded
-         * and no functions except this spawns processes.
-         */
-        static Result execute(const Task &task);
+  void swap(AsyncProcessGroup &processGroup) noexcept;
 
-    private:
-        void readResult();
+ public:
+  /*!
+   * \brief Control process implementation.
+   *
+   * \warning Should be called from separate process.
+   * Function assumes that application is single-threaded
+   * and no functions except this spawns processes.
+   */
+  static Result execute(const Task &task);
 
-    private:
-        AsyncProcess controlProcess_;
-        boost::optional<Result> result_;
-    };
+ private:
+  void readResult();
 
-    inline void swap(AsyncProcessGroup &a, AsyncProcessGroup &b) noexcept
-    {
-        a.swap(b);
-    }
-}}}}}
+ private:
+  AsyncProcess controlProcess_;
+  boost::optional<Result> result_;
+};
+
+inline void swap(AsyncProcessGroup &a, AsyncProcessGroup &b) noexcept {
+  a.swap(b);
+}
+
+}  // namespace execution
+}  // namespace detail
+}  // namespace invoker
+}  // namespace contest
+}  // namespace yandex

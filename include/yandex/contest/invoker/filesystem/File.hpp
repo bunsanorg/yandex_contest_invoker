@@ -10,50 +10,53 @@
 
 #include <sys/types.h>
 
-namespace yandex{namespace contest{namespace invoker{namespace filesystem
-{
-    struct File
-    {
-        template <typename Archive>
-        void serialize(Archive &ar, const unsigned int)
-        {
-            ar & BOOST_SERIALIZATION_NVP(path);
-            ar & BOOST_SERIALIZATION_NVP(mode);
-            ar & BOOST_SERIALIZATION_NVP(ownerId);
-        }
+namespace yandex {
+namespace contest {
+namespace invoker {
+namespace filesystem {
 
-        /*!
-         * \brief Create file.
-         *
-         * If parent path does not exists,
-         * all directories will be created
-         * (uid=gid=0, mode=0777).
-         */
-        void create() const;
+struct File {
+  template <typename Archive>
+  void serialize(Archive &ar, const unsigned int) {
+    ar & BOOST_SERIALIZATION_NVP(path);
+    ar & BOOST_SERIALIZATION_NVP(mode);
+    ar & BOOST_SERIALIZATION_NVP(ownerId);
+  }
 
-        boost::filesystem::path path;
+  /*!
+   * \brief Create file.
+   *
+   * If parent path does not exists,
+   * all directories will be created
+   * (uid=gid=0, mode=0777).
+   */
+  void create() const;
 
-        mode_t mode = 0777;
+  boost::filesystem::path path;
+  mode_t mode = 0777;
+  system::unistd::access::Id ownerId;
 
-        system::unistd::access::Id ownerId;
+ protected:
+  /*!
+   * \brief Appropriate call to mknod(3) or something similar.
+   *
+   * \note Should be implemented in derived class
+   * with needed configuration settings.
+   */
+  virtual void mknod() const = 0;
 
-    protected:
-        /*!
-         * \brief Appropriate call to mknod(3) or something similar.
-         *
-         * \note Should be implemented in derived class
-         * with needed configuration settings.
-         */
-        virtual void mknod() const=0;
+  /*!
+   * \brief Calls chmod(3).
+   *
+   * It may be used by some derived classes.
+   */
+  void chmod() const;
 
-        /*!
-         * \brief Calls chmod(3).
-         *
-         * It may be used by some derived classes.
-         */
-        void chmod() const;
+ private:
+  void chown() const;
+};
 
-    private:
-        void chown() const;
-    };
-}}}}
+}  // namespace filesystem
+}  // namespace invoker
+}  // namespace contest
+}  // namespace yandex

@@ -10,15 +10,21 @@
 #include <yandex/contest/invoker/detail/execution/AsyncProcessGroup.hpp>
 #include <yandex/contest/invoker/process/Result.hpp>
 
-namespace yandex{namespace contest{namespace invoker
-{
-    typedef detail::execution::AsyncProcessGroup::ProcessMeta ProcessMeta;
-    typedef detail::execution::AsyncProcessGroup::Process ProcessTask;
-    typedef detail::execution::AsyncProcessGroup::Stream Stream;
-    typedef detail::execution::AsyncProcessGroup::NonPipeStream NonPipeStream;
-    typedef detail::execution::AsyncProcessGroup::Pipe Pipe;
-    typedef detail::execution::AsyncProcessGroup::AccessMode AccessMode;
-    typedef detail::execution::AsyncProcessGroup::File File;
-    typedef detail::execution::AsyncProcessGroup::FdAlias FdAlias;
-    typedef detail::execution::AsyncProcessGroup::NotificationStream NotificationStream;
-}}}
+namespace yandex {
+namespace contest {
+namespace invoker {
+
+using ProcessMeta = detail::execution::AsyncProcessGroup::ProcessMeta;
+using ProcessTask = detail::execution::AsyncProcessGroup::Process;
+using Stream = detail::execution::AsyncProcessGroup::Stream;
+using NonPipeStream = detail::execution::AsyncProcessGroup::NonPipeStream;
+using Pipe = detail::execution::AsyncProcessGroup::Pipe;
+using AccessMode = detail::execution::AsyncProcessGroup::AccessMode;
+using File = detail::execution::AsyncProcessGroup::File;
+using FdAlias = detail::execution::AsyncProcessGroup::FdAlias;
+using NotificationStream =
+    detail::execution::AsyncProcessGroup::NotificationStream;
+
+}  // namespace invoker
+}  // namespace contest
+}  // namespace yandex

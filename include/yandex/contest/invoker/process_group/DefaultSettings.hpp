@@ -7,20 +7,25 @@
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/nvp.hpp>
 
-namespace yandex{namespace contest{namespace invoker{namespace process_group
-{
-    struct DefaultSettings
-    {
-        template <typename Archive>
-        void serialize(Archive &ar, const unsigned int)
-        {
-            ar & BOOST_SERIALIZATION_NVP(resourceLimits);
-            ar & BOOST_SERIALIZATION_NVP(processDefaultSettings);
-        }
+namespace yandex {
+namespace contest {
+namespace invoker {
+namespace process_group {
 
-        ResourceLimits resourceLimits;
-        process::DefaultSettings processDefaultSettings;
+struct DefaultSettings {
+  template <typename Archive>
+  void serialize(Archive &ar, const unsigned int) {
+    ar & BOOST_SERIALIZATION_NVP(resourceLimits);
+    ar & BOOST_SERIALIZATION_NVP(processDefaultSettings);
+  }
 
-        void setUpProcessGroup(const ProcessGroupPointer &processGroup) const;
-    };
-}}}}
+  ResourceLimits resourceLimits;
+  process::DefaultSettings processDefaultSettings;
+
+  void setUpProcessGroup(const ProcessGroupPointer &processGroup) const;
+};
+
+}  // namespace process_group
+}  // namespace invoker
+}  // namespace contest
+}  // namespace yandex

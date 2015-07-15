@@ -1,29 +1,30 @@
 #include <yandex/contest/invoker/detail/execution/AsyncProcessGroupDetail.hpp>
 
-namespace yandex{namespace contest{namespace invoker{
-    namespace detail{namespace execution{namespace async_process_group_detail
-{
-    File::File(const boost::filesystem::path &path_,
-               const AccessMode accessMode_):
-        path(path_),
-        accessMode(accessMode_) {}
+namespace yandex {
+namespace contest {
+namespace invoker {
+namespace detail {
+namespace execution {
+namespace async_process_group_detail {
 
-    Pipe::Pipe(const std::size_t id): pipeId(id) {}
+File::File(const boost::filesystem::path &path_, const AccessMode accessMode_)
+    : path(path_), accessMode(accessMode_) {}
 
-    Pipe::End Pipe::end(const Pipe::End::Type type) const
-    {
-        return End{pipeId, type};
-    }
+Pipe::Pipe(const std::size_t id) : pipeId(id) {}
 
-    Pipe::End Pipe::readEnd() const
-    {
-        return end(End::READ);
-    }
+Pipe::End Pipe::end(const Pipe::End::Type type) const {
+  return End{pipeId, type};
+}
 
-    Pipe::End Pipe::writeEnd() const
-    {
-        return end(End::WRITE);
-    }
+Pipe::End Pipe::readEnd() const { return end(End::READ); }
 
-    FdAlias::FdAlias(const int fd_): fd(fd_) {}
-}}}}}}
+Pipe::End Pipe::writeEnd() const { return end(End::WRITE); }
+
+FdAlias::FdAlias(const int fd_) : fd(fd_) {}
+
+}  // namespace async_process_group_detail
+}  // namespace execution
+}  // namespace detail
+}  // namespace invoker
+}  // namespace contest
+}  // namespace yandex

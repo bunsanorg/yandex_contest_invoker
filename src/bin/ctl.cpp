@@ -18,21 +18,17 @@
 
 #include <iostream>
 
-int main()
-{
-    try
-    {
-        yandex::contest::system::Trace::handle(SIGABRT);
-        yandex::contest::system::Trace::handle(SIGSEGV);
-        using yandex::contest::invoker::detail::execution::AsyncProcessGroup;
-        using namespace yandex::contest::serialization;
-        AsyncProcessGroup::Task task;
-        BinaryReader::readFromStream(std::cin, task);
-        BinaryWriter::writeToStream(std::cout, AsyncProcessGroup::execute(task));
-    }
-    catch (std::exception &e)
-    {
-        std::cerr << e.what() << std::endl;
-        return 1;
-    }
+int main() {
+  try {
+    yandex::contest::system::Trace::handle(SIGABRT);
+    yandex::contest::system::Trace::handle(SIGSEGV);
+    using yandex::contest::invoker::detail::execution::AsyncProcessGroup;
+    using namespace yandex::contest::serialization;
+    AsyncProcessGroup::Task task;
+    BinaryReader::readFromStream(std::cin, task);
+    BinaryWriter::writeToStream(std::cout, AsyncProcessGroup::execute(task));
+  } catch (std::exception &e) {
+    std::cerr << e.what() << std::endl;
+    return 1;
+  }
 }

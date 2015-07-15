@@ -8,199 +8,159 @@
 #include <boost/assert.hpp>
 #include <boost/variant/static_visitor.hpp>
 
-namespace yandex{namespace contest{namespace invoker
-{
-    YANDEX_CONTEST_INTRUSIVE_PTR_DEFINE(Process)
+namespace yandex {
+namespace contest {
+namespace invoker {
 
-    ProcessPointer Process::create(
-        const ProcessGroupPointer &processGroup,
-        const std::size_t id)
-    {
-        ProcessPointer ret(new Process(processGroup, id));
-        processGroup->processDefaultSettings().setUpProcess(ret);
-        return ret;
-    }
+YANDEX_CONTEST_INTRUSIVE_PTR_DEFINE(Process)
 
-    Process::Process(const ProcessGroupPointer &processGroup, const std::size_t id):
-        processGroup_(processGroup),
-        id_(id)
-    {
-        BOOST_ASSERT(processGroup_);
-    }
+ProcessPointer Process::create(const ProcessGroupPointer &processGroup,
+                               const std::size_t id) {
+  ProcessPointer ret(new Process(processGroup, id));
+  processGroup->processDefaultSettings().setUpProcess(ret);
+  return ret;
+}
 
-    const boost::filesystem::path &Process::executable() const
-    {
-        return processGroup_->processTask(id_).executable;
-    }
+Process::Process(const ProcessGroupPointer &processGroup, const std::size_t id)
+    : processGroup_(processGroup), id_(id) {
+  BOOST_ASSERT(processGroup_);
+}
 
-    bool Process::groupWaitsForTermination() const
-    {
-        return processGroup_->processTask(id_).groupWaitsForTermination;
-    }
+const boost::filesystem::path &Process::executable() const {
+  return processGroup_->processTask(id_).executable;
+}
 
-    void Process::setGroupWaitsForTermination(
-        const bool groupWaitsForTermination)
-    {
-        processGroup_->processTask(id_).groupWaitsForTermination =
-            groupWaitsForTermination;
-    }
+bool Process::groupWaitsForTermination() const {
+  return processGroup_->processTask(id_).groupWaitsForTermination;
+}
 
-    bool Process::terminateGroupOnCrash() const
-    {
-        return processGroup_->processTask(id_).terminateGroupOnCrash;
-    }
+void Process::setGroupWaitsForTermination(const bool groupWaitsForTermination) {
+  processGroup_->processTask(id_).groupWaitsForTermination =
+      groupWaitsForTermination;
+}
 
-    void Process::setTerminateGroupOnCrash(const bool terminateGroupOnCrash)
-    {
-        processGroup_->processTask(id_).terminateGroupOnCrash =
-            terminateGroupOnCrash;
-    }
+bool Process::terminateGroupOnCrash() const {
+  return processGroup_->processTask(id_).terminateGroupOnCrash;
+}
 
-    const ProcessArguments &Process::arguments() const
-    {
-        return processGroup_->processTask(id_).arguments;
-    }
+void Process::setTerminateGroupOnCrash(const bool terminateGroupOnCrash) {
+  processGroup_->processTask(id_).terminateGroupOnCrash = terminateGroupOnCrash;
+}
 
-    void Process::setArguments(const ProcessArguments &arguments)
-    {
-        processGroup_->processTask(id_).arguments = arguments;
-    }
+const ProcessArguments &Process::arguments() const {
+  return processGroup_->processTask(id_).arguments;
+}
 
-    const boost::filesystem::path &Process::currentPath() const
-    {
-        return processGroup_->processTask(id_).currentPath;
-    }
+void Process::setArguments(const ProcessArguments &arguments) {
+  processGroup_->processTask(id_).arguments = arguments;
+}
 
-    void Process::setCurrentPath(const boost::filesystem::path &currentPath)
-    {
-        processGroup_->processTask(id_).currentPath = currentPath;
-    }
+const boost::filesystem::path &Process::currentPath() const {
+  return processGroup_->processTask(id_).currentPath;
+}
 
-    const ProcessEnvironment &Process::environment() const
-    {
-        return processGroup_->processTask(id_).environment;
-    }
+void Process::setCurrentPath(const boost::filesystem::path &currentPath) {
+  processGroup_->processTask(id_).currentPath = currentPath;
+}
 
-    void Process::setEnvironment(const ProcessEnvironment &environment)
-    {
-        processGroup_->processTask(id_).environment = environment;
-    }
+const ProcessEnvironment &Process::environment() const {
+  return processGroup_->processTask(id_).environment;
+}
 
-    std::string Process::environment(const std::string &key) const
-    {
-        const auto &env = processGroup_->processTask(id_).environment;
-        const auto iter = env.find(key);
-        if (iter == env.end())
-            BOOST_THROW_EXCEPTION(
-                ProcessUndefinedEnvironmentVariableError() <<
-                ProcessUndefinedEnvironmentVariableError::key(key));
-        return iter->second;
-    }
+void Process::setEnvironment(const ProcessEnvironment &environment) {
+  processGroup_->processTask(id_).environment = environment;
+}
 
-    void Process::setEnvironment(const std::string &key, const std::string &value)
-    {
-        processGroup_->processTask(id_).environment[key] = value;
-    }
+std::string Process::environment(const std::string &key) const {
+  const auto &env = processGroup_->processTask(id_).environment;
+  const auto iter = env.find(key);
+  if (iter == env.end())
+    BOOST_THROW_EXCEPTION(
+        ProcessUndefinedEnvironmentVariableError()
+        << ProcessUndefinedEnvironmentVariableError::key(key));
+  return iter->second;
+}
 
-    void Process::unsetEnvironment(const std::string &key)
-    {
-        processGroup_->processTask(id_).environment.erase(key);
-    }
+void Process::setEnvironment(const std::string &key, const std::string &value) {
+  processGroup_->processTask(id_).environment[key] = value;
+}
 
-    const Process::ResourceLimits &Process::resourceLimits() const
-    {
-        return processGroup_->processTask(id_).resourceLimits;
-    }
+void Process::unsetEnvironment(const std::string &key) {
+  processGroup_->processTask(id_).environment.erase(key);
+}
 
-    void Process::setResourceLimits(
-        const Process::ResourceLimits &resourceLimits)
-    {
-        processGroup_->processTask(id_).resourceLimits = resourceLimits;
-    }
+const Process::ResourceLimits &Process::resourceLimits() const {
+  return processGroup_->processTask(id_).resourceLimits;
+}
 
-    const system::unistd::access::Id &Process::ownerId() const
-    {
-        return processGroup_->processTask(id_).ownerId;
-    }
+void Process::setResourceLimits(const Process::ResourceLimits &resourceLimits) {
+  processGroup_->processTask(id_).resourceLimits = resourceLimits;
+}
 
-    void Process::setOwnerId(const system::unistd::access::Id &ownerId)
-    {
-        processGroup_->processTask(id_).ownerId = ownerId;
-    }
+const system::unistd::access::Id &Process::ownerId() const {
+  return processGroup_->processTask(id_).ownerId;
+}
 
-    const std::string &Process::name() const
-    {
-        return processGroup_->processTask(id_).meta.name;
-    }
+void Process::setOwnerId(const system::unistd::access::Id &ownerId) {
+  processGroup_->processTask(id_).ownerId = ownerId;
+}
 
-    void Process::setName(const std::string &name)
-    {
-        processGroup_->processTask(id_).meta.name = name;
-    }
+const std::string &Process::name() const {
+  return processGroup_->processTask(id_).meta.name;
+}
 
-    void Process::setStream(const int descriptor, const Stream &stream)
-    {
-        processGroup_->processTask(id_).descriptors[descriptor] = stream;
-    }
+void Process::setName(const std::string &name) {
+  processGroup_->processTask(id_).meta.name = name;
+}
 
-    namespace
-    {
-        struct NonPipeStreamToStreamVisitor: boost::static_visitor<Stream>
-        {
-            template <typename T>
-            Stream operator()(const T &obj) const
-            {
-                return obj;
-            }
-        };
-    }
+void Process::setStream(const int descriptor, const Stream &stream) {
+  processGroup_->processTask(id_).descriptors[descriptor] = stream;
+}
 
-    void Process::setNonPipeStream(
-        const int descriptor,
-        const NonPipeStream &stream)
-    {
-        setStream(
-            descriptor,
-            boost::apply_visitor(NonPipeStreamToStreamVisitor(), stream)
-        );
-    }
+namespace {
+struct NonPipeStreamToStreamVisitor : boost::static_visitor<Stream> {
+  template <typename T>
+  Stream operator()(const T &obj) const {
+    return obj;
+  }
+};
+}  // namespace
 
-    Stream Process::stream(const int descriptor) const
-    {
-        const auto iter =
-            processGroup_->processTask(id_).descriptors.find(descriptor);
+void Process::setNonPipeStream(const int descriptor,
+                               const NonPipeStream &stream) {
+  setStream(descriptor,
+            boost::apply_visitor(NonPipeStreamToStreamVisitor(), stream));
+}
 
-        if (iter == processGroup_->processTask(id_).descriptors.end())
-        {
-            BOOST_THROW_EXCEPTION(
-                ProcessDescriptorOutOfRangeError() <<
-                ProcessDescriptorOutOfRangeError::descriptor(descriptor));
-        }
-        else
-        {
-            return iter->second;
-        }
-    }
+Stream Process::stream(const int descriptor) const {
+  const auto iter =
+      processGroup_->processTask(id_).descriptors.find(descriptor);
 
-    void Process::closeStream(const int descriptor)
-    {
-        processGroup_->processTask(id_).descriptors.erase(descriptor);
-    }
+  if (iter == processGroup_->processTask(id_).descriptors.end()) {
+    BOOST_THROW_EXCEPTION(
+        ProcessDescriptorOutOfRangeError()
+        << ProcessDescriptorOutOfRangeError::descriptor(descriptor));
+  } else {
+    return iter->second;
+  }
+}
 
-    bool Process::hasStream(const int descriptor) const
-    {
-        const auto iter =
-            processGroup_->processTask(id_).descriptors.find(descriptor);
-        return iter != processGroup_->processTask(id_).descriptors.end();
-    }
+void Process::closeStream(const int descriptor) {
+  processGroup_->processTask(id_).descriptors.erase(descriptor);
+}
 
-    const Process::Result &Process::result() const
-    {
-        return processGroup_->processResult(id_);
-    }
+bool Process::hasStream(const int descriptor) const {
+  const auto iter =
+      processGroup_->processTask(id_).descriptors.find(descriptor);
+  return iter != processGroup_->processTask(id_).descriptors.end();
+}
 
-    Process::Id Process::id() const
-    {
-        return id_;
-    }
-}}}
+const Process::Result &Process::result() const {
+  return processGroup_->processResult(id_);
+}
+
+Process::Id Process::id() const { return id_; }
+
+}  // namespace invoker
+}  // namespace contest
+}  // namespace yandex

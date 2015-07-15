@@ -7,25 +7,34 @@
 
 #include <memory>
 
-namespace yandex{namespace contest{namespace invoker{
-    namespace detail{namespace execution{namespace async_process_group_detail
-{
-    class EventWriter: private boost::noncopyable
-    {
-    public:
-        typedef std::shared_ptr<EventWriter> EventWriterPointer;
-        typedef boost::asio::posix::stream_descriptor Connection;
+namespace yandex {
+namespace contest {
+namespace invoker {
+namespace detail {
+namespace execution {
+namespace async_process_group_detail {
 
-    public:
-        virtual void write(const notifier::Event &event)=0;
-        virtual void close()=0;
+class EventWriter : private boost::noncopyable {
+ public:
+  using EventWriterPointer = std::shared_ptr<EventWriter>;
+  using Connection = boost::asio::posix::stream_descriptor;
 
-        virtual ~EventWriter() {}
+ public:
+  virtual void write(const notifier::Event &event) = 0;
+  virtual void close() = 0;
 
-    public:
-        static EventWriterPointer instance(
-            const NotificationStream::Protocol protocol,
-            Connection &connection);
-    };
-    typedef EventWriter::EventWriterPointer EventWriterPointer;
-}}}}}}
+  virtual ~EventWriter() {}
+
+ public:
+  static EventWriterPointer instance(NotificationStream::Protocol protocol,
+                                     Connection &connection);
+};
+
+using EventWriterPointer = EventWriter::EventWriterPointer;
+
+}  // namespace async_process_group_detail
+}  // namespace execution
+}  // namespace detail
+}  // namespace invoker
+}  // namespace contest
+}  // namespace yandex

@@ -8,80 +8,74 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/noncopyable.hpp>
 
-namespace yandex{namespace contest{namespace invoker
-{
-    struct FilesystemError: virtual Error
-    {
-        typedef boost::error_info<
-            struct localPathTag,
-            boost::filesystem::path
-        > localPath;
+namespace yandex {
+namespace contest {
+namespace invoker {
 
-        typedef boost::error_info<
-            struct remotePathTag,
-            boost::filesystem::path
-        > remotePath;
-    };
+struct FilesystemError : virtual Error {
+  using localPath =
+      boost::error_info<struct localPathTag, boost::filesystem::path>;
 
-    struct FileExistsError: virtual FilesystemError {};
-    struct FileDoesNotExistError: virtual FilesystemError {};
+  using remotePath =
+      boost::error_info<struct remotePathTag, boost::filesystem::path>;
+};
 
-    /*!
-     * \brief Object implements interface to the container's filesystem.
-     */
-    class Filesystem: private boost::noncopyable
-    {
-    public:
-        Filesystem(const boost::filesystem::path &containerRoot,
-                   const filesystem::Config &config);
+struct FileExistsError : virtual FilesystemError {};
+struct FileDoesNotExistError : virtual FilesystemError {};
 
-        /*!
-         * \brief Container's root directory.
-         */
-        const boost::filesystem::path &containerRoot() const;
+/*!
+ * \brief Object implements interface to the container's filesystem.
+ */
+class Filesystem : private boost::noncopyable {
+ public:
+  Filesystem(const boost::filesystem::path &containerRoot,
+             const filesystem::Config &config);
 
-        /// Transform path in container to host path.
-        boost::filesystem::path keepInRoot(
-            const boost::filesystem::path &path) const;
+  /*!
+   * \brief Container's root directory.
+   */
+  const boost::filesystem::path &containerRoot() const;
 
-        /// Transform host path into container path.
-        boost::filesystem::path containerPath(
-            const boost::filesystem::path &path) const;
+  /// Transform path in container to host path.
+  boost::filesystem::path keepInRoot(const boost::filesystem::path &path) const;
 
-        /*!
-         * \brief Push local file into container.
-         */
-        void push(const boost::filesystem::path &local,
-                  const boost::filesystem::path &remote,
-                  const system::unistd::access::Id &ownerId,
-                  const mode_t mode);
+  /// Transform host path into container path.
+  boost::filesystem::path containerPath(
+      const boost::filesystem::path &path) const;
 
-        /*!
-         * \brief Push local file into container.
-         */
-        void pushLink(const boost::filesystem::path &local,
-                      const boost::filesystem::path &remote,
-                      const system::unistd::access::Id &ownerId,
-                      const mode_t mode);
+  /*!
+   * \brief Push local file into container.
+   */
+  void push(const boost::filesystem::path &local,
+            const boost::filesystem::path &remote,
+            const system::unistd::access::Id &ownerId, mode_t mode);
 
-        system::unistd::FileStatus fileStatus(
-            const boost::filesystem::path &remote);
+  /*!
+   * \brief Push local file into container.
+   */
+  void pushLink(const boost::filesystem::path &local,
+                const boost::filesystem::path &remote,
+                const system::unistd::access::Id &ownerId, mode_t mode);
 
-        void setOwnerId(const boost::filesystem::path &remote,
-                        const system::unistd::access::Id &ownerId);
+  system::unistd::FileStatus fileStatus(const boost::filesystem::path &remote);
 
-        void setMode(const boost::filesystem::path &remote,
-                     const mode_t mode);
+  void setOwnerId(const boost::filesystem::path &remote,
+                  const system::unistd::access::Id &ownerId);
 
-        /*!
-         * \brief Pull remote directory tree.
-         */
-        void pull(const boost::filesystem::path &remote,
-                  const boost::filesystem::path &local);
+  void setMode(const boost::filesystem::path &remote, mode_t mode);
 
-        ~Filesystem();
+  /*!
+   * \brief Pull remote directory tree.
+   */
+  void pull(const boost::filesystem::path &remote,
+            const boost::filesystem::path &local);
 
-    private:
-        const boost::filesystem::path containerRoot_;
-    };
-}}}
+  ~Filesystem();
+
+ private:
+  const boost::filesystem::path containerRoot_;
+};
+
+}  // namespace invoker
+}  // namespace contest
+}  // namespace yandex

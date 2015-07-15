@@ -6,23 +6,30 @@
 
 #include <bunsan/asio/line_connection.hpp>
 
-namespace yandex{namespace contest{namespace invoker{
-    namespace detail{namespace execution{namespace async_process_group_detail
-{
-    class PlainTextEventWriter: public EventWriter
-    {
-    public:
-        PlainTextEventWriter(Connection &connection);
+namespace yandex {
+namespace contest {
+namespace invoker {
+namespace detail {
+namespace execution {
+namespace async_process_group_detail {
 
-        void write(const notifier::Event &event) override;
+class PlainTextEventWriter : public EventWriter {
+ public:
+  PlainTextEventWriter(Connection &connection);
 
-        void close() override;
+  void write(const notifier::Event &event) override;
 
-    private:
-        bunsan::asio::line_connection<Connection> connection_;
-        notifier::QueuedWriter<
-            std::string,
-            bunsan::asio::line_connection<Connection>
-        > writer_;
-    };
-}}}}}}
+  void close() override;
+
+ private:
+  bunsan::asio::line_connection<Connection> connection_;
+  notifier::QueuedWriter<std::string, bunsan::asio::line_connection<Connection>>
+      writer_;
+};
+
+}  // namespace async_process_group_detail
+}  // namespace execution
+}  // namespace detail
+}  // namespace invoker
+}  // namespace contest
+}  // namespace yandex

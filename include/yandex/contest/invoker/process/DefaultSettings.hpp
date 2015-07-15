@@ -9,28 +9,33 @@
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/nvp.hpp>
 
-namespace yandex{namespace contest{namespace invoker{namespace process
-{
-    struct DefaultSettings
-    {
-        template <typename Archive>
-        void serialize(Archive &ar, const unsigned int)
-        {
-            ar & BOOST_SERIALIZATION_NVP(resourceLimits);
-            ar & BOOST_SERIALIZATION_NVP(environment);
-            ar & BOOST_SERIALIZATION_NVP(currentPath);
-            ar & BOOST_SERIALIZATION_NVP(ownerId);
-            ar & BOOST_SERIALIZATION_NVP(descriptors);
-        }
+namespace yandex {
+namespace contest {
+namespace invoker {
+namespace process {
 
-        ResourceLimits resourceLimits;
-        ProcessEnvironment environment;
-        boost::filesystem::path currentPath;
-        system::unistd::access::Id ownerId;
+struct DefaultSettings {
+  template <typename Archive>
+  void serialize(Archive &ar, const unsigned int) {
+    ar & BOOST_SERIALIZATION_NVP(resourceLimits);
+    ar & BOOST_SERIALIZATION_NVP(environment);
+    ar & BOOST_SERIALIZATION_NVP(currentPath);
+    ar & BOOST_SERIALIZATION_NVP(ownerId);
+    ar & BOOST_SERIALIZATION_NVP(descriptors);
+  }
 
-        /// \note It is not possible to use Pipe::End here.
-        std::unordered_map<int, NonPipeStream> descriptors;
+  ResourceLimits resourceLimits;
+  ProcessEnvironment environment;
+  boost::filesystem::path currentPath;
+  system::unistd::access::Id ownerId;
 
-        void setUpProcess(const ProcessPointer &process) const;
-    };
-}}}}
+  /// \note It is not possible to use Pipe::End here.
+  std::unordered_map<int, NonPipeStream> descriptors;
+
+  void setUpProcess(const ProcessPointer &process) const;
+};
+
+}  // namespace process
+}  // namespace invoker
+}  // namespace contest
+}  // namespace yandex

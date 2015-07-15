@@ -14,201 +14,196 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/optional.hpp>
 
-namespace yandex{namespace contest{namespace invoker
-{
-    struct ProcessGroupError: virtual ContainerError {};
+namespace yandex {
+namespace contest {
+namespace invoker {
 
-    struct ProcessGroupIllegalStateError:
-        virtual ProcessGroupError,
-        virtual ContainerIllegalStateError {};
+struct ProcessGroupError : virtual ContainerError {};
 
-    struct ProcessGroupHasAlreadyStartedError:
-        virtual ProcessGroupIllegalStateError {};
+struct ProcessGroupIllegalStateError : virtual ProcessGroupError,
+                                       virtual ContainerIllegalStateError {};
 
-    struct ProcessGroupHasNotStartedError:
-        virtual ProcessGroupIllegalStateError {};
+struct ProcessGroupHasAlreadyStartedError
+    : virtual ProcessGroupIllegalStateError {};
 
-    struct ProcessGroupHasAlreadyTerminatedError:
-        virtual ProcessGroupIllegalStateError {};
+struct ProcessGroupHasNotStartedError : virtual ProcessGroupIllegalStateError {
+};
 
-    struct ProcessGroupHasNotTerminatedError:
-        virtual ProcessGroupIllegalStateError {};
+struct ProcessGroupHasAlreadyTerminatedError
+    : virtual ProcessGroupIllegalStateError {};
 
-    struct ProcessGroupNotifierError:
-        virtual ProcessGroupError
-    {
-        typedef boost::error_info<
-            struct notifierIdTag,
-            std::size_t
-        > notifierId;
-    };
+struct ProcessGroupHasNotTerminatedError
+    : virtual ProcessGroupIllegalStateError {};
 
-    struct ProcessGroupNotifierOutOfRangeError:
-        virtual ProcessGroupNotifierError {};
+struct ProcessGroupNotifierError : virtual ProcessGroupError {
+  using notifierId = boost::error_info<struct notifierIdTag, std::size_t>;
+};
 
-    struct ProcessGroupNotifierIllegalSinkError:
-        virtual ProcessGroupNotifierError {};
+struct ProcessGroupNotifierOutOfRangeError : virtual ProcessGroupNotifierError {
+};
 
-    namespace process_group
-    {
-        struct DefaultSettings;
-    }
+struct ProcessGroupNotifierIllegalSinkError
+    : virtual ProcessGroupNotifierError {};
 
-    class ProcessGroup: public IntrusivePointeeBase
-    {
-    public:
-        typedef process_group::Result Result;
-        typedef process_group::ResourceLimits ResourceLimits;
-        typedef process_group::ResourceUsage ResourceUsage;
-        typedef process_group::DefaultSettings DefaultSettings;
-        typedef process_group::State State;
+namespace process_group {
+struct DefaultSettings;
+}  // namespace process_group
 
-    public:
-        static ProcessGroupPointer create(const ContainerPointer &container);
-        ~ProcessGroup();
+class ProcessGroup : public IntrusivePointeeBase {
+ public:
+  using Result = process_group::Result;
+  using ResourceLimits = process_group::ResourceLimits;
+  using ResourceUsage = process_group::ResourceUsage;
+  using DefaultSettings = process_group::DefaultSettings;
+  using State = process_group::State;
 
-        /*!
-         * \brief Start all processes, associated with process group.
-         *
-         * It is not possible to start multiple process groups,
-         * associated with the same container.
-         *
-         * \throws ProcessGroupIllegalStateError
-         * if any other process group is running.
-         */
-        void start();
+ public:
+  static ProcessGroupPointer create(const ContainerPointer &container);
+  ~ProcessGroup();
 
-        /*!
-         * \brief Stop all processes, started by process group.
-         *
-         * This function kills all associated processes
-         * and controlling process.
-         * All CompletionStatus fields will be set STOPPED.
-         */
-        void stop();
+  /*!
+   * \brief Start all processes, associated with process group.
+   *
+   * It is not possible to start multiple process groups,
+   * associated with the same container.
+   *
+   * \throws ProcessGroupIllegalStateError
+   * if any other process group is running.
+   */
+  void start();
 
-        /*!
-         * \brief Start process group and wait for termination.
-         *
-         * \see start()
-         * \see wait()
-         */
-        const Result &synchronizedCall();
+  /*!
+   * \brief Stop all processes, started by process group.
+   *
+   * This function kills all associated processes
+   * and controlling process.
+   * All CompletionStatus fields will be set STOPPED.
+   */
+  void stop();
 
-        /*!
-         * \brief Check if process group has terminated.
-         *
-         * Set process group result if terminated.
-         *
-         * \return Initialized process group result
-         * if process group has terminated.
-         */
-        boost::optional<Result> poll();
+  /*!
+   * \brief Start process group and wait for termination.
+   *
+   * \see start()
+   * \see wait()
+   */
+  const Result &synchronizedCall();
 
-        /*!
-         * \brief Wait for process group termination.
-         * Set process group result.
-         */
-        const Result &wait();
+  /*!
+   * \brief Check if process group has terminated.
+   *
+   * Set process group result if terminated.
+   *
+   * \return Initialized process group result
+   * if process group has terminated.
+   */
+  boost::optional<Result> poll();
 
-        /*!
-         * \return ProcessGroupResult previously set by poll() or wait().
-         *
-         * \throws ProcessGroupIllegalStateError
-         * if process group result was not set.
-         *
-         * \deprecated We can use wait() instead.
-         */
-        const Result &result();
+  /*!
+   * \brief Wait for process group termination.
+   * Set process group result.
+   */
+  const Result &wait();
 
-        /*!
-         * \return Current state of process group.
-         */
-        State state();
+  /*!
+   * \return ProcessGroupResult previously set by poll() or wait().
+   *
+   * \throws ProcessGroupIllegalStateError
+   * if process group result was not set.
+   *
+   * \deprecated We can use wait() instead.
+   */
+  const Result &result();
 
-        /*!
-         * \brief Create new process, associated with ProcessGroup.
-         *
-         * \throws ProcessGroupIllegalStateError
-         * if process group has already started.
-         *
-         * \see start()
-         */
-        ProcessPointer createProcess(const boost::filesystem::path &executable);
+  /*!
+   * \return Current state of process group.
+   */
+  State state();
 
-        /*!
-         * \brief Create new pipe, associated with ProcessGroup.
-         *
-         * \throws ProcessGroupIllegalStateError
-         * if process group has already started.
-         */
-        Pipe createPipe();
+  /*!
+   * \brief Create new process, associated with ProcessGroup.
+   *
+   * \throws ProcessGroupIllegalStateError
+   * if process group has already started.
+   *
+   * \see start()
+   */
+  ProcessPointer createProcess(const boost::filesystem::path &executable);
 
-        const ResourceLimits &resourceLimits() const;
-        void setResourceLimits(const ResourceLimits &resourceLimits);
+  /*!
+   * \brief Create new pipe, associated with ProcessGroup.
+   *
+   * \throws ProcessGroupIllegalStateError
+   * if process group has already started.
+   */
+  Pipe createPipe();
 
-        /*!
-         * \brief Process with other pipe end will receive
-         * notifications that can be accessed by Notifier.
-         *
-         * \throws ProcessGroupNotifierIllegalSinkError
-         * if notificationStream.pipeEnd.end != WRITE
-         */
-        NotificationStream notifier(const std::size_t notifierId) const;
+  const ResourceLimits &resourceLimits() const;
+  void setResourceLimits(const ResourceLimits &resourceLimits);
 
-        void setNotifier(const std::size_t notifierId,
-                         const NotificationStream &notificationStream);
-        void setNotifier(const std::size_t notifierId,
-                         const Pipe::End &pipeEnd,
-                         const NotificationStream::Protocol protocol);
-        void setNotifier(const std::size_t notifierId,
-                         const Pipe::End &pipeEnd);
+  /*!
+   * \brief Process with other pipe end will receive
+   * notifications that can be accessed by Notifier.
+   *
+   * \throws ProcessGroupNotifierIllegalSinkError
+   * if notificationStream.pipeEnd.end != WRITE
+   */
+  NotificationStream notifier(std::size_t notifierId) const;
 
-        std::size_t addNotifier(const NotificationStream &notificationStream);
-        std::size_t addNotifier(const Pipe::End &pipeEnd,
-                                const NotificationStream::Protocol protocol);
-        std::size_t addNotifier(const Pipe::End &pipeEnd);
-        Pipe::End addNotifier(const NotificationStream::Protocol protocol);
-        Pipe::End addNotifier();
+  void setNotifier(std::size_t notifierId,
+                   const NotificationStream &notificationStream);
+  void setNotifier(std::size_t notifierId, const Pipe::End &pipeEnd,
+                   NotificationStream::Protocol protocol);
+  void setNotifier(std::size_t notifierId, const Pipe::End &pipeEnd);
 
-        /*!
-         * \brief Default settings for process.
-         *
-         * Will be used by every created instance of Process.
-         *
-         * \see ProcessDefaultSettings
-         */
-        const process::DefaultSettings &processDefaultSettings() const;
+  std::size_t addNotifier(const NotificationStream &notificationStream);
+  std::size_t addNotifier(const Pipe::End &pipeEnd,
+                          NotificationStream::Protocol protocol);
+  std::size_t addNotifier(const Pipe::End &pipeEnd);
+  Pipe::End addNotifier(NotificationStream::Protocol protocol);
+  Pipe::End addNotifier();
 
-        /*!
-         * \brief Set process default settings.
-         *
-         * \see processDefaultSettings()
-         */
-        void setProcessDefaultSettings(
-            const process::DefaultSettings &processDefaultSettings);
+  /*!
+   * \brief Default settings for process.
+   *
+   * Will be used by every created instance of Process.
+   *
+   * \see ProcessDefaultSettings
+   */
+  const process::DefaultSettings &processDefaultSettings() const;
 
-    private:
-        /*!
-         * \warning Constructor is private because
-         * class uses own reference-counting mechanism.
-         * Lifetime of ProcessGroup object
-         * is depended on lifetime of associated Process objects.
-         */
-        explicit ProcessGroup(const ContainerPointer &container);
+  /*!
+   * \brief Set process default settings.
+   *
+   * \see processDefaultSettings()
+   */
+  void setProcessDefaultSettings(
+      const process::DefaultSettings &processDefaultSettings);
 
-        friend class Process;
+ private:
+  /*!
+   * \warning Constructor is private because
+   * class uses own reference-counting mechanism.
+   * Lifetime of ProcessGroup object
+   * is depended on lifetime of associated Process objects.
+   */
+  explicit ProcessGroup(const ContainerPointer &container);
 
-        ProcessTask &processTask(const std::size_t id);
-        const process::Result &processResult(const std::size_t id);
+  friend class Process;
 
-    private:
-        /// If pointer is null process group has terminated.
-        ContainerPointer container_;
-        /// If processGroup_ is not valid ProcessGroup was not started.
-        detail::execution::AsyncProcessGroup processGroup_;
-        detail::execution::AsyncProcessGroup::Task task_;
-        boost::optional<detail::execution::AsyncProcessGroup::Result> result_;
-        process::DefaultSettings processDefaultSettings_;
-    };
-}}}
+  ProcessTask &processTask(std::size_t id);
+  const process::Result &processResult(std::size_t id);
+
+ private:
+  /// If pointer is null process group has terminated.
+  ContainerPointer container_;
+  /// If processGroup_ is not valid ProcessGroup was not started.
+  detail::execution::AsyncProcessGroup processGroup_;
+  detail::execution::AsyncProcessGroup::Task task_;
+  boost::optional<detail::execution::AsyncProcessGroup::Result> result_;
+  process::DefaultSettings processDefaultSettings_;
+};
+
+}  // namespace invoker
+}  // namespace contest
+}  // namespace yandex

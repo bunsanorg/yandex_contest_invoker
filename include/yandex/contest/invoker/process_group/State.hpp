@@ -7,17 +7,23 @@
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/nvp.hpp>
 
-namespace yandex{namespace contest{namespace invoker{namespace process_group
-{
-    BUNSAN_STREAM_ENUM_CLASS(State,
-    (
-        STOPPED,
-        STARTING,
-        RUNNING,
-        STOPPING,
-        ABORTING,
-        FREEZING,
-        FROZEN,
-        THAWED
-    ))
-}}}}
+namespace yandex {
+namespace contest {
+namespace invoker {
+namespace process_group {
+
+BUNSAN_STREAM_ENUM_CLASS(State, (
+  STOPPED,
+  STARTING,
+  RUNNING,
+  STOPPING,
+  ABORTING,
+  FREEZING,
+  FROZEN,
+  THAWED
+))
+
+}  // namespace process_group
+}  // namespace invoker
+}  // namespace contest
+}  // namespace yandex

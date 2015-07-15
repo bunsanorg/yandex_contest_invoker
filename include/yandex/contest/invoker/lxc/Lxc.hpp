@@ -19,77 +19,79 @@
 #include <utility>
 #include <vector>
 
-namespace yandex{namespace contest{namespace invoker{namespace lxc
-{
-    class Lxc: private boost::noncopyable
-    {
-    public:
-        typedef lxc_detail::State State;
+namespace yandex {
+namespace contest {
+namespace invoker {
+namespace lxc {
 
-    public:
-        Lxc(const std::string &name,
-            const boost::filesystem::path &dir,
-            const Config &settings);
+class Lxc : private boost::noncopyable {
+ public:
+  using State = lxc_detail::State;
 
-        void freeze();
-        void unfreeze();
+ public:
+  Lxc(const std::string &name, const boost::filesystem::path &dir,
+      const Config &settings);
 
-        template <typename Ctor>
-        auto execute(
-            const Ctor &ctor,
-            const system::execution::AsyncProcess::Options &options)
-        {
-            decltype(ctor(options)) result;
-            execute_(
-                [&result, &ctor](const system::execution::AsyncProcess::Options &options)
-                {
-                    result = ctor(options);
-                },
-                options
-            );
-            return result;
-        }
+  void freeze();
+  void unfreeze();
 
-        /// \todo Is not implemented.
-        //void start(const ProcessArguments &arguments);
+  template <typename Ctor>
+  auto execute(const Ctor &ctor,
+               const system::execution::AsyncProcess::Options &options) {
+    decltype(ctor(options)) result;
+    execute_(
+        [&result, &ctor](
+            const system::execution::AsyncProcess::Options &options) {
+          result = ctor(options);
+        },
+        options);
+    return result;
+  }
 
-        /// \todo Is not implemented.
-        //void start();
+  /// \todo Is not implemented.
+  // void start(const ProcessArguments &arguments);
 
-        /// Kill all processes running in container.
-        void stop();
+  /// \todo Is not implemented.
+  // void start();
 
-        /// Container's state.
-        State state();
+  /// Kill all processes running in container.
+  void stop();
 
-        ~Lxc();
+  /// Container's state.
+  State state();
 
-        const boost::filesystem::path &rootfs() const;
+  ~Lxc();
 
-    private:
-        using Clock = std::chrono::steady_clock;
-        using Executor = std::function<void (const system::execution::AsyncProcess::Options &options)>;
+  const boost::filesystem::path &rootfs() const;
 
-        void execute_(
-            const Executor &executor,
-            const system::execution::AsyncProcess::Options &options);
+ private:
+  using Clock = std::chrono::steady_clock;
+  using Executor = std::function<void(
+      const system::execution::AsyncProcess::Options &options)>;
 
-        void prepare(Config &config);
-        void prepare(system::unistd::MountEntry &entry);
+  void execute_(const Executor &executor,
+                const system::execution::AsyncProcess::Options &options);
 
-        /// Transform process options to make them execute process in container
-        system::execution::AsyncProcess::Options transform(
-            const system::execution::AsyncProcess::Options &options) const;
+  void prepare(Config &config);
+  void prepare(system::unistd::MountEntry &entry);
 
-        UtilityError toUtilityError(const system::execution::Result &result) const;
+  /// Transform process options to make them execute process in container
+  system::execution::AsyncProcess::Options transform(
+      const system::execution::AsyncProcess::Options &options) const;
 
-    private:
-        const std::string name_;
-        const boost::filesystem::path dir_;
-        const boost::filesystem::path rootfs_;
-        const boost::filesystem::path rootfsMount_;
-        const boost::filesystem::path configPath_;
-        api::container_ptr container_;
-        std::atomic<Clock::time_point> lastStart_;
-    };
-}}}}
+  UtilityError toUtilityError(const system::execution::Result &result) const;
+
+ private:
+  const std::string name_;
+  const boost::filesystem::path dir_;
+  const boost::filesystem::path rootfs_;
+  const boost::filesystem::path rootfsMount_;
+  const boost::filesystem::path configPath_;
+  api::container_ptr container_;
+  std::atomic<Clock::time_point> lastStart_;
+};
+
+}  // namespace lxc
+}  // namespace invoker
+}  // namespace contest
+}  // namespace yandex

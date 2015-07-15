@@ -14,43 +14,51 @@
 #include <unordered_map>
 #include <unordered_set>
 
-namespace yandex{namespace contest{namespace invoker{
-    namespace detail{namespace execution{namespace async_process_group_detail
-{
-    class ProcessStarter: private boost::noncopyable
-    {
-    public:
-        ProcessStarter(
-            const system::cgroup::ControlGroupPointer &controlGroup,
-            const AsyncProcessGroup::Process &process,
-            std::vector<system::unistd::Pipe> &pipes);
+namespace yandex {
+namespace contest {
+namespace invoker {
+namespace detail {
+namespace execution {
+namespace async_process_group_detail {
 
-        /// Start process and return it's pid.
-        Pid operator()();
+class ProcessStarter : private boost::noncopyable {
+ public:
+  ProcessStarter(const system::cgroup::ControlGroupPointer &controlGroup,
+                 const AsyncProcessGroup::Process &process,
+                 std::vector<system::unistd::Pipe> &pipes);
 
-    private:
-        /// Never returns.
-        void startChild() noexcept;
+  /// Start process and return it's pid.
+  Pid operator()();
 
-        void childCloseFds();
+ private:
+  /// Never returns.
+  void startChild() noexcept;
 
-        void childSetUpFds();
+  void childCloseFds();
 
-        void setUpControlGroup();
+  void childSetUpFds();
 
-        void childSetUpResourceLimits();
+  void setUpControlGroup();
 
-        /// For resource limits that depends on user id.
-        void childSetUpResourceLimitsUser();
+  void childSetUpResourceLimits();
 
-    private:
-        system::cgroup::ControlGroupPointer controlGroup_;
-        system::unistd::access::Id ownerId_;
-        system::unistd::Exec exec_;
-        std::unordered_map<int, int> descriptors_;
-        std::vector<system::unistd::Descriptor> allocatedFds_;
-        std::unordered_set<int> childCloseFds_;
-        boost::filesystem::path currentPath_;
-        process::ResourceLimits resourceLimits_;
-    };
-}}}}}}
+  /// For resource limits that depends on user id.
+  void childSetUpResourceLimitsUser();
+
+ private:
+  system::cgroup::ControlGroupPointer controlGroup_;
+  system::unistd::access::Id ownerId_;
+  system::unistd::Exec exec_;
+  std::unordered_map<int, int> descriptors_;
+  std::vector<system::unistd::Descriptor> allocatedFds_;
+  std::unordered_set<int> childCloseFds_;
+  boost::filesystem::path currentPath_;
+  process::ResourceLimits resourceLimits_;
+};
+
+}  // namespace async_process_group_detail
+}  // namespace execution
+}  // namespace detail
+}  // namespace invoker
+}  // namespace contest
+}  // namespace yandex

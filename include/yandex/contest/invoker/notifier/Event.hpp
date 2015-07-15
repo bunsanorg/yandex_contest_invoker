@@ -6,10 +6,14 @@
 #include <boost/serialization/variant.hpp>
 #include <boost/variant.hpp>
 
-namespace yandex{namespace contest{namespace invoker{namespace notifier
-{
-    typedef boost::variant<
-        SpawnEvent,
-        TerminationEvent
-    > Event;
-}}}}
+namespace yandex {
+namespace contest {
+namespace invoker {
+namespace notifier {
+
+using Event = boost::variant<SpawnEvent, TerminationEvent>;
+
+}  // namespace notifier
+}  // namespace invoker
+}  // namespace contest
+}  // namespace yandex

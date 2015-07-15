@@ -2,9 +2,13 @@
 
 #include <yandex/contest/system/execution/CommonTypedefs.hpp>
 
-namespace yandex{namespace contest{namespace invoker
-{
-    using system::execution::ProcessArguments;
-    using system::execution::ProcessEnvironment;
-}}}
+namespace yandex {
+namespace contest {
+namespace invoker {
 
+using system::execution::ProcessArguments;
+using system::execution::ProcessEnvironment;
+
+}  // namespace invoker
+}  // namespace contest
+}  // namespace yandex

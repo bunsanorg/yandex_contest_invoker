@@ -5,112 +5,91 @@
 
 #include <boost/assert.hpp>
 
-namespace yandex{namespace contest{namespace invoker{
-    namespace detail{namespace execution
-{
-    namespace
-    {
-        AsyncProcess::Options apply(
-            AsyncProcess::Options options,
-            const AsyncProcessGroup::Task &task)
-        {
-            STREAM_TRACE << "Attempt to execute process group: "
-                         << STREAM_OBJECT(task);
-            options.in = serialization::serialize(task);
-            return options;
-        }
-    }
+namespace yandex {
+namespace contest {
+namespace invoker {
+namespace detail {
+namespace execution {
 
-    AsyncProcessGroup::AsyncProcessGroup(
-        const AsyncProcess::Options &options, const Task &task):
-            controlProcess_(apply(options, task))
-    {
-    }
+namespace {
+AsyncProcess::Options apply(AsyncProcess::Options options,
+                            const AsyncProcessGroup::Task &task) {
+  STREAM_TRACE << "Attempt to execute process group: " << STREAM_OBJECT(task);
+  options.in = serialization::serialize(task);
+  return options;
+}
+}  // namespace
 
-    AsyncProcessGroup::AsyncProcessGroup(AsyncProcessGroup &&processGroup)
-    {
-        swap(processGroup);
-    }
+AsyncProcessGroup::AsyncProcessGroup(const AsyncProcess::Options &options,
+                                     const Task &task)
+    : controlProcess_(apply(options, task)) {}
 
-    AsyncProcessGroup &AsyncProcessGroup::operator=(
-        AsyncProcessGroup &&processGroup)
-    {
-        if (*this)
-            stop();
-        swap(processGroup);
-        return *this;
-    }
+AsyncProcessGroup::AsyncProcessGroup(AsyncProcessGroup &&processGroup) {
+  swap(processGroup);
+}
 
-    AsyncProcessGroup::operator bool() const noexcept
-    {
-        return static_cast<bool>(controlProcess_);
-    }
+AsyncProcessGroup &AsyncProcessGroup::operator=(
+    AsyncProcessGroup &&processGroup) {
+  if (*this) stop();
+  swap(processGroup);
+  return *this;
+}
 
-    void AsyncProcessGroup::swap(AsyncProcessGroup &processGroup) noexcept
-    {
-        using boost::swap;
-        swap(controlProcess_, processGroup.controlProcess_);
-        swap(result_, processGroup.result_);
-    }
+AsyncProcessGroup::operator bool() const noexcept {
+  return static_cast<bool>(controlProcess_);
+}
 
-    const AsyncProcessGroup::Result &AsyncProcessGroup::wait()
-    {
-        BOOST_ASSERT_MSG(*this, "Invalid AsyncProcessGroup instance.");
-        if (!result_)
-            readResult();
-        BOOST_ASSERT(result_);
-        return result_.get();
-    }
+void AsyncProcessGroup::swap(AsyncProcessGroup &processGroup) noexcept {
+  using boost::swap;
+  swap(controlProcess_, processGroup.controlProcess_);
+  swap(result_, processGroup.result_);
+}
 
-    const boost::optional<AsyncProcessGroup::Result> &AsyncProcessGroup::poll()
-    {
-        BOOST_ASSERT_MSG(*this, "Invalid AsyncProcessGroup instance.");
-        if (!result_ && controlProcess_.poll())
-            readResult();
-        return result_;
-    }
+const AsyncProcessGroup::Result &AsyncProcessGroup::wait() {
+  BOOST_ASSERT_MSG(*this, "Invalid AsyncProcessGroup instance.");
+  if (!result_) readResult();
+  BOOST_ASSERT(result_);
+  return result_.get();
+}
 
-    void AsyncProcessGroup::stop()
-    {
-        BOOST_ASSERT_MSG(*this, "Invalid AsyncProcessGroup instance.");
-        controlProcess_.stop();
-        readResult();
-    }
+const boost::optional<AsyncProcessGroup::Result> &AsyncProcessGroup::poll() {
+  BOOST_ASSERT_MSG(*this, "Invalid AsyncProcessGroup instance.");
+  if (!result_ && controlProcess_.poll()) readResult();
+  return result_;
+}
 
-    void AsyncProcessGroup::readResult()
-    {
-        const execution::Result result = controlProcess_.wait();
-        if (result)
-        {
-            try
-            {
-                result_ = serialization::deserialize<Result>(result.out);
-            }
-            catch (std::exception &)
-            {
-                BOOST_THROW_EXCEPTION(
-                    AsyncProcessGroupControlProcessError(result) <<
-                    bunsan::enable_nested_current());
-            }
-        }
-        else
-        {
-            BOOST_THROW_EXCEPTION(
-                AsyncProcessGroupControlProcessError(result));
-        }
-    }
+void AsyncProcessGroup::stop() {
+  BOOST_ASSERT_MSG(*this, "Invalid AsyncProcessGroup instance.");
+  controlProcess_.stop();
+  readResult();
+}
 
-    AsyncProcessGroup::~AsyncProcessGroup()
-    {
-        if (*this)
-        {
-            try
-            {
-                stop();
-            }
-            catch (std::exception &e)
-            {
-            }
-        }
+void AsyncProcessGroup::readResult() {
+  const execution::Result result = controlProcess_.wait();
+  if (result) {
+    try {
+      result_ = serialization::deserialize<Result>(result.out);
+    } catch (std::exception &) {
+      BOOST_THROW_EXCEPTION(AsyncProcessGroupControlProcessError(result)
+                            << bunsan::enable_nested_current());
     }
-}}}}}
+  } else {
+    BOOST_THROW_EXCEPTION(AsyncProcessGroupControlProcessError(result));
+  }
+}
+
+AsyncProcessGroup::~AsyncProcessGroup() {
+  if (*this) {
+    try {
+      stop();
+    } catch (std::exception &e) {
+      // TODO
+    }
+  }
+}
+
+}  // namespace execution
+}  // namespace detail
+}  // namespace invoker
+}  // namespace contest
+}  // namespace yandex

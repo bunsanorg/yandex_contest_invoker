@@ -11,82 +11,85 @@
 
 #include <unordered_set>
 
-namespace yandex{namespace contest{namespace invoker{
-    namespace detail{namespace execution{namespace async_process_group_detail
-{
-    typedef std::size_t Id;
+namespace yandex {
+namespace contest {
+namespace invoker {
+namespace detail {
+namespace execution {
+namespace async_process_group_detail {
 
-    class ExecutionMonitor: private boost::noncopyable
-    {
-    public:
-        explicit ExecutionMonitor(
-            const std::vector<AsyncProcessGroup::Process> &processes):
-                resourceLimits_(processes.size())
-        {
-            for (std::size_t i = 0; i < processes.size(); ++i)
-                resourceLimits_[i] = processes[i].resourceLimits;
-            result_.processGroupResult.completionStatus =
-                process_group::Result::CompletionStatus::OK;
-            result_.processResults.resize(processes.size());
-        }
+using Id = std::size_t;
 
-        /// Notify monitor that process has started.
-        void started(
-            ProcessInfo &processInfo,
-            const AsyncProcessGroup::Process &process);
+class ExecutionMonitor : private boost::noncopyable {
+ public:
+  explicit ExecutionMonitor(
+      const std::vector<AsyncProcessGroup::Process> &processes)
+      : resourceLimits_(processes.size()) {
+    for (std::size_t i = 0; i < processes.size(); ++i)
+      resourceLimits_[i] = processes[i].resourceLimits;
+    result_.processGroupResult.completionStatus =
+        process_group::Result::CompletionStatus::OK;
+    result_.processResults.resize(processes.size());
+  }
 
-        /// Notify monitor that process has terminated.
-        void terminated(ProcessInfo &processInfo, const int statLoc);
+  /// Notify monitor that process has started.
+  void started(ProcessInfo &processInfo,
+               const AsyncProcessGroup::Process &process);
 
-        void terminatedBySystem(ProcessInfo &processInfo);
+  /// Notify monitor that process has terminated.
+  void terminated(ProcessInfo &processInfo, int statLoc);
 
-        /// All processes has terminated.
-        void allTerminated();
+  void terminatedBySystem(ProcessInfo &processInfo);
 
-        /// Notify monitor that real time limit was exceeded.
-        void realTimeLimitExceeded();
+  /// All processes has terminated.
+  void allTerminated();
 
-        bool runOutOfResourceLimits(ProcessInfo &processInfo);
+  /// Notify monitor that real time limit was exceeded.
+  void realTimeLimitExceeded();
 
-        process::Result::CompletionStatus collectResourceInfo(
-            ProcessInfo &processInfo);
+  bool runOutOfResourceLimits(ProcessInfo &processInfo);
 
-        bool processGroupIsRunning() const
-        {
-            return result_.processGroupResult.completionStatus ==
-                       process_group::Result::CompletionStatus::OK &&
-                   !groupWaitsForTermination_.empty();
-        }
+  process::Result::CompletionStatus collectResourceInfo(
+      ProcessInfo &processInfo);
 
-        bool processesAreRunning() const { return !running_.empty(); }
+  bool processGroupIsRunning() const {
+    return result_.processGroupResult.completionStatus ==
+               process_group::Result::CompletionStatus::OK &&
+           !groupWaitsForTermination_.empty();
+  }
 
-        const AsyncProcessGroup::Result &result() const;
+  bool processesAreRunning() const { return !running_.empty(); }
 
-        const std::unordered_set<Id> &running() const { return running_; }
+  const AsyncProcessGroup::Result &result() const;
 
-        boost::signals2::connection onSpawn(
-            const Notifier::SpawnSignal::slot_type &slot)
-        {
-            return signals_.spawn.connect(slot);
-        }
+  const std::unordered_set<Id> &running() const { return running_; }
 
-        boost::signals2::connection onTermination(
-            const Notifier::TerminationSignal::slot_type &slot)
-        {
-            return signals_.termination.connect(slot);
-        }
+  boost::signals2::connection onSpawn(
+      const Notifier::SpawnSignal::slot_type &slot) {
+    return signals_.spawn.connect(slot);
+  }
 
-        boost::signals2::connection onClose(
-            const Notifier::CloseSignal::slot_type &slot)
-        {
-            return signals_.close.connect(slot);
-        }
+  boost::signals2::connection onTermination(
+      const Notifier::TerminationSignal::slot_type &slot) {
+    return signals_.termination.connect(slot);
+  }
 
-    private:
-        Notifier::Signals signals_;
-        std::vector<process::ResourceLimits> resourceLimits_;
-        AsyncProcessGroup::Result result_;
-        std::unordered_set<Id> running_, terminated_,
-            terminateGroupOnCrash_, groupWaitsForTermination_;
-    };
-}}}}}}
+  boost::signals2::connection onClose(
+      const Notifier::CloseSignal::slot_type &slot) {
+    return signals_.close.connect(slot);
+  }
+
+ private:
+  Notifier::Signals signals_;
+  std::vector<process::ResourceLimits> resourceLimits_;
+  AsyncProcessGroup::Result result_;
+  std::unordered_set<Id> running_, terminated_, terminateGroupOnCrash_,
+      groupWaitsForTermination_;
+};
+
+}  // namespace async_process_group_detail
+}  // namespace execution
+}  // namespace detail
+}  // namespace invoker
+}  // namespace contest
+}  // namespace yandex

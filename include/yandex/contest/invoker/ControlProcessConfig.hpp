@@ -6,31 +6,34 @@
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/nvp.hpp>
 
-namespace yandex{namespace contest{namespace invoker
-{
-    /*!
-     * \brief Config for control process
-     *
-     * Class is intended to be used by system administrator
-     * or package maintainer. These settings are system
-     * and usually should not be changed after installation.
-     *
-     * \see ContainerConfig
-     * \see system::execution::AsyncProcessGroup
-     * \see system::execution::AsyncProcessGroup::execute()
-     */
-    struct ControlProcessConfig
-    {
-        friend class boost::serialization::access;
+namespace yandex {
+namespace contest {
+namespace invoker {
 
-        template <typename Archive>
-        void serialize(Archive &ar, const unsigned int)
-        {
-            ar & BOOST_SERIALIZATION_NVP(executable);
-        }
+/*!
+ * \brief Config for control process
+ *
+ * Class is intended to be used by system administrator
+ * or package maintainer. These settings are system
+ * and usually should not be changed after installation.
+ *
+ * \see ContainerConfig
+ * \see system::execution::AsyncProcessGroup
+ * \see system::execution::AsyncProcessGroup::execute()
+ */
+struct ControlProcessConfig {
+  friend class boost::serialization::access;
 
-        boost::filesystem::path executable;
+  template <typename Archive>
+  void serialize(Archive &ar, const unsigned int) {
+    ar & BOOST_SERIALIZATION_NVP(executable);
+  }
 
-        explicit operator system::execution::AsyncProcess::Options() const;
-    };
-}}}
+  boost::filesystem::path executable;
+
+  explicit operator system::execution::AsyncProcess::Options() const;
+};
+
+}  // namespace invoker
+}  // namespace contest
+}  // namespace yandex

@@ -13,45 +13,49 @@
 
 #include <utility>
 
-namespace yandex{namespace contest{namespace invoker{namespace process
-{
-    struct Result: system::unistd::ProcessResult
-    {
-        friend class boost::serialization::access;
+namespace yandex {
+namespace contest {
+namespace invoker {
+namespace process {
 
-        template <typename Archive>
-        void serialize(Archive &ar, const unsigned int)
-        {
-            ar & BOOST_SERIALIZATION_NVP(exitStatus);
-            ar & BOOST_SERIALIZATION_NVP(termSig);
-            ar & BOOST_SERIALIZATION_NVP(completionStatus);
-            ar & BOOST_SERIALIZATION_NVP(resourceUsage);
-        }
+struct Result : system::unistd::ProcessResult {
+  friend class boost::serialization::access;
 
-        explicit Result(const int statLoc);
+  template <typename Archive>
+  void serialize(Archive &ar, const unsigned int) {
+    ar & BOOST_SERIALIZATION_NVP(exitStatus);
+    ar & BOOST_SERIALIZATION_NVP(termSig);
+    ar & BOOST_SERIALIZATION_NVP(completionStatus);
+    ar & BOOST_SERIALIZATION_NVP(resourceUsage);
+  }
 
-        Result()=default;
-        Result(const Result &)=default;
-        Result &operator=(const Result &)=default;
+  explicit Result(const int statLoc);
 
-        explicit operator bool() const;
+  Result() = default;
+  Result(const Result &) = default;
+  Result &operator=(const Result &) = default;
 
-        BUNSAN_INCLASS_STREAM_ENUM_CLASS(CompletionStatus,
-        (
-            OK,
-            ABNORMAL_EXIT,
-            TERMINATED_BY_SYSTEM,
-            MEMORY_LIMIT_EXCEEDED,
-            TIME_LIMIT_EXCEEDED,
-            USER_TIME_LIMIT_EXCEEDED,
-            SYSTEM_TIME_LIMIT_EXCEEDED,
-            OUTPUT_LIMIT_EXCEEDED,
-            START_FAILED,
-            STOPPED
-        ))
+  explicit operator bool() const;
 
-        CompletionStatus completionStatus = CompletionStatus::OK;
+  BUNSAN_INCLASS_STREAM_ENUM_CLASS(CompletionStatus, (
+    OK,
+    ABNORMAL_EXIT,
+    TERMINATED_BY_SYSTEM,
+    MEMORY_LIMIT_EXCEEDED,
+    TIME_LIMIT_EXCEEDED,
+    USER_TIME_LIMIT_EXCEEDED,
+    SYSTEM_TIME_LIMIT_EXCEEDED,
+    OUTPUT_LIMIT_EXCEEDED,
+    START_FAILED,
+    STOPPED
+  ))
 
-        ResourceUsage resourceUsage;
-    };
-}}}}
+  CompletionStatus completionStatus = CompletionStatus::OK;
+
+  ResourceUsage resourceUsage;
+};
+
+}  // namespace process
+}  // namespace invoker
+}  // namespace contest
+}  // namespace yandex

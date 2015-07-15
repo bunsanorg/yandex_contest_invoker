@@ -1,11 +1,9 @@
-int main()
-{
+int main() {
+  clearAll();
+  while (readAll()) {
+    fastValidateAll();
+    writeAll();
     clearAll();
-    while (readAll())
-    {
-        fastValidateAll();
-        writeAll();
-        clearAll();
-    }
-    return 0;
+  }
+  return 0;
 }

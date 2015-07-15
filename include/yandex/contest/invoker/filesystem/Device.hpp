@@ -8,31 +8,32 @@
 #include <boost/serialization/export.hpp>
 #include <boost/serialization/nvp.hpp>
 
-namespace yandex{namespace contest{namespace invoker{namespace filesystem
-{
-    /// See mknod(3), makedev(3).
-    struct Device: File
-    {
-        BUNSAN_INCLASS_STREAM_ENUM(Type,
-        (
-            CHAR,
-            BLOCK
-        ))
+namespace yandex {
+namespace contest {
+namespace invoker {
+namespace filesystem {
 
-        template <typename Archive>
-        void serialize(Archive &ar, const unsigned int)
-        {
-            ar & static_cast<File &>(*this);
-            ar & BOOST_SERIALIZATION_NVP(type);
-            ar & BOOST_SERIALIZATION_NVP(major);
-            ar & BOOST_SERIALIZATION_NVP(minor);
-        }
+/// See mknod(3), makedev(3).
+struct Device : File {
+  BUNSAN_INCLASS_STREAM_ENUM(Type, (CHAR, BLOCK))
 
-        Type type;
-        int major;
-        int minor;
+  template <typename Archive>
+  void serialize(Archive &ar, const unsigned int) {
+    ar & static_cast<File &>(*this);
+    ar & BOOST_SERIALIZATION_NVP(type);
+    ar & BOOST_SERIALIZATION_NVP(major);
+    ar & BOOST_SERIALIZATION_NVP(minor);
+  }
 
-    protected:
-        virtual void mknod() const;
-    };
-}}}}
+  Type type;
+  int major;
+  int minor;
+
+ protected:
+  virtual void mknod() const;
+};
+
+}  // namespace filesystem
+}  // namespace invoker
+}  // namespace contest
+}  // namespace yandex

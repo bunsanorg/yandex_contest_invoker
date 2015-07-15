@@ -9,27 +9,30 @@
 #include <deque>
 #include <utility>
 
-namespace yandex{namespace contest{namespace invoker{namespace notifier
-{
-    namespace detail
-    {
-        void logQueuedWriterError(const boost::system::error_code &ec);
-    }
+namespace yandex {
+namespace contest {
+namespace invoker {
+namespace notifier {
 
-    template <typename T, typename Connection>
-    class QueuedWriter: public bunsan::asio::queued_writer<T, Connection>
-    {
-    public:
-        typedef bunsan::asio::queued_writer<T, Connection> implementation;
-        typedef typename implementation::write_handler WriteHandler;
+namespace detail {
+void logQueuedWriterError(const boost::system::error_code &ec);
+}  // namespace detail
 
-    public:
-        explicit QueuedWriter(Connection &connection):
-            QueuedWriter(connection, detail::logQueuedWriterError) {}
+template <typename T, typename Connection>
+class QueuedWriter : public bunsan::asio::queued_writer<T, Connection> {
+ public:
+  using implementation = bunsan::asio::queued_writer<T, Connection>;
+  using WriteHandler = typename implementation::write_handler;
 
-        QueuedWriter(
-            Connection &connection,
-            const WriteHandler &handle_write):
-                implementation(connection, handle_write) {}
-    };
-}}}}
+ public:
+  explicit QueuedWriter(Connection &connection)
+      : QueuedWriter(connection, detail::logQueuedWriterError) {}
+
+  QueuedWriter(Connection &connection, const WriteHandler &handle_write)
+      : implementation(connection, handle_write) {}
+};
+
+}  // namespace notifier
+}  // namespace invoker
+}  // namespace contest
+}  // namespace yandex

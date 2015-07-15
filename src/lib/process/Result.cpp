@@ -2,14 +2,19 @@
 
 #include <yandex/contest/invoker/process/ResourceLimits.hpp>
 
-namespace yandex{namespace contest{namespace invoker{namespace process
-{
-    Result::Result(const int statLoc):
-        system::unistd::ProcessResult(statLoc) {}
+namespace yandex {
+namespace contest {
+namespace invoker {
+namespace process {
 
-    Result::operator bool() const
-    {
-        return system::unistd::ProcessResult::operator bool() &&
-               completionStatus == CompletionStatus::OK;
-    }
-}}}}
+Result::Result(const int statLoc) : system::unistd::ProcessResult(statLoc) {}
+
+Result::operator bool() const {
+  return system::unistd::ProcessResult::operator bool() &&
+         completionStatus == CompletionStatus::OK;
+}
+
+}  // namespace process
+}  // namespace invoker
+}  // namespace contest
+}  // namespace yandex

@@ -14,73 +14,67 @@
 #include <boost/serialization/vector.hpp>
 #include <boost/variant.hpp>
 
-namespace yandex{namespace contest{namespace invoker{namespace filesystem
-{
-    class CreateFile
-    {
-    public:
-        CreateFile()=default;
+namespace yandex {
+namespace contest {
+namespace invoker {
+namespace filesystem {
 
-        template <typename T>
-        explicit CreateFile(const T &file): file_(file) {}
+class CreateFile {
+ public:
+  CreateFile() = default;
 
-        template <typename T>
-        CreateFile &operator=(const T &file)
-        {
-            file_ = file;
-            return *this;
-        }
+  template <typename T>
+  explicit CreateFile(const T &file)
+      : file_(file) {}
 
-        CreateFile(const CreateFile &)=default;
-        CreateFile &operator=(const CreateFile &)=default;
+  template <typename T>
+  CreateFile &operator=(const T &file) {
+    file_ = file;
+    return *this;
+  }
 
-        /// \copydoc File::create()
-        void create() const;
+  CreateFile(const CreateFile &) = default;
+  CreateFile &operator=(const CreateFile &) = default;
 
-        /// Call create() relative to root.
-        void create(const boost::filesystem::path &root) const;
+  /// \copydoc File::create()
+  void create() const;
 
-        template <typename Archive>
-        void serialize(Archive &ar, const unsigned int)
-        {
-            // Do not use nvp here
-            // (this class is wrapper,
-            // we want to serialize field).
-            ar & file_;
-        }
+  /// Call create() relative to root.
+  void create(const boost::filesystem::path &root) const;
 
-    public:
-        typedef boost::variant<
-            RegularFile,
-            SymLink,
-            Device,
-            Directory,
-            Fifo
-        > Variant;
+  template <typename Archive>
+  void serialize(Archive &ar, const unsigned int) {
+    // Do not use nvp here: this class is wrapper, we want to serialize field.
+    ar & file_;
+  }
 
-    private:
-        Variant file_;
-    };
+ public:
+  using Variant = boost::variant<RegularFile, SymLink, Device, Directory, Fifo>;
 
-    typedef std::vector<CreateFile> CreateFiles;
-}}}}
+ private:
+  Variant file_;
+};
 
-BUNSAN_CONFIG_EXPORT(
-    yandex::contest::invoker::filesystem::CreateFile::Variant,
-    yandex::contest::invoker::filesystem::RegularFile, "RegularFile")
+using CreateFiles = std::vector<CreateFile>;
 
-BUNSAN_CONFIG_EXPORT(
-    yandex::contest::invoker::filesystem::CreateFile::Variant,
-    yandex::contest::invoker::filesystem::SymLink, "SymLink")
+}  // namespace filesystem
+}  // namespace invoker
+}  // namespace contest
+}  // namespace yandex
 
-BUNSAN_CONFIG_EXPORT(
-    yandex::contest::invoker::filesystem::CreateFile::Variant,
-    yandex::contest::invoker::filesystem::Device, "Device")
+BUNSAN_CONFIG_EXPORT(yandex::contest::invoker::filesystem::CreateFile::Variant,
+                     yandex::contest::invoker::filesystem::RegularFile,
+                     "RegularFile")
 
-BUNSAN_CONFIG_EXPORT(
-    yandex::contest::invoker::filesystem::CreateFile::Variant,
-    yandex::contest::invoker::filesystem::Directory, "Directory")
+BUNSAN_CONFIG_EXPORT(yandex::contest::invoker::filesystem::CreateFile::Variant,
+                     yandex::contest::invoker::filesystem::SymLink, "SymLink")
 
-BUNSAN_CONFIG_EXPORT(
-    yandex::contest::invoker::filesystem::CreateFile::Variant,
-    yandex::contest::invoker::filesystem::Fifo, "Fifo")
+BUNSAN_CONFIG_EXPORT(yandex::contest::invoker::filesystem::CreateFile::Variant,
+                     yandex::contest::invoker::filesystem::Device, "Device")
+
+BUNSAN_CONFIG_EXPORT(yandex::contest::invoker::filesystem::CreateFile::Variant,
+                     yandex::contest::invoker::filesystem::Directory,
+                     "Directory")
+
+BUNSAN_CONFIG_EXPORT(yandex::contest::invoker::filesystem::CreateFile::Variant,
+                     yandex::contest::invoker::filesystem::Fifo, "Fifo")

@@ -6,20 +6,25 @@
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/nvp.hpp>
 
-namespace yandex{namespace contest{namespace invoker{namespace filesystem
-{
-    struct SymLink: File
-    {
-        template <typename Archive>
-        void serialize(Archive &ar, const unsigned int)
-        {
-            ar & static_cast<File &>(*this);
-            ar & BOOST_SERIALIZATION_NVP(value);
-        }
+namespace yandex {
+namespace contest {
+namespace invoker {
+namespace filesystem {
 
-        boost::filesystem::path value;
+struct SymLink : File {
+  template <typename Archive>
+  void serialize(Archive &ar, const unsigned int) {
+    ar & static_cast<File &>(*this);
+    ar & BOOST_SERIALIZATION_NVP(value);
+  }
 
-    protected:
-        virtual void mknod() const;
-    };
-}}}}
+  boost::filesystem::path value;
+
+ protected:
+  virtual void mknod() const;
+};
+
+}  // namespace filesystem
+}  // namespace invoker
+}  // namespace contest
+}  // namespace yandex

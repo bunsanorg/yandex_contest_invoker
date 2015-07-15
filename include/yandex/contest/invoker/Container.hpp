@@ -10,112 +10,115 @@
 
 #include <yandex/contest/IntrusivePointeeBase.hpp>
 
-namespace yandex{namespace contest{namespace invoker
-{
-    class Container: public IntrusivePointeeBase
-    {
-    public:
-        /*!
-         * \brief Create new container using specified config.
-         */
-        static ContainerPointer create(const ContainerConfig &config);
+namespace yandex {
+namespace contest {
+namespace invoker {
 
-        /*!
-         * \brief Create new container using
-         * specified config with patched lxcConfig.
-         *
-         * \see create()
-         */
-        static ContainerPointer create(const ContainerConfig &config,
-                                       const lxc::Config &lxcConfig);
+class Container : public IntrusivePointeeBase {
+ public:
+  /*!
+   * \brief Create new container using specified config.
+   */
+  static ContainerPointer create(const ContainerConfig &config);
 
-        /*!
-         * \brief Create new container using
-         * default config with patched lxcConfig.
-         *
-         * \see ContainerConfig::ContainerConfig()
-         */
-        static ContainerPointer create(const lxc::Config &lxcConfig);
+  /*!
+   * \brief Create new container using
+   * specified config with patched lxcConfig.
+   *
+   * \see create()
+   */
+  static ContainerPointer create(const ContainerConfig &config,
+                                 const lxc::Config &lxcConfig);
 
-        /*!
-         * \brief Create new container using default config.
-         *
-         * \see ContainerConfig::ContainerConfig()
-         */
-        static ContainerPointer create();
+  /*!
+   * \brief Create new container using
+   * default config with patched lxcConfig.
+   *
+   * \see ContainerConfig::ContainerConfig()
+   */
+  static ContainerPointer create(const lxc::Config &lxcConfig);
 
-        /*!
-         * \brief Destroy container.
-         *
-         * Stop all running processes, associated with container.
-         */
-        ~Container()=default;
+  /*!
+   * \brief Create new container using default config.
+   *
+   * \see ContainerConfig::ContainerConfig()
+   */
+  static ContainerPointer create();
 
-        /*!
-         * \brief Access to the container's filesystem.
-         *
-         * Filesystem object lifetime is equivalent to Container
-         * object lifetime. It is not recommended to store pointer
-         * or reference to Filesystem object if you are not sure
-         * that pointer's lifetime is not greater than Container's.
-         */
-        Filesystem &filesystem();
+  /*!
+   * \brief Destroy container.
+   *
+   * Stop all running processes, associated with container.
+   */
+  ~Container() = default;
 
-        /*!
-         * \brief Create new process group, associated with container.
-         *
-         * \see yandex::contest::invoker::ProcessGroup::create()
-         */
-        ProcessGroupPointer createProcessGroup();
+  /*!
+   * \brief Access to the container's filesystem.
+   *
+   * Filesystem object lifetime is equivalent to Container
+   * object lifetime. It is not recommended to store pointer
+   * or reference to Filesystem object if you are not sure
+   * that pointer's lifetime is not greater than Container's.
+   */
+  Filesystem &filesystem();
 
-        /*!
-         * \brief Default settings for process group.
-         *
-         * Will be used by every created instance of ProcessGroup.
-         *
-         * \see ProcessGroupDefaultSettings
-         */
-        const process_group::DefaultSettings &processGroupDefaultSettings() const;
+  /*!
+   * \brief Create new process group, associated with container.
+   *
+   * \see yandex::contest::invoker::ProcessGroup::create()
+   */
+  ProcessGroupPointer createProcessGroup();
 
-        /*!
-         * \brief Set process group default settings.
-         * \see processGroupDefaultSettings()
-         */
-        void setProcessGroupDefaultSettings(
-            const process_group::DefaultSettings &processGroupDefaultSettings);
+  /*!
+   * \brief Default settings for process group.
+   *
+   * Will be used by every created instance of ProcessGroup.
+   *
+   * \see ProcessGroupDefaultSettings
+   */
+  const process_group::DefaultSettings &processGroupDefaultSettings() const;
 
-    private:
-        friend class ProcessGroup;
+  /*!
+   * \brief Set process group default settings.
+   * \see processGroupDefaultSettings()
+   */
+  void setProcessGroupDefaultSettings(
+      const process_group::DefaultSettings &processGroupDefaultSettings);
 
-        /*!
-         * \brief Execute process group in container.
-         *
-         * \note This function should not be used directly.
-         *
-         * \see createProcessGroup()
-         */
-        detail::execution::AsyncProcessGroup execute(
-            const detail::execution::AsyncProcessGroup::Task &task);
+ private:
+  friend class ProcessGroup;
 
-        /// \copydoc lxc::Lxc::stop()
-        void stop();
+  /*!
+   * \brief Execute process group in container.
+   *
+   * \note This function should not be used directly.
+   *
+   * \see createProcessGroup()
+   */
+  detail::execution::AsyncProcessGroup execute(
+      const detail::execution::AsyncProcessGroup::Task &task);
 
-    private:
-        /*!
-         * \warning Constructor is private because
-         * class uses own reference-counting mechanism.
-         * Lifetime of Container object is depended on
-         * lifetime of ProcessGroup objects.
-         *
-         * \see create()
-         */
-        Container(std::unique_ptr<lxc::Lxc> &&lxcPtr,
-                  const ContainerConfig &config);
+  /// \copydoc lxc::Lxc::stop()
+  void stop();
 
-    private:
-        Filesystem filesystem_;
-        const detail::execution::AsyncProcess::Options controlProcessOptions_;
-        process_group::DefaultSettings processGroupDefaultSettings_;
-        std::unique_ptr<lxc::Lxc> lxcPtr_;
-    };
-}}}
+ private:
+  /*!
+   * \warning Constructor is private because
+   * class uses own reference-counting mechanism.
+   * Lifetime of Container object is depended on
+   * lifetime of ProcessGroup objects.
+   *
+   * \see create()
+   */
+  Container(std::unique_ptr<lxc::Lxc> &&lxcPtr, const ContainerConfig &config);
+
+ private:
+  Filesystem filesystem_;
+  const detail::execution::AsyncProcess::Options controlProcessOptions_;
+  process_group::DefaultSettings processGroupDefaultSettings_;
+  std::unique_ptr<lxc::Lxc> lxcPtr_;
+};
+
+}  // namespace invoker
+}  // namespace contest
+}  // namespace yandex

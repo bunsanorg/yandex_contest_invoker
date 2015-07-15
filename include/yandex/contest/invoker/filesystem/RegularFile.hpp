@@ -8,30 +8,31 @@
 #include <boost/serialization/nvp.hpp>
 #include <boost/serialization/optional.hpp>
 
-namespace yandex{namespace contest{namespace invoker{namespace filesystem
-{
-    struct RegularFile: File
-    {
-        struct InvalidSourceError: virtual Error
-        {
-            typedef boost::error_info<
-                struct sourceTag,
-                boost::filesystem::path
-            > source;
-        };
-        struct SourceDoesNotExistsError: virtual InvalidSourceError {};
-        struct SourceIsNotRegularFileError: virtual InvalidSourceError {};
+namespace yandex {
+namespace contest {
+namespace invoker {
+namespace filesystem {
 
-        template <typename Archive>
-        void serialize(Archive &ar, const unsigned int)
-        {
-            ar & static_cast<File &>(*this);
-            ar & BOOST_SERIALIZATION_NVP(source);
-        }
+struct RegularFile : File {
+  struct InvalidSourceError : virtual Error {
+    using source = boost::error_info<struct sourceTag, boost::filesystem::path>;
+  };
+  struct SourceDoesNotExistsError : virtual InvalidSourceError {};
+  struct SourceIsNotRegularFileError : virtual InvalidSourceError {};
 
-        boost::optional<boost::filesystem::path> source;
+  template <typename Archive>
+  void serialize(Archive &ar, const unsigned int) {
+    ar & static_cast<File &>(*this);
+    ar & BOOST_SERIALIZATION_NVP(source);
+  }
 
-    protected:
-        virtual void mknod() const;
-    };
-}}}}
+  boost::optional<boost::filesystem::path> source;
+
+ protected:
+  virtual void mknod() const;
+};
+
+}  // namespace filesystem
+}  // namespace invoker
+}  // namespace contest
+}  // namespace yandex

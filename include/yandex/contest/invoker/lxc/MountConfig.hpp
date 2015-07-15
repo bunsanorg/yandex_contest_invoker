@@ -9,27 +9,32 @@
 
 #include <vector>
 
-namespace yandex{namespace contest{namespace invoker{namespace lxc
-{
-    struct MountConfig
-    {
-        friend class boost::serialization::access;
+namespace yandex {
+namespace contest {
+namespace invoker {
+namespace lxc {
 
-        template <typename Archive>
-        void serialize(Archive &ar, const unsigned int)
-        {
-            ar & BOOST_SERIALIZATION_NVP(fstab);
-            ar & BOOST_SERIALIZATION_NVP(entries);
-        }
+struct MountConfig {
+  friend class boost::serialization::access;
 
-        /// Path to fstab(5) file.
-        boost::optional<boost::filesystem::path> fstab;
+  template <typename Archive>
+  void serialize(Archive &ar, const unsigned int) {
+    ar & BOOST_SERIALIZATION_NVP(fstab);
+    ar & BOOST_SERIALIZATION_NVP(entries);
+  }
 
-        /// List of mount entries.
-        boost::optional<std::vector<system::unistd::MountEntry>> entries;
+  /// Path to fstab(5) file.
+  boost::optional<boost::filesystem::path> fstab;
 
-        void patch(const MountConfig &config);
-    };
+  /// List of mount entries.
+  boost::optional<std::vector<system::unistd::MountEntry>> entries;
 
-    std::ostream &operator<<(std::ostream &out, const MountConfig &config);
-}}}}
+  void patch(const MountConfig &config);
+};
+
+std::ostream &operator<<(std::ostream &out, const MountConfig &config);
+
+}  // namespace lxc
+}  // namespace invoker
+}  // namespace contest
+}  // namespace yandex

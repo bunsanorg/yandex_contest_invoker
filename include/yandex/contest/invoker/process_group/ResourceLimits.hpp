@@ -6,18 +6,22 @@
 
 #include <chrono>
 
-namespace yandex{namespace contest{namespace invoker{namespace process_group
-{
-    struct ResourceLimits
-    {
-        template <typename Archive>
-        void serialize(Archive &ar, const unsigned int)
-        {
-            using boost::serialization::make_nvp;
+namespace yandex {
+namespace contest {
+namespace invoker {
+namespace process_group {
 
-            ar & make_nvp("realTimeLimitMillis", realTimeLimit);
-        }
+struct ResourceLimits {
+  template <typename Archive>
+  void serialize(Archive &ar, const unsigned int) {
+    using boost::serialization::make_nvp;
+    ar & make_nvp("realTimeLimitMillis", realTimeLimit);
+  }
 
-        std::chrono::milliseconds realTimeLimit = std::chrono::seconds(10);
-    };
-}}}}
+  std::chrono::milliseconds realTimeLimit = std::chrono::seconds(10);
+};
+
+}  // namespace process_group
+}  // namespace invoker
+}  // namespace contest
+}  // namespace yandex

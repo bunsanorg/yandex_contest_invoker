@@ -6,20 +6,25 @@
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/nvp.hpp>
 
-namespace yandex{namespace contest{namespace invoker{namespace notifier
-{
-    struct TerminationEvent
-    {
-        friend class boost::serialization::access;
+namespace yandex {
+namespace contest {
+namespace invoker {
+namespace notifier {
 
-        template <typename Archive>
-        void serialize(Archive &ar, const unsigned int)
-        {
-            ar & BOOST_SERIALIZATION_NVP(meta);
-            ar & BOOST_SERIALIZATION_NVP(result);
-        }
+struct TerminationEvent {
+  friend class boost::serialization::access;
 
-        ProcessMeta meta;
-        process::Result result;
-    };
-}}}}
+  template <typename Archive>
+  void serialize(Archive &ar, const unsigned int) {
+    ar & BOOST_SERIALIZATION_NVP(meta);
+    ar & BOOST_SERIALIZATION_NVP(result);
+  }
+
+  ProcessMeta meta;
+  process::Result result;
+};
+
+}  // namespace notifier
+}  // namespace invoker
+}  // namespace contest
+}  // namespace yandex

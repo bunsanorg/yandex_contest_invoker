@@ -9,16 +9,21 @@
 #include <memory>
 #include <vector>
 
-namespace yandex{namespace contest{namespace invoker{namespace filesystem
-{
-    struct Config
-    {
-        template <typename Archive>
-        void serialize(Archive &ar, const unsigned int)
-        {
-            ar & BOOST_SERIALIZATION_NVP(createFiles);
-        }
+namespace yandex {
+namespace contest {
+namespace invoker {
+namespace filesystem {
 
-        CreateFiles createFiles;
-    };
-}}}}
+struct Config {
+  template <typename Archive>
+  void serialize(Archive &ar, const unsigned int) {
+    ar & BOOST_SERIALIZATION_NVP(createFiles);
+  }
+
+  CreateFiles createFiles;
+};
+
+}  // namespace filesystem
+}  // namespace invoker
+}  // namespace contest
+}  // namespace yandex

@@ -7,46 +7,47 @@
 
 #include <boost/signals2/signal.hpp>
 
-namespace yandex{namespace contest{namespace invoker{
-    namespace detail{namespace execution{namespace async_process_group_detail
-{
-    class Notifier: private boost::noncopyable
-    {
-    public:
-        typedef boost::signals2::signal<
-            void (const ProcessMeta &)
-        > SpawnSignal;
+namespace yandex {
+namespace contest {
+namespace invoker {
+namespace detail {
+namespace execution {
+namespace async_process_group_detail {
 
-        typedef boost::signals2::signal<
-            void (const ProcessMeta &, const process::Result &)
-        > TerminationSignal;
+class Notifier : private boost::noncopyable {
+ public:
+  using SpawnSignal = boost::signals2::signal<void(const ProcessMeta &)>;
+  using TerminationSignal = boost::signals2::signal<void(
+      const ProcessMeta &, const process::Result &)>;
+  using CloseSignal = boost::signals2::signal<void()>;
 
-        typedef boost::signals2::signal<void ()> CloseSignal;
+  struct Signals {
+    SpawnSignal spawn;
+    TerminationSignal termination;
+    CloseSignal close;
+  };
 
-        struct Signals
-        {
-            SpawnSignal spawn;
-            TerminationSignal termination;
-            CloseSignal close;
-        };
+ public:
+  Notifier(boost::asio::io_service &ioService, int fd,
+           NotificationStream::Protocol protocol);
 
-    public:
-        Notifier(boost::asio::io_service &ioService,
-                 const int fd,
-                 const NotificationStream::Protocol protocol);
+  void spawn(const ProcessMeta &processMeta);
 
-        void spawn(const ProcessMeta &processMeta);
+  void termination(const ProcessMeta &processMeta,
+                   const process::Result &result);
 
-        void termination(
-            const ProcessMeta &processMeta,
-            const process::Result &result);
+  void close();
 
-        void close();
+ private:
+  using Connection = EventWriter::Connection;
 
-    private:
-        typedef EventWriter::Connection Connection;
+  Connection fd_;
+  EventWriterPointer writer_;
+};
 
-        Connection fd_;
-        EventWriterPointer writer_;
-    };
-}}}}}}
+}  // namespace async_process_group_detail
+}  // namespace execution
+}  // namespace detail
+}  // namespace invoker
+}  // namespace contest
+}  // namespace yandex

@@ -2,12 +2,20 @@
 
 #include "ProcessGroupStarter.hpp"
 
-namespace yandex{namespace contest{namespace invoker{namespace detail{namespace execution
-{
-    AsyncProcessGroup::Result AsyncProcessGroup::execute(const Task &task)
-    {
-        async_process_group_detail::ProcessGroupStarter starter(task);
-        starter.executionLoop();
-        return starter.result();
-    }
-}}}}}
+namespace yandex {
+namespace contest {
+namespace invoker {
+namespace detail {
+namespace execution {
+
+AsyncProcessGroup::Result AsyncProcessGroup::execute(const Task &task) {
+  async_process_group_detail::ProcessGroupStarter starter(task);
+  starter.executionLoop();
+  return starter.result();
+}
+
+}  // namespace execution
+}  // namespace detail
+}  // namespace invoker
+}  // namespace contest
+}  // namespace yandex

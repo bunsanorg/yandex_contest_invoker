@@ -1,6 +1,7 @@
 #pragma once
 
 #include <yandex/contest/invoker/lxc/MountConfig.hpp>
+#include <yandex/contest/invoker/lxc/NetworkConfig.hpp>
 #include <yandex/contest/invoker/lxc/RootfsConfig.hpp>
 
 #include <bunsan/stream_enum.hpp>
@@ -26,7 +27,7 @@ struct Config {
   void serialize(Archive &ar, const unsigned int) {
     ar & BOOST_SERIALIZATION_NVP(arch);
     ar & BOOST_SERIALIZATION_NVP(utsname);
-    // TODO network
+    ar & BOOST_SERIALIZATION_NVP(network);
     // TODO pts
     ar & BOOST_SERIALIZATION_NVP(console);
     ar & BOOST_SERIALIZATION_NVP(tty);
@@ -43,7 +44,7 @@ struct Config {
   /// Hostname.
   boost::optional<std::string> utsname;
 
-  // TODO network (seems to be useless for now)
+  boost::optional<NetworkConfig> network;
 
   // TODO pts (is not fully implemented by LXC,
   // seems to be useless for now)

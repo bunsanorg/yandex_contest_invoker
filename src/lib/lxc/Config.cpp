@@ -10,7 +10,7 @@ namespace lxc {
 void Config::patch(const Config &config) {
   BOOST_OPTIONAL_OVERRIDE_PATCH(arch);
   BOOST_OPTIONAL_OVERRIDE_PATCH(utsname);
-  // TODO network
+  BOOST_OPTIONAL_OVERRIDE_PATCH(network);
   // TODO pts
   BOOST_OPTIONAL_OVERRIDE_PATCH(console);
   BOOST_OPTIONAL_OVERRIDE_PATCH(tty);
@@ -26,6 +26,7 @@ std::ostream &operator<<(std::ostream &out, const Config &config) {
   using namespace config_helper;
   optionalOutput(out, "lxc.arch", config.arch);
   optionalOutput(out, "lxc.utsname", config.utsname);
+  if (config.network) out << config.network.get();
   // TODO network
   // TODO pts
   optionalOutput(out, "lxc.console", config.console);

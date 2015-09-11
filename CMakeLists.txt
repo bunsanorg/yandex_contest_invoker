@@ -34,6 +34,7 @@ bunsan_add_library(${PROJECT_NAME}
     src/lib/lxc/Lxc.cpp
     src/lib/lxc/LxcApi.cpp
     src/lib/lxc/MountConfig.cpp
+    src/lib/lxc/NetworkConfig.cpp
     src/lib/detail/execution/AsyncProcessGroup.cpp
     src/lib/detail/execution/AsyncProcessGroup/detail.cpp
     src/lib/detail/execution/AsyncProcessGroup/execute.cpp

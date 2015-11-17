@@ -246,6 +246,8 @@ class IntervalTimer : private boost::noncopyable {
     // too small values are dangerous
     tval_.it_value =
         duration < resolution ? toTimeval(resolution) : toTimeval(duration);
+    BUNSAN_LOG_TRACE << "Setting timer for " << tval_.it_value.tv_sec << "s + "
+                     << tval_.it_value.tv_usec << "us";
     system::unistd::setitimer(ITIMER_REAL, tval_);
   }
 

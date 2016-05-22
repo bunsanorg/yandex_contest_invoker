@@ -1,7 +1,7 @@
 #pragma once
 
-#include <yandex/contest/invoker/notifier/Event.hpp>
 #include <yandex/contest/invoker/notifier/ErrorEvent.hpp>
+#include <yandex/contest/invoker/notifier/Event.hpp>
 
 #include <boost/asio/io_service.hpp>
 #include <boost/noncopyable.hpp>

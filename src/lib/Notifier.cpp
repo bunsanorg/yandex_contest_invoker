@@ -67,10 +67,11 @@ class Notifier::Impl : public boost::enable_shared_from_this<Impl>,
   void handle_read(const boost::system::error_code &ec) {
     if (ec) {
       Error::Event error;
-      if (closed_)
+      if (closed_) {
         error.errorCode = boost::asio::error::operation_aborted;
-      else
+      } else {
         error.errorCode = ec;
+      }
       (*this)(error);
     } else {
       (*this)(inboundEvent_);

@@ -1,5 +1,10 @@
 #pragma once
 
+#include <boost/version.hpp>
+#if BOOST_VERSION < 106100
+#define BOOST_NO_CXX11_VARIADIC_TEMPLATES
+#endif
+
 #include "EventWriter.hpp"
 
 #include <yandex/contest/invoker/detail/CommonProcessTypedefs.hpp>
